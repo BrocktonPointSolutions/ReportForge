@@ -6,7 +6,7 @@
 <title>ReportForge</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#0f1117;--surface:#1a1d27;--surface2:#22263a;--border:#2d3154;--accent:#4f6ef7;--accent2:#7c9cff;--text:#e8eaf6;--text2:#9fa8c0;--danger:#f55;--success:#4c9;--warn:#fa0;--radius:8px}
+:root{--bg:#0f1117;--surface:#1a1d27;--surface2:#22263a;--border:#2d3154;--accent:#4f6ef7;--accent2:#7c9cff;--text:#e8eaf6;--text2:#9fa8c0;--danger:#f55;--success:#4caf50;--radius:8px}
 body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden}
 .app{display:flex;flex-direction:column;height:100vh}
 .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;gap:12px;height:52px;flex-shrink:0}
@@ -20,7 +20,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .btn{padding:8px 16px;border-radius:var(--radius);border:none;cursor:pointer;font-size:13px;font-weight:500;transition:.15s;display:inline-flex;align-items:center;gap:6px}
 .btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{filter:brightness(1.12)}
 .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border)}.btn-secondary:hover{border-color:var(--accent2)}
-.btn-danger{background:#2a1515;color:var(--danger);border:1px solid #4a2020}.btn-danger:hover{background:#3a1a1a}
+.btn-danger{background:#2e1515;color:var(--danger);border:1px solid #4a2020}.btn-danger:hover{background:#3a1a1a}
 .btn-ghost{background:none;color:var(--text2);border:1px solid var(--border)}.btn-ghost:hover{color:var(--text);border-color:var(--text2)}
 .btn-sm{padding:5px 10px;font-size:12px}.btn-icon{padding:6px 8px;font-size:14px}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
@@ -32,7 +32,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .item-actions{display:flex;gap:6px;margin-top:10px}
 .field-group{margin-bottom:14px}
 .field-label{display:block;font-size:11px;font-weight:600;color:var(--text2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px}
-.field-input,.field-select,.field-textarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:8px 12px;font-size:13px;font-family:inherit;transition:.15s}
+.field-input,.field-select,.field-textarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:8px 12px;font-size:13px}
 .field-input:focus,.field-select:focus,.field-textarea:focus{outline:none;border-color:var(--accent)}
 .field-textarea{resize:vertical;min-height:80px}.field-select option{background:var(--surface2)}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
@@ -40,660 +40,891 @@ table{width:100%;border-collapse:collapse;font-size:13px}
 th{text-align:left;padding:9px 12px;background:var(--surface2);color:var(--text2);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border)}
 td{padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
 tr:hover td{background:rgba(255,255,255,.02)}
-.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600}
-.badge-draft{background:#1e2030;color:var(--text2)}.badge-review{background:#1e1535;color:#a78bfa}.badge-final{background:#0d2010;color:var(--success)}
-.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px}
-.page-title{font-size:22px;font-weight:700}.page-subtitle{font-size:13px;color:var(--text2);margin-top:3px}
-.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;pointer-events:none;transition:.2s}
-.modal-backdrop.open{opacity:1;pointer-events:all}
-.modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:26px;width:min(580px,94vw);max-height:90vh;overflow-y:auto;transform:translateY(16px);transition:.2s}
-.modal-backdrop.open .modal{transform:translateY(0)}
-.modal-lg{width:min(820px,96vw)}
-.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
-.modal-title{font-size:17px;font-weight:700}
-.modal-close{background:none;border:none;color:var(--text2);cursor:pointer;font-size:20px;padding:2px 6px;border-radius:4px}.modal-close:hover{color:var(--text)}
-.modal-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:18px;padding-top:14px;border-top:1px solid var(--border)}
-.section-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:10px}
-.section-head{display:flex;align-items:center;gap:10px;padding:11px 14px;cursor:pointer}.section-head:hover{background:rgba(255,255,255,.03)}
-.section-name{flex:1;font-weight:600;font-size:13px}
-.section-type{font-size:11px;color:var(--text2);background:var(--surface);padding:2px 7px;border-radius:8px}
-.section-body{padding:0 14px 14px;border-top:1px solid var(--border);display:none}.section-body.open{display:block}
-.field-row{display:flex;align-items:center;gap:7px;margin-top:7px;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:7px 9px}
-.rpt-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:14px}
-.rpt-section-head{padding:13px 16px;display:flex;align-items:center;gap:8px;cursor:pointer}.rpt-section-head:hover{background:rgba(255,255,255,.02)}
-.rpt-section-title{font-weight:600;font-size:14px;flex:1}
-.rpt-section-body{padding:14px 16px;border-top:1px solid var(--border)}
-.finding-item{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:13px 14px;margin-bottom:8px;display:flex;align-items:flex-start;gap:10px}
-.sev-bar{width:5px;border-radius:3px;align-self:stretch;flex-shrink:0}
-.sev-critical{background:#f44}.sev-high{background:#f80}.sev-medium{background:#fa0}.sev-low{background:#4c9}.sev-info{background:#4af}
-.finding-content{flex:1}.finding-title{font-weight:600;font-size:13px;margin-bottom:3px}
-.finding-desc{font-size:12px;color:var(--text2);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.finding-meta{display:flex;gap:10px;margin-top:6px;font-size:11px;color:var(--text2)}
-.finding-actions{display:flex;gap:4px}
-.empty{text-align:center;padding:50px 20px;color:var(--text2)}
-.empty .eicon{font-size:44px;margin-bottom:14px}
-.empty h3{font-size:15px;color:var(--text);margin-bottom:7px}
-.empty p{font-size:13px;max-width:300px;margin:0 auto 16px}
-#toast-root{position:fixed;bottom:20px;right:20px;display:flex;flex-direction:column;gap:7px;z-index:9999}
-.toast{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 16px;font-size:13px;display:flex;align-items:center;gap:9px;min-width:220px;box-shadow:0 4px 20px rgba(0,0,0,.4);animation:tsin .2s ease}
-@keyframes tsin{from{transform:translateX(100%);opacity:0}}
-.toast-success{border-color:var(--success)}.toast-error{border-color:var(--danger)}
-.divider{height:1px;background:var(--border);margin:18px 0}
-.flex{display:flex}.gap8{gap:8px}.gap12{gap:12px}.ac{align-items:center}
-.mt16{margin-top:16px}.mb16{margin-bottom:16px}.muted{color:var(--text2)}.small{font-size:12px}
-.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 22px}
-.stat-label{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
-.stat-val{font-size:30px;font-weight:700}
-.etab{display:none}.etab.active{display:block}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600}
+.badge-draft{background:#1e2a1e;color:#6fcf97}.badge-review{background:#2a2010;color:#f2c94c}.badge-final{background:#1a2040;color:#56ccf2}.badge-open{background:#2a1010;color:#eb5757}.badge-info{background:#1a1a2a;color:#9b9bd4}
+.page-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.page-title{font-size:20px;font-weight:700}
+.section-hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;cursor:pointer;margin-bottom:6px}
+.section-body{padding:14px;border:1px solid var(--border);border-top:none;border-radius:0 0 6px 6px;margin-bottom:10px}
+.finding-card{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:14px;margin-bottom:8px}
+.finding-sev{font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;margin-right:6px}
+.sev-critical{background:#3a0a0a;color:#ff4444}.sev-high{background:#3a1a0a;color:#ff8c00}.sev-medium{background:#2a2a0a;color:#ffd700}.sev-low{background:#0a2a0a;color:#90ee90}.sev-info{background:#0a0a2a;color:#87ceeb}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;width:540px;max-width:95vw;max-height:90vh;display:flex;flex-direction:column}
+.modal-hdr{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-weight:600;flex-shrink:0}
+.modal-body{padding:22px;overflow-y:auto;flex:1}
+.modal-footer{padding:14px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;flex-shrink:0}
+.editor-layout{display:grid;grid-template-columns:1fr 340px;gap:20px;height:calc(100vh - 130px)}
+.editor-main{display:flex;flex-direction:column;min-height:0}
+.editor-tabs{display:flex;gap:2px;margin-bottom:14px}
+.editor-tab{padding:6px 14px;border-radius:6px;cursor:pointer;font-size:13px;color:var(--text2);border:none;background:none}
+.editor-tab.active{background:var(--surface2);color:var(--text)}
+.editor-panel{display:none;flex:1;overflow-y:auto}.editor-panel.active{display:block}
+.preview-box{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:20px;min-height:300px;font-size:13px;line-height:1.6}
+.preview-box h2{font-size:15px;font-weight:700;margin:16px 0 6px;border-bottom:1px solid var(--border);padding-bottom:4px}
+.preview-box p{color:var(--text2);margin-bottom:8px}
+.sidebar{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;overflow-y:auto}
+.stat-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-align:center}
+.stat-num{font-size:28px;font-weight:700;color:var(--accent)}.stat-label{font-size:12px;color:var(--text2);margin-top:4px}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.empty-state{text-align:center;padding:48px 20px;color:var(--text2)}
+.empty-state svg{margin-bottom:12px;opacity:.4}
+.toast-root{position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;gap:8px;z-index:999}
+.toast{padding:10px 16px;border-radius:8px;font-size:13px;font-weight:500;animation:slideIn .2s ease;min-width:220px}
+.toast-success{background:#1a3a1a;color:#6fcf97;border:1px solid #2a5a2a}
+.toast-error{background:#3a1010;color:#ff6b6b;border:1px solid #5a2020}
+.toast-info{background:#1a1a3a;color:#9b9bd4;border:1px solid #2a2a5a}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:none;opacity:1}}
 </style>
-</head><body>
+</head>
+<body>
 <div class="app">
-<div class="topbar">
-  <div class="logo">Report<span>Forge</span></div>
-  <div class="nav-tabs">
-    <button class="nav-tab active" id="tab-dashboard" onclick="showView('dashboard',this)">📊 Dashboard</button>
-    <button class="nav-tab" id="tab-reports" onclick="showView('reports',this)">📄 Reports</button>
-    <button class="nav-tab" id="tab-templates" onclick="showView('templates',this)">🧩 Templates</button>
-    <button class="nav-tab" id="tab-findings" onclick="showView('findings',this)">🔍 Findings</button>
+  <div class="topbar">
+    <div class="logo">Report<span>Forge</span></div>
+    <nav class="nav-tabs">
+      <button class="nav-tab active" onclick="showView('dash')">Dashboard</button>
+      <button class="nav-tab" onclick="showView('reports')">Reports</button>
+      <button class="nav-tab" onclick="showView('findings')">Findings</button>
+      <button class="nav-tab" onclick="showView('templates')">Templates</button>
+    </nav>
+    <div class="topbar-right" id="topbar-right"></div>
   </div>
-  <div class="topbar-right">
-    <button class="btn btn-primary btn-sm" onclick="openModal('new-report-modal')">+ New Report</button>
-  </div>
-</div>
-<div class="main">
+  <div class="main">
 
-<!-- DASHBOARD -->
-<div class="view active" id="view-dashboard">
-  <div class="page-header">
-    <div><div class="page-title">Dashboard</div><div class="page-subtitle">Your reports at a glance</div></div>
-    <button class="btn btn-primary" onclick="openModal('new-report-modal')">+ New Report</button>
-  </div>
-  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px">
-    <div class="stat-card"><div class="stat-label">Total Reports</div><div class="stat-val" id="stat-total">—</div></div>
-    <div class="stat-card"><div class="stat-label">Draft</div><div class="stat-val muted" id="stat-draft">—</div></div>
-    <div class="stat-card"><div class="stat-label">In Review</div><div class="stat-val" style="color:#a78bfa" id="stat-review">—</div></div>
-    <div class="stat-card"><div class="stat-label">Final</div><div class="stat-val" style="color:var(--success)" id="stat-final">—</div></div>
-  </div>
-  <div class="divider"></div>
-  <div style="font-size:15px;font-weight:600;margin-bottom:14px">Recent Reports</div>
-  <div id="dash-recent"></div>
-</div>
-
-<!-- REPORTS -->
-<div class="view" id="view-reports">
-  <div class="page-header">
-    <div><div class="page-title">Reports</div><div class="page-subtitle">All security reports</div></div>
-    <div class="flex gap8 ac">
-      <select class="field-select" style="width:140px" id="reports-filter" onchange="renderReportsList()">
-        <option value="">All Status</option><option value="draft">Draft</option><option value="review">In Review</option><option value="final">Final</option>
-      </select>
-      <button class="btn btn-primary" onclick="openModal('new-report-modal')">+ New Report</button>
-    </div>
-  </div>
-  <div id="reports-list"></div>
-</div>
-
-<!-- TEMPLATES -->
-<div class="view" id="view-templates">
-  <div class="page-header">
-    <div><div class="page-title">Templates</div><div class="page-subtitle">Reusable report structures with custom sections and fields</div></div>
-    <button class="btn btn-primary" onclick="openModal('new-template-modal')">+ New Template</button>
-  </div>
-  <div id="templates-list"></div>
-</div>
-
-<!-- FINDINGS -->
-<div class="view" id="view-findings">
-  <div class="page-header">
-    <div><div class="page-title">Findings</div><div class="page-subtitle" id="findings-sub">Select a report to view findings</div></div>
-    <div class="flex gap8 ac">
-      <select class="field-select" style="width:230px" id="findings-rpt-sel" onchange="onFindingsReportChange()">
-        <option value="">— Select a Report —</option>
-      </select>
-      <button class="btn btn-primary btn-sm" id="add-finding-btn" style="display:none" onclick="openFindingModal()">+ Add Finding</button>
-    </div>
-  </div>
-  <div id="findings-list"></div>
-</div>
-
-</div><!-- .main -->
-</div><!-- .app -->
-
-<!-- REPORT EDITOR MODAL -->
-<div class="modal-backdrop" id="report-editor-modal">
-<div class="modal modal-lg">
-  <div class="modal-header">
-    <div>
-      <div class="modal-title" id="ed-report-title">Report Editor</div>
-      <div class="small muted" id="ed-report-meta"></div>
-    </div>
-    <div class="flex gap8 ac">
-      <select class="field-select" style="width:125px;padding:5px 8px;font-size:12px" id="ed-status" onchange="updateReportStatus()">
-        <option value="draft">Draft</option><option value="review">In Review</option><option value="final">Final</option>
-      </select>
-      <button class="modal-close" onclick="closeModal('report-editor-modal')">✕</button>
-    </div>
-  </div>
-  <div class="nav-tabs mb16" style="border-bottom:1px solid var(--border);padding-bottom:0;margin-bottom:0">
-    <button class="nav-tab active" id="etab-info-btn" onclick="switchEdTab('info',this)">Info</button>
-    <button class="nav-tab" id="etab-sections-btn" onclick="switchEdTab('sections',this)">Sections</button>
-    <button class="nav-tab" id="etab-findings-btn" onclick="switchEdTab('findings',this)">Findings</button>
-    <button class="nav-tab" id="etab-preview-btn" onclick="switchEdTab('preview',this)">Preview</button>
-  </div>
-  <div style="height:12px"></div>
-  <div class="etab active" id="etab-info">
-    <div class="form-row">
-      <div class="field-group"><label class="field-label">Report Title</label><input class="field-input" id="e-title" oninput="markDirty()"></div>
-      <div class="field-group"><label class="field-label">Organization</label><input class="field-input" id="e-org" oninput="markDirty()"></div>
-    </div>
-    <div class="form-row">
-      <div class="field-group"><label class="field-label">Report Type</label>
-        <select class="field-select" id="e-type" onchange="markDirty()">
-          <option>Security Assessment</option><option>Penetration Test</option><option>Vulnerability Assessment</option><option>Red Team Exercise</option><option>Compliance Audit</option><option>Risk Assessment</option>
-        </select>
+    <!-- DASHBOARD -->
+    <div class="view active" id="view-dash">
+      <div class="page-hdr"><span class="page-title">Dashboard</span></div>
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-num" id="stat-total">0</div><div class="stat-label">Total Reports</div></div>
+        <div class="stat-card"><div class="stat-num" id="stat-draft">0</div><div class="stat-label">Draft</div></div>
+        <div class="stat-card"><div class="stat-num" id="stat-review">0</div><div class="stat-label">In Review</div></div>
+        <div class="stat-card"><div class="stat-num" id="stat-final">0</div><div class="stat-label">Final</div></div>
       </div>
-      <div class="field-group"><label class="field-label">Classification</label>
-        <select class="field-select" id="e-cls" onchange="markDirty()">
-          <option>Confidential</option><option>Restricted</option><option>Internal</option><option>Public</option>
-        </select>
+      <div class="card">
+        <div style="font-weight:600;margin-bottom:12px">Recent Reports</div>
+        <div id="dash-recent"></div>
       </div>
     </div>
-    <div class="form-row">
-      <div class="field-group"><label class="field-label">Assessment Date</label><input class="field-input" id="e-date" type="date" oninput="markDirty()"></div>
-      <div class="field-group"><label class="field-label">Authors</label><input class="field-input" id="e-authors" placeholder="comma-separated" oninput="markDirty()"></div>
-    </div>
-    <div class="field-group"><label class="field-label">Executive Summary</label><textarea class="field-textarea" id="e-exec" rows="4" placeholder="High-level summary of the assessment…" oninput="markDirty()"></textarea></div>
-    <div class="field-group"><label class="field-label">Scope &amp; Methodology</label><textarea class="field-textarea" id="e-scope" rows="3" placeholder="What was tested and how…" oninput="markDirty()"></textarea></div>
-  </div>
-  <div class="etab" id="etab-sections"><div id="ed-sections"></div></div>
-  <div class="etab" id="etab-findings">
-    <div class="flex" style="justify-content:flex-end;margin-bottom:12px">
-      <button class="btn btn-primary btn-sm" onclick="openFindingModal()">+ Add Finding</button>
-    </div>
-    <div id="ed-findings-list"></div>
-  </div>
-  <div class="etab" id="etab-preview"><div id="ed-preview" style="font-size:13px;line-height:1.8"></div></div>
-  <div class="modal-footer">
-    <span class="small muted" id="ed-save-status">All saved</span>
-    <button class="btn btn-ghost btn-sm" onclick="closeModal('report-editor-modal')">Close</button>
-    <button class="btn btn-primary btn-sm" onclick="saveEditorNow()">Save</button>
-  </div>
-</div>
-</div>
 
-<!-- TEMPLATE EDITOR MODAL -->
-<div class="modal-backdrop" id="template-editor-modal">
-<div class="modal modal-lg">
-  <div class="modal-header">
-    <div><div class="modal-title" id="ted-title">Template Editor</div></div>
-    <button class="modal-close" onclick="closeModal('template-editor-modal')">✕</button>
-  </div>
-  <div class="form-row mb16">
-    <div class="field-group"><label class="field-label">Template Name</label><input class="field-input" id="t-name" oninput="markTDirty()"></div>
-    <div class="field-group"><label class="field-label">Description</label><input class="field-input" id="t-desc" oninput="markTDirty()"></div>
-  </div>
-  <div class="flex ac" style="justify-content:space-between;margin-bottom:12px">
-    <span style="font-weight:600;font-size:14px">Sections</span>
-    <div class="flex gap8">
-      <button class="btn btn-secondary btn-sm" onclick="addSection('text')">+ Text</button>
-      <button class="btn btn-secondary btn-sm" onclick="addSection('table')">+ Table</button>
-      <button class="btn btn-secondary btn-sm" onclick="addSection('findings')">+ Findings</button>
-      <button class="btn btn-secondary btn-sm" onclick="addSection('checklist')">+ Checklist</button>
+    <!-- REPORTS -->
+    <div class="view" id="view-reports">
+      <div class="page-hdr">
+        <span class="page-title">Reports</span>
+        <button class="btn btn-primary" onclick="openNewReportModal()">+ New Report</button>
+      </div>
+      <input class="field-input" id="rpt-search" placeholder="Search reports..." style="margin-bottom:14px" oninput="renderReportsList()">
+      <div id="reports-list"></div>
     </div>
+
+    <!-- REPORT EDITOR -->
+    <div class="view" id="view-editor">
+      <div class="page-hdr" style="margin-bottom:10px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <button class="btn btn-ghost btn-sm" onclick="showView('reports')">&#8592; Reports</button>
+          <span class="page-title" id="editor-title">Report Editor</span>
+          <span id="editor-dirty" style="color:var(--text2);font-size:12px"></span>
+        </div>
+        <div style="display:flex;gap:8px">
+          <select class="field-select" id="editor-status" style="width:auto" onchange="updateReportStatus()">
+            <option value="draft">Draft</option>
+            <option value="review">In Review</option>
+            <option value="final">Final</option>
+          </select>
+          <button class="btn btn-primary btn-sm" onclick="saveEditorNow()">Save</button>
+        </div>
+      </div>
+      <div class="editor-layout">
+        <div class="editor-main">
+          <div class="editor-tabs">
+            <button class="editor-tab active" onclick="switchEdTab('info')">Info</button>
+            <button class="editor-tab" onclick="switchEdTab('sections')">Sections</button>
+            <button class="editor-tab" onclick="switchEdTab('findings')">Findings</button>
+            <button class="editor-tab" onclick="switchEdTab('preview')">Preview</button>
+          </div>
+          <div class="editor-panel active" id="ed-info">
+            <div class="field-group"><label class="field-label">Title</label><input class="field-input" id="ed-title" oninput="markDirty()"></div>
+            <div class="form-row">
+              <div class="field-group"><label class="field-label">Client / Org</label><input class="field-input" id="ed-org" oninput="markDirty()"></div>
+              <div class="field-group"><label class="field-label">Assessor</label><input class="field-input" id="ed-assessor" oninput="markDirty()"></div>
+            </div>
+            <div class="form-row">
+              <div class="field-group"><label class="field-label">Start Date</label><input class="field-input" type="date" id="ed-start" oninput="markDirty()"></div>
+              <div class="field-group"><label class="field-label">End Date</label><input class="field-input" type="date" id="ed-end" oninput="markDirty()"></div>
+            </div>
+            <div class="field-group"><label class="field-label">Executive Summary</label><textarea class="field-textarea" id="ed-summary" rows="5" oninput="markDirty()"></textarea></div>
+          </div>
+          <div class="editor-panel" id="ed-sections">
+            <div id="ed-sections-body"></div>
+          </div>
+          <div class="editor-panel" id="ed-findings">
+            <div class="page-hdr" style="margin-bottom:10px">
+              <span style="font-weight:600">Findings</span>
+              <button class="btn btn-primary btn-sm" onclick="openFindingModal()">+ Add Finding</button>
+            </div>
+            <div id="ed-findings-list"></div>
+          </div>
+          <div class="editor-panel" id="ed-preview">
+            <div class="preview-box" id="preview-content"></div>
+          </div>
+        </div>
+        <div class="sidebar">
+          <div style="font-weight:600;font-size:13px;margin-bottom:14px">Report Details</div>
+          <div id="editor-sidebar"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FINDINGS VIEW -->
+    <div class="view" id="view-findings">
+      <div class="page-hdr">
+        <span class="page-title">Findings</span>
+        <button class="btn btn-primary" onclick="openFindingModal(null)">+ Add Finding</button>
+      </div>
+      <div style="display:flex;gap:10px;margin-bottom:14px">
+        <select class="field-select" id="findings-rpt-sel" onchange="onFindingsReportChange()" style="flex:1">
+          <option value="">All Reports</option>
+        </select>
+        <select class="field-select" id="findings-sev-sel" onchange="renderFindingsView()" style="width:140px">
+          <option value="">All Severities</option>
+          <option>Critical</option><option>High</option><option>Medium</option><option>Low</option><option>Info</option>
+        </select>
+      </div>
+      <div id="findings-list"></div>
+    </div>
+
+    <!-- TEMPLATES -->
+    <div class="view" id="view-templates">
+      <div class="page-hdr">
+        <span class="page-title">Templates</span>
+        <button class="btn btn-primary" onclick="openNewTemplateModal()">+ New Template</button>
+      </div>
+      <div id="templates-list"></div>
+    </div>
+
+    <!-- TEMPLATE EDITOR -->
+    <div class="view" id="view-template-editor">
+      <div class="page-hdr" style="margin-bottom:10px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <button class="btn btn-ghost btn-sm" onclick="showView('templates')">&#8592; Templates</button>
+          <span class="page-title" id="ted-title">Template Editor</span>
+          <span id="ted-dirty" style="color:var(--text2);font-size:12px"></span>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="saveTemplate()">Save Template</button>
+      </div>
+      <div class="card" style="margin-bottom:14px">
+        <div class="field-group"><label class="field-label">Template Name</label><input class="field-input" id="ted-name" oninput="markTDirty()"></div>
+        <div class="field-group"><label class="field-label">Description</label><input class="field-input" id="ted-desc" oninput="markTDirty()"></div>
+      </div>
+      <div class="page-hdr" style="margin-bottom:10px">
+        <span style="font-weight:600">Sections</span>
+        <div style="display:flex;gap:8px">
+          <select class="field-select" id="add-sec-type" style="width:auto">
+            <option value="text">Text Section</option>
+            <option value="table">Table</option>
+            <option value="findings">Findings</option>
+            <option value="checklist">Checklist</option>
+          </select>
+          <button class="btn btn-primary btn-sm" onclick="addSection()">+ Add Section</button>
+        </div>
+      </div>
+      <div id="ted-sections"></div>
+    </div>
+
   </div>
-  <div id="template-sections"></div>
-  <div id="template-sections-empty" class="empty" style="padding:20px 0">
-    <div class="eicon">🧩</div><h3>No sections yet</h3><p>Add sections above to build your template.</p>
-  </div>
-  <div class="modal-footer">
-    <span class="small muted" id="ted-save-status"></span>
-    <button class="btn btn-ghost btn-sm" onclick="closeModal('template-editor-modal')">Cancel</button>
-    <button class="btn btn-primary btn-sm" onclick="saveTemplateNow()">Save Template</button>
-  </div>
-</div>
 </div>
 
 <!-- NEW REPORT MODAL -->
-<div class="modal-backdrop" id="new-report-modal">
-<div class="modal">
-  <div class="modal-header"><div class="modal-title">New Report</div><button class="modal-close" onclick="closeModal('new-report-modal')">✕</button></div>
-  <div class="form-row">
-    <div class="field-group"><label class="field-label">Title *</label><input class="field-input" id="nr-title" placeholder="e.g. Q1 Pentest"></div>
-    <div class="field-group"><label class="field-label">Organization</label><input class="field-input" id="nr-org" placeholder="Client name"></div>
-  </div>
-  <div class="form-row">
-    <div class="field-group"><label class="field-label">Report Type</label>
-      <select class="field-select" id="nr-type">
-        <option>Security Assessment</option><option>Penetration Test</option><option>Vulnerability Assessment</option><option>Red Team Exercise</option><option>Compliance Audit</option><option>Risk Assessment</option>
-      </select>
+<div class="modal-overlay" id="modal-new-report">
+  <div class="modal">
+    <div class="modal-hdr"><span>New Report</span><button class="btn btn-ghost btn-sm" onclick="closeModal('modal-new-report')">&#10005;</button></div>
+    <div class="modal-body">
+      <div class="field-group"><label class="field-label">Title</label><input class="field-input" id="nr-title" placeholder="Report title"></div>
+      <div class="field-group"><label class="field-label">Template</label>
+        <select class="field-select" id="nr-template"><option value="">None (blank)</option></select>
+      </div>
     </div>
-    <div class="field-group"><label class="field-label">Start from Template</label>
-      <select class="field-select" id="nr-template"><option value="">Blank Report</option></select>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-new-report')">Cancel</button>
+      <button class="btn btn-primary" onclick="createReport()">Create</button>
     </div>
   </div>
-  <div class="modal-footer">
-    <button class="btn btn-ghost" onclick="closeModal('new-report-modal')">Cancel</button>
-    <button class="btn btn-primary" onclick="createReport()">Create Report →</button>
-  </div>
-</div>
 </div>
 
 <!-- NEW TEMPLATE MODAL -->
-<div class="modal-backdrop" id="new-template-modal">
-<div class="modal">
-  <div class="modal-header"><div class="modal-title">New Template</div><button class="modal-close" onclick="closeModal('new-template-modal')">✕</button></div>
-  <div class="field-group"><label class="field-label">Name *</label><input class="field-input" id="nt-name" placeholder="e.g. Pentest Report Template"></div>
-  <div class="field-group"><label class="field-label">Description</label><input class="field-input" id="nt-desc" placeholder="Brief description…"></div>
-  <div class="modal-footer">
-    <button class="btn btn-ghost" onclick="closeModal('new-template-modal')">Cancel</button>
-    <button class="btn btn-primary" onclick="createTemplate()">Create &amp; Edit →</button>
+<div class="modal-overlay" id="modal-new-template">
+  <div class="modal">
+    <div class="modal-hdr"><span>New Template</span><button class="btn btn-ghost btn-sm" onclick="closeModal('modal-new-template')">&#10005;</button></div>
+    <div class="modal-body">
+      <div class="field-group"><label class="field-label">Template Name</label><input class="field-input" id="nt-name" placeholder="e.g. Web App Pentest"></div>
+      <div class="field-group"><label class="field-label">Description</label><input class="field-input" id="nt-desc" placeholder="Optional description"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-new-template')">Cancel</button>
+      <button class="btn btn-primary" onclick="createTemplate()">Create</button>
+    </div>
   </div>
-</div>
 </div>
 
 <!-- FINDING MODAL -->
-<div class="modal-backdrop" id="finding-modal">
-<div class="modal">
-  <div class="modal-header"><div class="modal-title" id="fm-title">Add Finding</div><button class="modal-close" onclick="closeModal('finding-modal')">✕</button></div>
-  <div class="field-group"><label class="field-label">Title *</label><input class="field-input" id="f-title" placeholder="Finding title"></div>
-  <div class="form-row">
-    <div class="field-group"><label class="field-label">Severity</label>
-      <select class="field-select" id="f-sev"><option>Critical</option><option>High</option><option selected>Medium</option><option>Low</option><option>Info</option></select>
+<div class="modal-overlay" id="modal-finding">
+  <div class="modal">
+    <div class="modal-hdr"><span id="fm-title">Add Finding</span><button class="btn btn-ghost btn-sm" onclick="closeModal('modal-finding')">&#10005;</button></div>
+    <div class="modal-body">
+      <div class="field-group"><label class="field-label">Report</label>
+        <select class="field-select" id="fm-report"></select>
+      </div>
+      <div class="field-group"><label class="field-label">Title</label><input class="field-input" id="fm-ftitle" placeholder="Finding title"></div>
+      <div class="form-row">
+        <div class="field-group"><label class="field-label">Severity</label>
+          <select class="field-select" id="fm-severity">
+            <option>Critical</option><option>High</option><option selected>Medium</option><option>Low</option><option>Info</option>
+          </select>
+        </div>
+        <div class="field-group"><label class="field-label">Status</label>
+          <select class="field-select" id="fm-status">
+            <option value="open">Open</option><option value="remediated">Remediated</option><option value="accepted">Accepted</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-group"><label class="field-label">Description</label><textarea class="field-textarea" id="fm-desc" rows="4"></textarea></div>
+      <div class="field-group"><label class="field-label">Recommendation</label><textarea class="field-textarea" id="fm-rec" rows="3"></textarea></div>
+      <div class="field-group"><label class="field-label">CVSS Score</label><input class="field-input" id="fm-cvss" type="number" min="0" max="10" step="0.1" placeholder="0.0"></div>
     </div>
-    <div class="field-group"><label class="field-label">Status</label>
-      <select class="field-select" id="f-stat"><option>Open</option><option>In Progress</option><option>Remediated</option><option>Accepted</option></select>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-finding')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveFinding()">Save Finding</button>
     </div>
   </div>
-  <div class="field-group"><label class="field-label">Description</label><textarea class="field-textarea" id="f-desc" rows="3" placeholder="Describe the finding…"></textarea></div>
-  <div class="field-group"><label class="field-label">Impact</label><textarea class="field-textarea" id="f-impact" rows="2" placeholder="Business or technical impact…"></textarea></div>
-  <div class="field-group"><label class="field-label">Recommendation</label><textarea class="field-textarea" id="f-rec" rows="2" placeholder="Steps to remediate…"></textarea></div>
-  <div class="field-group"><label class="field-label">References / CVSS</label><input class="field-input" id="f-refs" placeholder="CVE IDs, CVSS score, links…"></div>
-  <div class="modal-footer">
-    <button class="btn btn-ghost" onclick="closeModal('finding-modal')">Cancel</button>
-    <button class="btn btn-primary" id="f-save-btn" onclick="saveFinding()">Add Finding</button>
-  </div>
-</div>
 </div>
 
-<!-- CONFIRM MODAL -->
-<div class="modal-backdrop" id="confirm-modal">
-<div class="modal" style="width:min(400px,94vw)">
-  <div class="modal-header"><div class="modal-title" id="conf-title">Confirm</div><button class="modal-close" onclick="closeModal('confirm-modal')">✕</button></div>
-  <p class="small muted" id="conf-body"></p>
-  <div class="modal-footer">
-    <button class="btn btn-ghost" onclick="closeModal('confirm-modal')">Cancel</button>
-    <button class="btn btn-danger" id="conf-ok">Delete</button>
+<!-- CONFIRM DELETE MODAL -->
+<div class="modal-overlay" id="modal-confirm">
+  <div class="modal" style="width:380px">
+    <div class="modal-hdr"><span>Confirm Delete</span><button class="btn btn-ghost btn-sm" onclick="closeModal('modal-confirm')">&#10005;</button></div>
+    <div class="modal-body"><p id="confirm-msg" style="color:var(--text2)"></p></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('modal-confirm')">Cancel</button>
+      <button class="btn btn-danger" id="confirm-ok">Delete</button>
+    </div>
   </div>
 </div>
-</div>
 
-<div id="toast-root"></div>
+<div class="toast-root" id="toast-root"></div>
+
 <script>
-// ── State ──────────────────────────────────────────────────────────────
-const S = { reports:[], templates:[], activeRptId:null, activeTplId:null, dirty:false, tSections:[], editFindingIdx:null, findingsRptId:null };
-let saveTimer = null;
+// ── State ──────────────────────────────────────────────────────────
+const S = {
+  reports: [],
+  templates: [],
+  findings: [],
+  currentReport: null,
+  currentTemplate: null,
+  edDirty: false,
+  tedDirty: false,
+  saveTimer: null,
+  editingFindingId: null,
+};
 
-// ── Utilities ──────────────────────────────────────────────────────────
-function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-function fmtDate(iso){if(!iso)return'—';try{return new Date(iso).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'});}catch{return iso;}}
-function badge(s){const m={draft:'badge-draft',review:'badge-review',final:'badge-final'};return '<span class="badge '+(m[s]||'badge-draft')+'">'+s+'</span>';}
-function toast(msg,type='success'){const el=document.createElement('div');el.className='toast toast-'+type;el.textContent=msg;document.getElementById('toast-root').appendChild(el);setTimeout(()=>el.remove(),3500);}
-
-// ── API ────────────────────────────────────────────────────────────────
-async function api(path,opts={}){
-  const res=await fetch(path,{headers:{'Content-Type':'application/json',...(opts.headers||{})}, ...opts});
-  if(!res.ok){const e=await res.json().catch(()=>({detail:res.statusText}));throw new Error(e.detail||res.statusText);}
+// ── Utilities ──────────────────────────────────────────────────────
+function esc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function fmtDate(s) {
+  if (!s) return '';
+  try { return new Date(s).toLocaleDateString(); } catch(e) { return s; }
+}
+function badge(status) {
+  const map = { draft:'badge-draft', review:'badge-review', final:'badge-final', open:'badge-open', info:'badge-info', remediated:'badge-info', accepted:'badge-info' };
+  return '<span class="badge ' + (map[status] || 'badge-draft') + '">' + esc(status) + '</span>';
+}
+function toast(msg, type) {
+  type = type || 'success';
+  const el = document.createElement('div');
+  el.className = 'toast toast-' + type;
+  el.textContent = msg;
+  document.getElementById('toast-root').appendChild(el);
+  setTimeout(function() { el.remove(); }, 3000);
+}
+async function api(path, opts) {
+  opts = opts || {};
+  const res = await fetch(path, {
+    headers: { 'Content-Type': 'application/json' },
+    ...opts
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text || res.statusText);
+  }
+  if (res.status === 204) return null;
   return res.json();
 }
-
-// ── Modals ─────────────────────────────────────────────────────────────
-function openModal(id){document.getElementById(id).classList.add('open');}
-function closeModal(id){document.getElementById(id).classList.remove('open');}
-document.addEventListener('click',e=>{if(e.target.classList.contains('modal-backdrop'))closeModal(e.target.id);});
-
-// ── Navigation ─────────────────────────────────────────────────────────
-function showView(name,btn){
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById('view-'+name).classList.add('active');
-  (btn||document.getElementById('tab-'+name))?.classList.add('active');
-  if(name==='findings')populateFindingsSelect();
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+function showView(name) {
+  document.querySelectorAll('.view').forEach(function(v) { v.classList.remove('active'); });
+  document.querySelectorAll('.nav-tab').forEach(function(t) { t.classList.remove('active'); });
+  var el = document.getElementById('view-' + name);
+  if (el) el.classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach(function(t) {
+    if (t.getAttribute('onclick') && t.getAttribute('onclick').includes("'" + name + "'")) {
+      t.classList.add('active');
+    }
+  });
+  if (name === 'reports') renderReportsList();
+  if (name === 'findings') renderFindingsView();
+  if (name === 'templates') renderTemplatesList();
+  if (name === 'dash') renderDash();
 }
 
-// ── Load Data ──────────────────────────────────────────────────────────
-async function loadAll(){
-  await Promise.all([loadReports(),loadTemplates()]);
-}
-async function loadReports(){
-  try{S.reports=await api('/api/reports');}catch{S.reports=[];}
-  renderDash();renderReportsList();populateFindingsSelect();populateNRTemplates();
-}
-async function loadTemplates(){
-  try{S.templates=await api('/api/templates');}catch{S.templates=[];}
-  renderTemplatesList();populateNRTemplates();
-}
-
-// ── Dashboard ──────────────────────────────────────────────────────────
-function renderDash(){
-  const r=S.reports;
-  document.getElementById('stat-total').textContent=r.length;
-  document.getElementById('stat-draft').textContent=r.filter(x=>x.status==='draft').length;
-  document.getElementById('stat-review').textContent=r.filter(x=>x.status==='review').length;
-  document.getElementById('stat-final').textContent=r.filter(x=>x.status==='final').length;
-  const el=document.getElementById('dash-recent');
-  if(!r.length){el.innerHTML='<div class="empty"><div class="eicon">📋</div><h3>No reports yet</h3><p>Create your first report to get started.</p><button class="btn btn-primary mt16" onclick="openModal('new-report-modal')">+ New Report</button></div>';return;}
-  el.innerHTML='<div class="card-grid">'+r.slice(0,6).map(x=>'<div class="card-item" onclick="openReportEditor(''+x.id+'')">'+'<div class="item-title">'+esc(x.title)+'</div>'+'<div class="item-meta">'+esc(x.org||'—')+' · '+esc(x.type)+'</div>'+'<div class="item-meta" style="margin-top:4px">'+badge(x.status)+' <span style="margin-left:6px">'+fmtDate(x.updated_at)+'</span></div></div>').join('')+'</div>';
+// ── Load ───────────────────────────────────────────────────────────
+async function loadAll() {
+  try {
+    var results = await Promise.all([
+      api('/api/reports'),
+      api('/api/templates'),
+      api('/api/findings'),
+    ]);
+    S.reports = results[0] || [];
+    S.templates = results[1] || [];
+    S.findings = results[2] || [];
+    renderDash();
+    renderReportsList();
+    renderTemplatesList();
+    renderFindingsView();
+    populateNRTemplates();
+    populateFindingsSelect();
+  } catch(e) {
+    toast('Failed to load data: ' + e.message, 'error');
+  }
 }
 
-// ── Reports List ───────────────────────────────────────────────────────
-function renderReportsList(){
-  const filter=document.getElementById('reports-filter').value;
-  const rows=filter?S.reports.filter(r=>r.status===filter):S.reports;
-  const el=document.getElementById('reports-list');
-  if(!rows.length){el.innerHTML='<div class="empty"><div class="eicon">📄</div><h3>No reports</h3><p>Create your first security report.</p></div>';return;}
-  el.innerHTML='<div style="overflow-x:auto"><table><thead><tr><th>Title</th><th>Organization</th><th>Type</th><th>Status</th><th>Updated</th><th></th></tr></thead><tbody>'+
-    rows.map(r=>'<tr><td><a href="#" onclick="openReportEditor(''+r.id+'');return false" style="color:var(--text);font-weight:500">'+esc(r.title)+'</a></td>'+'<td class="muted">'+esc(r.org||'—')+'</td>'+'<td class="muted small">'+esc(r.type)+'</td>'+'<td>'+badge(r.status)+'</td>'+'<td class="muted small">'+fmtDate(r.updated_at)+'</td>'+'<td><div class="flex gap8"><button class="btn btn-ghost btn-sm btn-icon" onclick="openReportEditor(''+r.id+'')">✏️</button>'+'<button class="btn btn-danger btn-sm btn-icon" onclick="confirmDel('report',''+r.id+'',''+esc(r.title)+'')">🗑️</button></div></td></tr>').join('')+
-  '</tbody></table></div>';
+// ── Dashboard ──────────────────────────────────────────────────────
+function renderDash() {
+  var rpts = S.reports;
+  document.getElementById('stat-total').textContent = rpts.length;
+  document.getElementById('stat-draft').textContent = rpts.filter(function(r){ return r.status === 'draft'; }).length;
+  document.getElementById('stat-review').textContent = rpts.filter(function(r){ return r.status === 'review'; }).length;
+  document.getElementById('stat-final').textContent = rpts.filter(function(r){ return r.status === 'final'; }).length;
+  var recent = rpts.slice().sort(function(a,b){ return (b.updated_at||'').localeCompare(a.updated_at||''); }).slice(0,5);
+  var el = document.getElementById('dash-recent');
+  if (!recent.length) {
+    el.innerHTML = '<div class="empty-state"><p>No reports yet</p></div>';
+    return;
+  }
+  el.innerHTML = '<table><thead><tr><th>Title</th><th>Status</th><th>Updated</th></tr></thead><tbody>' +
+    recent.map(function(r) {
+      return '<tr style="cursor:pointer" onclick="openReportEditor(' + r.id + ')"><td>' + esc(r.title) + '</td><td>' + badge(r.status) + '</td><td>' + fmtDate(r.updated_at) + '</td></tr>';
+    }).join('') + '</tbody></table>';
 }
 
-// ── Report Editor ──────────────────────────────────────────────────────
-async function openReportEditor(id){
-  S.activeRptId=id; S.dirty=false; S.editFindingIdx=null;
-  document.getElementById('ed-save-status').textContent='Loading…';
-  openModal('report-editor-modal');
-  switchEdTab('info',document.getElementById('etab-info-btn'));
-  try{
-    const r=await api('/api/reports/'+id);
-    const rep=(r.data||{}).report||{};
-    document.getElementById('e-title').value=r.title||'';
-    document.getElementById('e-org').value=r.org||'';
-    document.getElementById('e-type').value=r.type||'Security Assessment';
-    document.getElementById('e-cls').value=r.classification||'Confidential';
-    document.getElementById('e-date').value=r.date||'';
-    document.getElementById('e-authors').value=r.authors||'';
-    document.getElementById('e-exec').value=rep.exec_summary||'';
-    document.getElementById('e-scope').value=rep.scope||'';
-    document.getElementById('ed-report-title').textContent=r.title;
-    document.getElementById('ed-report-meta').textContent=(r.org?r.org+' · ':'')+r.type;
-    document.getElementById('ed-status').value=r.status||'draft';
-    renderEdSections(r.data||{});
-    renderEdFindings(r.data||{});
-    document.getElementById('ed-save-status').textContent='All saved';
-  }catch(e){toast('Failed to load report: '+e.message,'error');closeModal('report-editor-modal');}
+// ── Reports List ───────────────────────────────────────────────────
+function renderReportsList() {
+  var q = (document.getElementById('rpt-search') ? document.getElementById('rpt-search').value : '').toLowerCase();
+  var filtered = S.reports.filter(function(r){ return !q || (r.title||'').toLowerCase().includes(q); });
+  var el = document.getElementById('reports-list');
+  if (!filtered.length) {
+    el.innerHTML = '<div class="empty-state"><p>' + (q ? 'No matching reports' : 'No reports yet. Create one!') + '</p></div>';
+    return;
+  }
+  el.innerHTML = '<div class="card-grid">' +
+    filtered.map(function(r) {
+      return '<div class="card-item">' +
+        '<div class="item-title">' + esc(r.title) + '</div>' +
+        '<div class="item-meta">' + badge(r.status) + ' &bull; ' + fmtDate(r.updated_at) + '</div>' +
+        '<div class="item-actions">' +
+          '<button class="btn btn-primary btn-sm" onclick="event.stopPropagation();openReportEditor(' + r.id + ')">Open</button>' +
+          '<button class="btn btn-danger btn-sm" onclick="event.stopPropagation();confirmDelete('report',' + r.id + ','' + esc(r.title) + '')">Delete</button>' +
+        '</div>' +
+      '</div>';
+    }).join('') + '</div>';
+}
+function openNewReportModal() {
+  populateNRTemplates();
+  var el = document.getElementById('nr-title');
+  if (el) el.value = '';
+  openModal('modal-new-report');
+}
+function populateNRTemplates() {
+  var sel = document.getElementById('nr-template');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">None (blank)</option>' +
+    S.templates.map(function(t){ return '<option value="' + t.id + '">' + esc(t.name) + '</option>'; }).join('');
+}
+async function createReport() {
+  var title = document.getElementById('nr-title').value.trim();
+  if (!title) { toast('Title is required', 'error'); return; }
+  var tid = document.getElementById('nr-template').value;
+  try {
+    var r = await api('/api/reports', {
+      method: 'POST',
+      body: JSON.stringify({ title: title, template_id: tid ? parseInt(tid) : null, status: 'draft', sections: [], meta: {} })
+    });
+    S.reports.unshift(r);
+    closeModal('modal-new-report');
+    toast('Report created');
+    openReportEditor(r.id);
+  } catch(e) {
+    toast('Failed to create: ' + e.message, 'error');
+  }
 }
 
-function switchEdTab(tab,btn){
-  document.querySelectorAll('.etab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('[id^="etab-"][id$="-btn"]').forEach(b=>b.classList.remove('active'));
-  document.getElementById('etab-'+tab).classList.add('active');
-  if(btn)btn.classList.add('active');
-  if(tab==='preview')renderEdPreview();
+// ── Report Editor ──────────────────────────────────────────────────
+async function openReportEditor(id) {
+  try {
+    var r = await api('/api/reports/' + id);
+    S.currentReport = r;
+    S.edDirty = false;
+    document.getElementById('editor-title').textContent = r.title || 'Untitled';
+    document.getElementById('editor-dirty').textContent = '';
+    document.getElementById('editor-status').value = r.status || 'draft';
+    document.getElementById('ed-title').value = r.title || '';
+    document.getElementById('ed-org').value = r.meta && r.meta.org ? r.meta.org : '';
+    document.getElementById('ed-assessor').value = r.meta && r.meta.assessor ? r.meta.assessor : '';
+    document.getElementById('ed-start').value = r.meta && r.meta.start_date ? r.meta.start_date : '';
+    document.getElementById('ed-end').value = r.meta && r.meta.end_date ? r.meta.end_date : '';
+    document.getElementById('ed-summary').value = r.meta && r.meta.summary ? r.meta.summary : '';
+    renderEdSections();
+    renderEdFindings();
+    renderEdPreview();
+    switchEdTab('info');
+    showView('editor');
+  } catch(e) {
+    toast('Failed to open report: ' + e.message, 'error');
+  }
 }
-
-function markDirty(){
-  S.dirty=true;
-  document.getElementById('ed-save-status').textContent='Unsaved…';
-  clearTimeout(saveTimer);
-  saveTimer=setTimeout(saveEditorNow,1800);
+function switchEdTab(name) {
+  document.querySelectorAll('.editor-tab').forEach(function(t){ t.classList.remove('active'); });
+  document.querySelectorAll('.editor-panel').forEach(function(p){ p.classList.remove('active'); });
+  var panel = document.getElementById('ed-' + name);
+  if (panel) panel.classList.add('active');
+  document.querySelectorAll('.editor-tab').forEach(function(t){
+    if (t.getAttribute('onclick') && t.getAttribute('onclick').includes("'" + name + "'")) t.classList.add('active');
+  });
+  if (name === 'preview') renderEdPreview();
 }
-
-async function saveEditorNow(){
-  if(!S.activeRptId)return;
-  clearTimeout(saveTimer);
-  try{
-    const existing=await api('/api/reports/'+S.activeRptId);
-    const data={...(existing.data||{}),report:{...((existing.data||{}).report||{}),title:document.getElementById('e-title').value,org:document.getElementById('e-org').value,type:document.getElementById('e-type').value,classification:document.getElementById('e-cls').value,date:document.getElementById('e-date').value,authors:document.getElementById('e-authors').value,exec_summary:document.getElementById('e-exec').value,scope:document.getElementById('e-scope').value}};
-    await api('/api/reports/'+S.activeRptId,{method:'PUT',body:JSON.stringify({title:data.report.title,org:data.report.org,type:data.report.type,classification:data.report.classification,date:data.report.date,authors:data.report.authors,data})});
-    S.dirty=false;
-    document.getElementById('ed-save-status').textContent='Saved ✓';
-    document.getElementById('ed-report-title').textContent=data.report.title;
-    await loadReports();
-  }catch(e){document.getElementById('ed-save-status').textContent='Save failed';}
+function markDirty() {
+  S.edDirty = true;
+  document.getElementById('editor-dirty').textContent = '● unsaved';
+  clearTimeout(S.saveTimer);
+  S.saveTimer = setTimeout(saveEditorNow, 2000);
 }
-
-async function updateReportStatus(){
-  if(!S.activeRptId)return;
-  try{await api('/api/reports/'+S.activeRptId,{method:'PUT',body:JSON.stringify({status:document.getElementById('ed-status').value})});await loadReports();}catch{}
-}
-
-function renderEdSections(data){
-  const sections=data.sections||[];
-  const el=document.getElementById('ed-sections');
-  if(!sections.length){el.innerHTML='<div class="empty" style="padding:24px 0"><div class="eicon">🧩</div><h3>No template sections</h3><p>Create a template, then start a new report from it to see sections here.</p></div>';return;}
-  el.innerHTML=sections.map((s,i)=>'<div class="rpt-section"><div class="rpt-section-head" onclick="toggleRptSec('rsec'+i+'')">'+'<span class="rpt-section-title">'+esc(s.title||'Section')+'</span><span class="small muted">'+esc(s.type||'text')+'</span><span id="rsec'+i+'-arr">▼</span></div>'+'<div class="rpt-section-body" id="rsec'+i+'" style="display:none">'+renderSecFields(s,i)+'</div></div>').join('');
-}
-
-function toggleRptSec(id){const el=document.getElementById(id);const arr=document.getElementById(id+'-arr');const open=el.style.display!=='none';el.style.display=open?'none':'block';if(arr)arr.textContent=open?'▼':'▲';}
-
-function renderSecFields(s,si){
-  const fields=s.fields||[];
-  if(!fields.length)return'<p class="small muted">No fields defined.</p>';
-  return fields.map((f,fi)=>'<div class="field-group"><label class="field-label">'+esc(f.label||f.id||'Field')+'</label>'+renderFieldInput(f,si,fi)+'</div>').join('');
-}
-
-function renderFieldInput(f,si,fi){
-  const id='sf_'+si+'_'+fi,t=f.type||'text';
-  if(t==='textarea')return'<textarea class="field-textarea" id="'+id+'" oninput="markDirty()" rows="3" placeholder="'+esc(f.placeholder||'')+'"></textarea>';
-  if(t==='select'){const opts=(f.options||[]).map(o=>'<option>'+esc(o)+'</option>').join('');return'<select class="field-select" id="'+id+'" onchange="markDirty()">'+opts+'</select>';}
-  return'<input class="field-input" id="'+id+'" type="'+(t==='date'?'date':'text')+'" placeholder="'+esc(f.placeholder||'')+'" oninput="markDirty()">';
-}
-
-function renderEdPreview(){
-  const title=document.getElementById('e-title').value||'Untitled Report';
-  const org=document.getElementById('e-org').value,type=document.getElementById('e-type').value,cls=document.getElementById('e-cls').value,date=document.getElementById('e-date').value,authors=document.getElementById('e-authors').value,exec=document.getElementById('e-exec').value,scope=document.getElementById('e-scope').value;
-  document.getElementById('ed-preview').innerHTML='<div style="border-bottom:2px solid var(--accent);padding-bottom:14px;margin-bottom:20px"><h1 style="font-size:22px;font-weight:700;margin-bottom:8px">'+esc(title)+'</h1><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;color:var(--text2)">'+(org?'<span><b>Organization:</b> '+esc(org)+'</span>':'')+(type?'<span><b>Type:</b> '+esc(type)+'</span>':'')+(cls?'<span><b>Classification:</b> '+esc(cls)+'</span>':'')+(date?'<span><b>Date:</b> '+esc(date)+'</span>':'')+(authors?'<span><b>Authors:</b> '+esc(authors)+'</span>':'')+'</div></div>'+(exec?'<h2 style="font-size:15px;font-weight:700;color:var(--accent2);margin-bottom:8px">Executive Summary</h2><p style="margin-bottom:18px;white-space:pre-wrap">'+esc(exec)+'</p>':'')+(scope?'<h2 style="font-size:15px;font-weight:700;color:var(--accent2);margin-bottom:8px">Scope &amp; Methodology</h2><p style="white-space:pre-wrap">'+esc(scope)+'</p>':'');
-}
-
-// ── Create Report ──────────────────────────────────────────────────────
-async function createReport(){
-  const title=document.getElementById('nr-title').value.trim();
-  if(!title){toast('Title is required','error');return;}
-  try{
-    const res=await api('/api/reports',{method:'POST',body:JSON.stringify({title,org:document.getElementById('nr-org').value,type:document.getElementById('nr-type').value,template_id:document.getElementById('nr-template').value||null})});
-    closeModal('new-report-modal');
-    document.getElementById('nr-title').value='';document.getElementById('nr-org').value='';
-    toast('Report created');await loadReports();openReportEditor(res.id);
-  }catch(e){toast('Failed: '+e.message,'error');}
-}
-
-// ── Delete ─────────────────────────────────────────────────────────────
-function confirmDel(type,id,name){
-  document.getElementById('conf-title').textContent='Delete '+(type==='report'?'Report':'Template');
-  document.getElementById('conf-body').textContent='Delete "'+name+'"? This cannot be undone.';
-  const btn=document.getElementById('conf-ok');
-  btn.onclick=async()=>{
-    try{await api('/api/'+type+'s/'+id,{method:'DELETE'});closeModal('confirm-modal');toast((type==='report'?'Report':'Template')+' deleted');type==='report'?await loadReports():await loadTemplates();}
-    catch(e){toast('Delete failed: '+e.message,'error');}
+async function saveEditorNow() {
+  if (!S.currentReport) return;
+  var title = document.getElementById('ed-title').value.trim() || S.currentReport.title;
+  var meta = {
+    org: document.getElementById('ed-org').value,
+    assessor: document.getElementById('ed-assessor').value,
+    start_date: document.getElementById('ed-start').value,
+    end_date: document.getElementById('ed-end').value,
+    summary: document.getElementById('ed-summary').value,
   };
-  openModal('confirm-modal');
+  try {
+    var updated = await api('/api/reports/' + S.currentReport.id, {
+      method: 'PUT',
+      body: JSON.stringify({ title: title, status: S.currentReport.status, sections: S.currentReport.sections || [], meta: meta })
+    });
+    S.currentReport = updated;
+    S.edDirty = false;
+    document.getElementById('editor-dirty').textContent = '';
+    document.getElementById('editor-title').textContent = updated.title;
+    var idx = S.reports.findIndex(function(r){ return r.id === updated.id; });
+    if (idx >= 0) S.reports[idx] = updated;
+    toast('Saved');
+  } catch(e) {
+    toast('Save failed: ' + e.message, 'error');
+  }
+}
+async function updateReportStatus() {
+  if (!S.currentReport) return;
+  S.currentReport.status = document.getElementById('editor-status').value;
+  await saveEditorNow();
+}
+function renderEdSections() {
+  var el = document.getElementById('ed-sections-body');
+  if (!el) return;
+  var sections = (S.currentReport && S.currentReport.sections) || [];
+  if (!sections.length) {
+    el.innerHTML = '<div class="empty-state"><p>No sections. Apply a template or add sections manually.</p></div>';
+    return;
+  }
+  el.innerHTML = sections.map(function(sec, i) {
+    return '<div class="section-hdr" onclick="toggleRptSec(' + i + ')">' +
+      '<span>' + esc(sec.title || 'Section ' + (i+1)) + '</span><span>' + esc(sec.type || '') + '</span>' +
+      '</div>' +
+      '<div class="section-body" id="rpt-sec-' + i + '">' +
+        renderSecFields(sec) +
+      '</div>';
+  }).join('');
+}
+function toggleRptSec(i) {
+  var el = document.getElementById('rpt-sec-' + i);
+  if (el) el.style.display = el.style.display === 'none' ? '' : 'none';
+}
+function renderSecFields(sec) {
+  var fields = sec.fields || [];
+  if (!fields.length) return '<p style="color:var(--text2);font-size:13px">No fields defined.</p>';
+  return fields.map(function(f) {
+    return '<div class="field-group"><label class="field-label">' + esc(f.label) + '</label>' +
+      renderFieldInput(f, sec.id || '') +
+    '</div>';
+  }).join('');
+}
+function renderFieldInput(f, secId) {
+  var val = esc(f.value || '');
+  if (f.type === 'textarea') {
+    return '<textarea class="field-textarea" oninput="markDirty()">' + val + '</textarea>';
+  } else if (f.type === 'select') {
+    var opts = (f.options || '').split(',').map(function(o){ return '<option>' + esc(o.trim()) + '</option>'; }).join('');
+    return '<select class="field-select" onchange="markDirty()">' + opts + '</select>';
+  } else {
+    return '<input class="field-input" type="' + esc(f.type || 'text') + '" value="' + val + '" oninput="markDirty()">';
+  }
+}
+function renderEdPreview() {
+  var r = S.currentReport;
+  if (!r) return;
+  var html = '<h1 style="font-size:18px;font-weight:700;margin-bottom:4px">' + esc(r.title) + '</h1>';
+  var meta = r.meta || {};
+  if (meta.org) html += '<p><strong>Organization:</strong> ' + esc(meta.org) + '</p>';
+  if (meta.assessor) html += '<p><strong>Assessor:</strong> ' + esc(meta.assessor) + '</p>';
+  if (meta.summary) { html += '<h2>Executive Summary</h2><p>' + esc(meta.summary).replace(/
+/g,'<br>') + '</p>'; }
+  var sections = r.sections || [];
+  sections.forEach(function(sec) {
+    html += '<h2>' + esc(sec.title) + '</h2>';
+    (sec.fields || []).forEach(function(f) {
+      html += '<p><strong>' + esc(f.label) + ':</strong> ' + esc(f.value || '') + '</p>';
+    });
+  });
+  var rFindings = S.findings.filter(function(f){ return f.report_id === r.id; });
+  if (rFindings.length) {
+    html += '<h2>Findings (' + rFindings.length + ')</h2>';
+    rFindings.forEach(function(f) {
+      html += '<div style="margin-bottom:12px"><strong>' + esc(f.title) + '</strong> ' + badge(f.severity ? f.severity.toLowerCase() : '') + '<p>' + esc(f.description || '') + '</p></div>';
+    });
+  }
+  document.getElementById('preview-content').innerHTML = html;
 }
 
-// ── Findings ───────────────────────────────────────────────────────────
-function renderEdFindings(data){
-  const findings=data.findings||[];
-  const el=document.getElementById('ed-findings-list');
-  if(!findings.length){el.innerHTML='<div class="empty" style="padding:24px 0"><div class="eicon">🔍</div><h3>No findings yet</h3><p>Add findings to document vulnerabilities.</p></div>';return;}
-  el.innerHTML=findings.map((f,i)=>buildFindingCard(f,i,'ed')).join('');
+// ── Findings ───────────────────────────────────────────────────────
+function renderEdFindings() {
+  var el = document.getElementById('ed-findings-list');
+  if (!el || !S.currentReport) return;
+  var findings = S.findings.filter(function(f){ return f.report_id === S.currentReport.id; });
+  if (!findings.length) {
+    el.innerHTML = '<div class="empty-state"><p>No findings for this report.</p></div>';
+    return;
+  }
+  el.innerHTML = findings.map(function(f) { return buildFindingCard(f); }).join('');
 }
-
-function buildFindingCard(f,i,ctx){
-  return'<div class="finding-item">'+'<div class="sev-bar sev-'+(f.severity||'info').toLowerCase()+'"></div>'+'<div class="finding-content">'+'<div class="finding-title">'+esc(f.title||'Untitled')+'</div>'+(f.description?'<div class="finding-desc">'+esc(f.description)+'</div>':'')+'<div class="finding-meta"><span>'+esc(f.severity||'Info')+'</span><span>'+esc(f.status||'Open')+'</span>'+(f.refs?'<span>'+esc(f.refs)+'</span>':'')+'</div></div>'+'<div class="finding-actions"><button class="btn btn-ghost btn-sm btn-icon" onclick="editFinding('+i+',''+ctx+'')">✏️</button><button class="btn btn-danger btn-sm btn-icon" onclick="deleteFinding('+i+',''+ctx+'')">🗑️</button></div></div>';
+function buildFindingCard(f) {
+  var sev = (f.severity || 'info').toLowerCase();
+  return '<div class="finding-card">' +
+    '<div style="display:flex;align-items:center;margin-bottom:6px">' +
+      '<span class="finding-sev sev-' + esc(sev) + '">' + esc(f.severity) + '</span>' +
+      '<strong>' + esc(f.title) + '</strong>' +
+      '<span style="margin-left:auto">' + badge(f.status || 'open') + '</span>' +
+    '</div>' +
+    '<div style="color:var(--text2);font-size:12px;margin-bottom:8px">' + esc(f.description || '') + '</div>' +
+    '<div class="item-actions">' +
+      '<button class="btn btn-ghost btn-sm" onclick="editFinding(' + f.id + ')">Edit</button>' +
+      '<button class="btn btn-danger btn-sm" onclick="confirmDelete('finding',' + f.id + ','' + esc(f.title) + '')">Delete</button>' +
+    '</div>' +
+  '</div>';
 }
-
-function openFindingModal(){
-  S.editFindingIdx=null;
-  document.getElementById('fm-title').textContent='Add Finding';
-  document.getElementById('f-save-btn').textContent='Add Finding';
-  ['f-title','f-desc','f-impact','f-rec','f-refs'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('f-sev').value='Medium';document.getElementById('f-stat').value='Open';
-  openModal('finding-modal');
+function openFindingModal(reportId) {
+  S.editingFindingId = null;
+  document.getElementById('fm-title').textContent = 'Add Finding';
+  document.getElementById('fm-ftitle').value = '';
+  document.getElementById('fm-desc').value = '';
+  document.getElementById('fm-rec').value = '';
+  document.getElementById('fm-cvss').value = '';
+  document.getElementById('fm-severity').value = 'Medium';
+  document.getElementById('fm-status').value = 'open';
+  populateFmReport(reportId || (S.currentReport ? S.currentReport.id : null));
+  openModal('modal-finding');
 }
-
-async function editFinding(idx,ctx){
-  const rptId=ctx==='ed'?S.activeRptId:S.findingsRptId;
-  if(!rptId)return;
-  const r=await api('/api/reports/'+rptId);
-  const f=(r.data?.findings||[])[idx];
-  if(!f)return;
-  S.editFindingIdx=idx;S.activeRptId=rptId;
-  document.getElementById('fm-title').textContent='Edit Finding';
-  document.getElementById('f-save-btn').textContent='Save Changes';
-  document.getElementById('f-title').value=f.title||'';
-  document.getElementById('f-sev').value=f.severity||'Medium';
-  document.getElementById('f-stat').value=f.status||'Open';
-  document.getElementById('f-desc').value=f.description||'';
-  document.getElementById('f-impact').value=f.impact||'';
-  document.getElementById('f-rec').value=f.recommendation||'';
-  document.getElementById('f-refs').value=f.refs||'';
-  openModal('finding-modal');
+function editFinding(id) {
+  var f = S.findings.find(function(x){ return x.id === id; });
+  if (!f) return;
+  S.editingFindingId = id;
+  document.getElementById('fm-title').textContent = 'Edit Finding';
+  document.getElementById('fm-ftitle').value = f.title || '';
+  document.getElementById('fm-desc').value = f.description || '';
+  document.getElementById('fm-rec').value = f.recommendation || '';
+  document.getElementById('fm-cvss').value = f.cvss || '';
+  document.getElementById('fm-severity').value = f.severity || 'Medium';
+  document.getElementById('fm-status').value = f.status || 'open';
+  populateFmReport(f.report_id);
+  openModal('modal-finding');
 }
-
-async function saveFinding(){
-  if(!S.activeRptId)return;
-  const title=document.getElementById('f-title').value.trim();
-  if(!title){toast('Title is required','error');return;}
-  const f={title,severity:document.getElementById('f-sev').value,status:document.getElementById('f-stat').value,description:document.getElementById('f-desc').value,impact:document.getElementById('f-impact').value,recommendation:document.getElementById('f-rec').value,refs:document.getElementById('f-refs').value};
-  try{
-    const r=await api('/api/reports/'+S.activeRptId);
-    const data=r.data||{};
-    const findings=data.findings||[];
-    if(S.editFindingIdx!==null){f.id=findings[S.editFindingIdx].id;findings[S.editFindingIdx]=f;}
-    else{f.id=crypto.randomUUID();findings.push(f);}
-    data.findings=findings;
-    await api('/api/reports/'+S.activeRptId,{method:'PUT',body:JSON.stringify({data})});
-    closeModal('finding-modal');
-    renderEdFindings(data);
-    if(S.findingsRptId===S.activeRptId)renderFindingsView(data);
-    toast(S.editFindingIdx!==null?'Finding updated':'Finding added');
-    S.editFindingIdx=null;
-  }catch(e){toast('Save failed: '+e.message,'error');}
+function populateFmReport(selectedId) {
+  var sel = document.getElementById('fm-report');
+  sel.innerHTML = S.reports.map(function(r) {
+    return '<option value="' + r.id + '" ' + (r.id === selectedId ? 'selected' : '') + '>' + esc(r.title) + '</option>';
+  }).join('');
 }
-
-async function deleteFinding(idx,ctx){
-  const rptId=ctx==='ed'?S.activeRptId:S.findingsRptId;
-  if(!rptId)return;
-  const r=await api('/api/reports/'+rptId);
-  const data=r.data||{};
-  data.findings=(data.findings||[]).filter((_,i)=>i!==idx);
-  await api('/api/reports/'+rptId,{method:'PUT',body:JSON.stringify({data})});
-  renderEdFindings(data);
-  if(S.findingsRptId===rptId)renderFindingsView(data);
-  toast('Finding deleted');
-}
-
-// ── Findings View ──────────────────────────────────────────────────────
-function populateFindingsSelect(){
-  const sel=document.getElementById('findings-rpt-sel');
-  const cur=sel.value;
-  sel.innerHTML='<option value="">— Select a Report —</option>'+S.reports.map(r=>'<option value="'+r.id+'"'+(r.id===cur?' selected':'')+'>'+esc(r.title)+'</option>').join('');
-}
-
-async function onFindingsReportChange(){
-  const id=document.getElementById('findings-rpt-sel').value;
-  S.findingsRptId=id;S.activeRptId=id;
-  document.getElementById('add-finding-btn').style.display=id?'inline-flex':'none';
-  if(!id){document.getElementById('findings-list').innerHTML='<div class="empty"><div class="eicon">🔍</div><h3>Select a report</h3><p>Choose a report above.</p></div>';document.getElementById('findings-sub').textContent='Select a report to view findings';return;}
-  try{
-    const r=await api('/api/reports/'+id);
-    const rpt=S.reports.find(x=>x.id===id);
-    document.getElementById('findings-sub').textContent=(rpt?.title||'')+' — '+(r.data?.findings||[]).length+' finding(s)';
-    renderFindingsView(r.data||{});
-  }catch{toast('Failed to load findings','error');}
-}
-
-function renderFindingsView(data){
-  const findings=data.findings||[];
-  const el=document.getElementById('findings-list');
-  if(!findings.length){el.innerHTML='<div class="empty"><div class="eicon">🔍</div><h3>No findings</h3><p>Add findings to document vulnerabilities.</p></div>';return;}
-  const sev={Critical:0,High:1,Medium:2,Low:3,Info:4};
-  const sorted=[...findings].sort((a,b)=>(sev[a.severity]??5)-(sev[b.severity]??5));
-  el.innerHTML=sorted.map((f,i)=>buildFindingCard(f,i,'fv')).join('');
-}
-
-// ── Templates ──────────────────────────────────────────────────────────
-function populateNRTemplates(){
-  const sel=document.getElementById('nr-template');
-  sel.innerHTML='<option value="">Blank Report</option>'+S.templates.map(t=>'<option value="'+t.id+'">'+esc(t.name)+'</option>').join('');
-}
-
-function renderTemplatesList(){
-  const el=document.getElementById('templates-list');
-  if(!S.templates.length){el.innerHTML='<div class="empty"><div class="eicon">🧩</div><h3>No templates yet</h3><p>Build a reusable report structure with custom sections and fields.</p><button class="btn btn-primary mt16" onclick="openModal('new-template-modal')">+ New Template</button></div>';return;}
-  el.innerHTML='<div class="card-grid">'+S.templates.map(t=>'<div class="card-item"><div class="item-title">'+esc(t.name)+'</div><div class="item-meta">'+esc(t.description||'No description')+'</div><div class="item-meta">'+fmtDate(t.updated_at)+'</div><div class="item-actions"><button class="btn btn-secondary btn-sm" onclick="openTemplateEditor(''+t.id+'')">Edit</button><button class="btn btn-danger btn-sm" onclick="confirmDel('template',''+t.id+'',''+esc(t.name)+'')">Delete</button></div></div>').join('')+'</div>';
-}
-
-async function createTemplate(){
-  const name=document.getElementById('nt-name').value.trim();
-  if(!name){toast('Name is required','error');return;}
-  try{
-    const res=await api('/api/templates',{method:'POST',body:JSON.stringify({name,description:document.getElementById('nt-desc').value,sections:[]})});
-    closeModal('new-template-modal');document.getElementById('nt-name').value='';document.getElementById('nt-desc').value='';
-    await loadTemplates();openTemplateEditor(res.id);
-  }catch(e){toast('Failed: '+e.message,'error');}
-}
-
-async function openTemplateEditor(id){
-  S.activeTplId=id;S.tSections=[];
-  try{
-    const t=await api('/api/templates/'+id);
-    document.getElementById('t-name').value=t.name;
-    document.getElementById('t-desc').value=t.description||'';
-    document.getElementById('ted-title').textContent='Editing: '+t.name;
-    S.tSections=(t.sections||[]).map(s=>({...s,fields:(s.fields||[]).map(f=>({...f}))}));
-    renderTSections();openModal('template-editor-modal');
-  }catch(e){toast('Failed to load template','error');}
-}
-
-function markTDirty(){document.getElementById('ted-save-status').textContent='Unsaved…';}
-
-function addSection(type){
-  const defaults={text:'Text Section',table:'Data Table',findings:'Findings',checklist:'Checklist'};
-  const defaultFields={
-    text:[{id:'content',label:'Content',type:'textarea',placeholder:'Enter text…'}],
-    table:[{id:'headers',label:'Column Headers (comma-separated)',type:'text',placeholder:'Host, Port, Service, Notes'},{id:'data',label:'Table Data (one row per line, comma-separated)',type:'textarea',placeholder:'192.168.1.1, 80, HTTP, Open'}],
-    findings:[],
-    checklist:[{id:'items',label:'Checklist Items (one per line)',type:'textarea',placeholder:'Item 1
-Item 2
-Item 3'}]
+async function saveFinding() {
+  var title = document.getElementById('fm-ftitle').value.trim();
+  if (!title) { toast('Title required', 'error'); return; }
+  var payload = {
+    report_id: parseInt(document.getElementById('fm-report').value),
+    title: title,
+    severity: document.getElementById('fm-severity').value,
+    status: document.getElementById('fm-status').value,
+    description: document.getElementById('fm-desc').value,
+    recommendation: document.getElementById('fm-rec').value,
+    cvss: parseFloat(document.getElementById('fm-cvss').value) || null,
   };
-  S.tSections.push({id:'s_'+Date.now(),type,title:defaults[type]||'Section',fields:defaultFields[type]||[]});
-  renderTSections();markTDirty();
+  try {
+    if (S.editingFindingId) {
+      var updated = await api('/api/findings/' + S.editingFindingId, { method: 'PUT', body: JSON.stringify(payload) });
+      var idx = S.findings.findIndex(function(f){ return f.id === S.editingFindingId; });
+      if (idx >= 0) S.findings[idx] = updated;
+      toast('Finding updated');
+    } else {
+      var created = await api('/api/findings', { method: 'POST', body: JSON.stringify(payload) });
+      S.findings.push(created);
+      toast('Finding added');
+    }
+    closeModal('modal-finding');
+    renderEdFindings();
+    renderFindingsView();
+  } catch(e) {
+    toast('Save failed: ' + e.message, 'error');
+  }
+}
+function populateFindingsSelect() {
+  var sel = document.getElementById('findings-rpt-sel');
+  if (!sel) return;
+  var cur = sel.value;
+  sel.innerHTML = '<option value="">All Reports</option>' +
+    S.reports.map(function(r){ return '<option value="' + r.id + '">' + esc(r.title) + '</option>'; }).join('');
+  if (cur) sel.value = cur;
+}
+function onFindingsReportChange() {
+  renderFindingsView();
+}
+function renderFindingsView() {
+  populateFindingsSelect();
+  var rptId = document.getElementById('findings-rpt-sel') ? parseInt(document.getElementById('findings-rpt-sel').value) || 0 : 0;
+  var sev = document.getElementById('findings-sev-sel') ? document.getElementById('findings-sev-sel').value : '';
+  var filtered = S.findings.filter(function(f) {
+    if (rptId && f.report_id !== rptId) return false;
+    if (sev && f.severity !== sev) return false;
+    return true;
+  });
+  var el = document.getElementById('findings-list');
+  if (!el) return;
+  if (!filtered.length) {
+    el.innerHTML = '<div class="empty-state"><p>No findings found.</p></div>';
+    return;
+  }
+  var sevOrder = { Critical:0, High:1, Medium:2, Low:3, Info:4 };
+  filtered.sort(function(a,b){ return (sevOrder[a.severity]||5) - (sevOrder[b.severity]||5); });
+  el.innerHTML = filtered.map(function(f) { return buildFindingCard(f); }).join('');
 }
 
-function renderTSections(){
-  const el=document.getElementById('template-sections');
-  const empty=document.getElementById('template-sections-empty');
-  if(!S.tSections.length){el.innerHTML='';empty.style.display='block';return;}
-  empty.style.display='none';
-  el.innerHTML=S.tSections.map((s,i)=>'<div class="section-card"><div class="section-head" onclick="toggleTSec('+i+')">'+'<input class="field-input" style="flex:1;padding:4px 8px;font-size:13px" value="'+esc(s.title)+'" onclick="event.stopPropagation()" oninput="S.tSections['+i+'].title=this.value;markTDirty()"><span class="section-type">'+s.type+'</span><button class="btn btn-danger btn-sm btn-icon" onclick="event.stopPropagation();removeSection('+i+')">✕</button></div>'+'<div class="section-body" id="tsec-body-'+i+'">'+(s.type==='findings'?'<p class="small muted" style="padding-top:10px">Findings section — displays all report findings automatically.</p>':renderTFields(s,i)+'
-<div style="margin-top:8px"><button class="btn btn-ghost btn-sm" onclick="addField('+i+')">+ Add Field</button></div>')+'</div></div>').join('');
+// ── Templates ──────────────────────────────────────────────────────
+function renderTemplatesList() {
+  var el = document.getElementById('templates-list');
+  if (!el) return;
+  if (!S.templates.length) {
+    el.innerHTML = '<div class="empty-state"><p>No templates yet. Create one!</p></div>';
+    return;
+  }
+  el.innerHTML = '<div class="card-grid">' +
+    S.templates.map(function(t) {
+      return '<div class="card-item">' +
+        '<div class="item-title">' + esc(t.name) + '</div>' +
+        '<div class="item-meta">' + esc(t.description || '') + ' &bull; ' + ((t.sections||[]).length) + ' sections</div>' +
+        '<div class="item-actions">' +
+          '<button class="btn btn-primary btn-sm" onclick="openTemplateEditor(' + t.id + ')">Edit</button>' +
+          '<button class="btn btn-danger btn-sm" onclick="confirmDelete('template',' + t.id + ','' + esc(t.name) + '')">Delete</button>' +
+        '</div>' +
+      '</div>';
+    }).join('') + '</div>';
+}
+function openNewTemplateModal() {
+  document.getElementById('nt-name').value = '';
+  document.getElementById('nt-desc').value = '';
+  openModal('modal-new-template');
+}
+async function createTemplate() {
+  var name = document.getElementById('nt-name').value.trim();
+  if (!name) { toast('Name required', 'error'); return; }
+  try {
+    var t = await api('/api/templates', {
+      method: 'POST',
+      body: JSON.stringify({ name: name, description: document.getElementById('nt-desc').value, sections: [] })
+    });
+    S.templates.push(t);
+    closeModal('modal-new-template');
+    toast('Template created');
+    openTemplateEditor(t.id);
+  } catch(e) {
+    toast('Failed: ' + e.message, 'error');
+  }
+}
+async function openTemplateEditor(id) {
+  try {
+    var t = await api('/api/templates/' + id);
+    S.currentTemplate = t;
+    S.tedDirty = false;
+    document.getElementById('ted-title').textContent = t.name || 'Template Editor';
+    document.getElementById('ted-dirty').textContent = '';
+    document.getElementById('ted-name').value = t.name || '';
+    document.getElementById('ted-desc').value = t.description || '';
+    renderTSections();
+    showView('template-editor');
+  } catch(e) {
+    toast('Failed to open template: ' + e.message, 'error');
+  }
+}
+function markTDirty() {
+  S.tedDirty = true;
+  document.getElementById('ted-dirty').textContent = '● unsaved';
+}
+function addSection() {
+  if (!S.currentTemplate) return;
+  var type = document.getElementById('add-sec-type').value;
+  S.currentTemplate.sections = S.currentTemplate.sections || [];
+  S.currentTemplate.sections.push({ title: 'New ' + type + ' Section', type: type, fields: [] });
+  markTDirty();
+  renderTSections();
+}
+function renderTSections() {
+  var el = document.getElementById('ted-sections');
+  if (!el) return;
+  var sections = (S.currentTemplate && S.currentTemplate.sections) || [];
+  if (!sections.length) {
+    el.innerHTML = '<div class="empty-state"><p>No sections. Add one above.</p></div>';
+    return;
+  }
+  el.innerHTML = sections.map(function(sec, i) {
+    return '<div class="card" style="margin-bottom:12px">' +
+      '<div class="section-hdr" style="margin-bottom:10px" onclick="toggleTSec(' + i + ')">' +
+        '<span>' + esc(sec.title) + '</span>' +
+        '<div style="display:flex;gap:6px">' +
+          '<span style="font-size:12px;color:var(--text2)">' + esc(sec.type) + '</span>' +
+          '<button class="btn btn-danger btn-sm btn-icon" onclick="event.stopPropagation();removeSection(' + i + ')">&#10005;</button>' +
+        '</div>' +
+      '</div>' +
+      '<div id="tsec-' + i + '">' +
+        '<div class="field-group"><label class="field-label">Section Title</label>' +
+          '<input class="field-input" value="' + esc(sec.title) + '" oninput="S.currentTemplate.sections[' + i + '].title=this.value;markTDirty();document.getElementById('ted-title').textContent=S.currentTemplate.name||'Template Editor'"></div>' +
+        renderTFields(sec, i) +
+        '<div style="margin-top:10px">' +
+          '<button class="btn btn-secondary btn-sm" onclick="addField(' + i + ')">+ Add Field</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+function toggleTSec(i) {
+  var el = document.getElementById('tsec-' + i);
+  if (el) el.style.display = el.style.display === 'none' ? '' : 'none';
+}
+function removeSection(i) {
+  if (!S.currentTemplate) return;
+  S.currentTemplate.sections.splice(i, 1);
+  markTDirty();
+  renderTSections();
+}
+function renderTFields(sec, si) {
+  var fields = sec.fields || [];
+  if (!fields.length) return '<p style="color:var(--text2);font-size:12px;margin-top:6px">No fields yet.</p>';
+  return '<div style="margin-top:8px">' + fields.map(function(f, fi) {
+    return '<div class="form-row" style="margin-bottom:8px;align-items:end">' +
+      '<div class="field-group" style="margin:0"><label class="field-label">Label</label>' +
+        '<input class="field-input" value="' + esc(f.label||'') + '" oninput="S.currentTemplate.sections[' + si + '].fields[' + fi + '].label=this.value;markTDirty()"></div>' +
+      '<div class="field-group" style="margin:0"><label class="field-label">Type</label>' +
+        '<select class="field-select" onchange="S.currentTemplate.sections[' + si + '].fields[' + fi + '].type=this.value;markTDirty()">' +
+          '<option value="text"' + (f.type==='text'?' selected':'') + '>Text</option>' +
+          '<option value="textarea"' + (f.type==='textarea'?' selected':'') + '>Textarea</option>' +
+          '<option value="date"' + (f.type==='date'?' selected':'') + '>Date</option>' +
+          '<option value="number"' + (f.type==='number'?' selected':'') + '>Number</option>' +
+          '<option value="select"' + (f.type==='select'?' selected':'') + '>Select</option>' +
+        '</select></div>' +
+      '<button class="btn btn-danger btn-sm btn-icon" onclick="removeField(' + si + ',' + fi + ')">&#10005;</button>' +
+    '</div>';
+  }).join('') + '</div>';
+}
+function addField(si) {
+  if (!S.currentTemplate) return;
+  S.currentTemplate.sections[si].fields = S.currentTemplate.sections[si].fields || [];
+  S.currentTemplate.sections[si].fields.push({ label: 'New Field', type: 'text', value: '' });
+  markTDirty();
+  renderTSections();
+}
+function removeField(si, fi) {
+  if (!S.currentTemplate) return;
+  S.currentTemplate.sections[si].fields.splice(fi, 1);
+  markTDirty();
+  renderTSections();
+}
+async function saveTemplate() {
+  if (!S.currentTemplate) return;
+  var name = document.getElementById('ted-name').value.trim();
+  if (!name) { toast('Name required', 'error'); return; }
+  S.currentTemplate.name = name;
+  S.currentTemplate.description = document.getElementById('ted-desc').value;
+  try {
+    var updated = await api('/api/templates/' + S.currentTemplate.id, {
+      method: 'PUT',
+      body: JSON.stringify({ name: S.currentTemplate.name, description: S.currentTemplate.description, sections: S.currentTemplate.sections })
+    });
+    S.currentTemplate = updated;
+    S.tedDirty = false;
+    document.getElementById('ted-dirty').textContent = '';
+    var idx = S.templates.findIndex(function(t){ return t.id === updated.id; });
+    if (idx >= 0) S.templates[idx] = updated;
+    toast('Template saved');
+  } catch(e) {
+    toast('Save failed: ' + e.message, 'error');
+  }
 }
 
-function toggleTSec(i){const b=document.getElementById('tsec-body-'+i);b.classList.toggle('open');}
-function removeSection(i){S.tSections.splice(i,1);renderTSections();markTDirty();}
-
-function renderTFields(s,si){
-  if(!s.fields.length)return'<p class="small muted" style="padding-top:8px">No fields. Add a field below.</p>';
-  return s.fields.map((f,fi)=>'<div class="field-row"><input class="field-input" style="flex:1;padding:4px 8px;font-size:12px" placeholder="Field label" value="'+esc(f.label||'')+'" oninput="S.tSections['+si+'].fields['+fi+'].label=this.value;markTDirty()">'+'<select class="field-select" style="width:110px;padding:4px 6px;font-size:12px" onchange="S.tSections['+si+'].fields['+fi+'].type=this.value;markTDirty()">'+['text','textarea','date','number','select'].map(t=>'<option'+(f.type===t?' selected':'')+'>'+t+'</option>').join('')+'</select>'+'<button class="btn btn-danger btn-sm btn-icon" onclick="removeField('+si+','+fi+')">✕</button></div>').join('');
+// ── Delete ─────────────────────────────────────────────────────────
+function confirmDelete(type, id, name) {
+  document.getElementById('confirm-msg').textContent = 'Delete "' + name + '"? This cannot be undone.';
+  document.getElementById('confirm-ok').onclick = function() {
+    doDelete(type, id);
+    closeModal('modal-confirm');
+  };
+  openModal('modal-confirm');
+}
+async function doDelete(type, id) {
+  try {
+    await api('/api/' + type + 's/' + id, { method: 'DELETE' });
+    if (type === 'report') {
+      S.reports = S.reports.filter(function(r){ return r.id !== id; });
+      S.findings = S.findings.filter(function(f){ return f.report_id !== id; });
+      renderReportsList();
+      renderDash();
+    } else if (type === 'template') {
+      S.templates = S.templates.filter(function(t){ return t.id !== id; });
+      renderTemplatesList();
+    } else if (type === 'finding') {
+      S.findings = S.findings.filter(function(f){ return f.id !== id; });
+      renderEdFindings();
+      renderFindingsView();
+    }
+    toast(type.charAt(0).toUpperCase() + type.slice(1) + ' deleted');
+  } catch(e) {
+    toast('Delete failed: ' + e.message, 'error');
+  }
 }
 
-function addField(si){S.tSections[si].fields.push({id:'f_'+Date.now(),label:'New Field',type:'text',placeholder:''});renderTSections();markTDirty();}
-function removeField(si,fi){S.tSections[si].fields.splice(fi,1);renderTSections();markTDirty();}
-
-async function saveTemplateNow(){
-  if(!S.activeTplId)return;
-  const name=document.getElementById('t-name').value.trim();
-  if(!name){toast('Name is required','error');return;}
-  try{
-    await api('/api/templates/'+S.activeTplId,{method:'PUT',body:JSON.stringify({name,description:document.getElementById('t-desc').value,sections:S.tSections})});
-    document.getElementById('ted-save-status').textContent='Saved ✓';
-    document.getElementById('ted-title').textContent='Editing: '+name;
-    await loadTemplates();toast('Template saved');
-  }catch(e){toast('Save failed: '+e.message,'error');}
-}
-
-// ── Init ───────────────────────────────────────────────────────────────
-loadAll();
+// ── Init ───────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  loadAll();
+});
 </script>
 </body>
 </html>
