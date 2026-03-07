@@ -505,7 +505,7 @@ async function createReport(){
       method:'POST',
       body:JSON.stringify({
         title:title,
-        template_id:tid?parseInt(tid):null,
+        template_id:tid||null,
         status:'draft',sections:[],meta:{}
       })
     });
@@ -745,7 +745,7 @@ async function saveFinding(){
   var title=gv('fm-ftitle').trim();
   if(!title){toast('Title required','err');return;}
   var p={
-    report_id:parseInt(gv('fm-report')),
+    report_id:gv('fm-report'),
     title:title,
     severity:gv('fm-severity'),
     status:gv('fm-status'),
@@ -788,7 +788,7 @@ function popFindSel(){
   if(cur)sel.value=cur;
 }
 function renderFindings(){
-  var rptId=parseInt(gv('findings-rpt-sel'))||0;
+  var rptId=gv('findings-rpt-sel');
   var sev=gv('findings-sev-sel');
   var list=S.findings.filter(function(f){
     if(rptId&&f.report_id!==rptId)return false;
@@ -1051,13 +1051,13 @@ document.addEventListener('click',function(e){
   if(or){
     e.stopPropagation();
     openEditor(
-      parseInt(or.getAttribute('data-open-rpt')));
+      or.getAttribute('data-open-rpt'));
     return;
   }
   var ot=t.closest('[data-open-tpl]');
   if(ot){
     openTplEditor(
-      parseInt(ot.getAttribute('data-open-tpl')));
+      ot.getAttribute('data-open-tpl'));
     return;
   }
   var ef=t.closest('[data-edit-f]');
@@ -1071,7 +1071,7 @@ document.addEventListener('click',function(e){
     e.stopPropagation();
     confirmDel(
       dl.getAttribute('data-del-t'),
-      parseInt(dl.getAttribute('data-del-id')),
+      dl.getAttribute('data-del-id'),
       dl.getAttribute('data-del-n'));
     return;
   }
