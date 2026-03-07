@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>ReportForge</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0f1117;--surface:#1a1d27;--surface2:#22263a;--border:#2d3154;--accent:#4f6ef7;--accent2:#7c9cff;--text:#e8eaf6;--text2:#9fa8c0;--danger:#f55;--success:#4c9;--warn:#fa0;--radius:8px}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden}
+.app{display:flex;flex-direction:column;height:100vh}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;gap:12px;height:52px;flex-shrink:0}
+.logo{font-weight:700;font-size:18px;letter-spacing:-.5px}.logo span{color:var(--accent)}
+.nav-tabs{display:flex;gap:2px;margin-left:8px}
+.nav-tab{padding:6px 14px;border-radius:6px;cursor:pointer;font-size:13px;color:var(--text2);border:none;background:none;transition:.15s}
+.nav-tab:hover{background:var(--surface2);color:var(--text)}.nav-tab.active{background:var(--accent);color:#fff}
+.topbar-right{margin-left:auto;display:flex;gap:8px;align-items:center}
+.main{flex:1;overflow-y:auto;padding:28px 32px}
+.view{display:none}.view.active{display:block}
+.btn{padding:8px 16px;border-radius:var(--radius);border:none;cursor:pointer;font-size:13px;font-weight:500;transition:.15s;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{filter:brightness(1.12)}
+.btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border)}.btn-secondary:hover{border-color:var(--accent2)}
+.btn-danger{background:#2a1515;color:var(--danger);border:1px solid #4a2020}.btn-danger:hover{background:#3a1a1a}
+.btn-ghost{background:none;color:var(--text2);border:1px solid var(--border)}.btn-ghost:hover{color:var(--text);border-color:var(--text2)}
+.btn-sm{padding:5px 10px;font-size:12px}.btn-icon{padding:6px 8px;font-size:14px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-top:14px}
+.card-item{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;cursor:pointer;transition:.15s}
+.card-item:hover{border-color:var(--accent);transform:translateY(-1px)}
+.item-title{font-weight:600;font-size:14px;margin-bottom:4px}
+.item-meta{font-size:12px;color:var(--text2);margin-top:2px}
+.item-actions{display:flex;gap:6px;margin-top:10px}
+.field-group{margin-bottom:14px}
+.field-label{display:block;font-size:11px;font-weight:600;color:var(--text2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px}
+.field-input,.field-select,.field-textarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:8px 12px;font-size:13px;font-family:inherit;transition:.15s}
+.field-input:focus,.field-select:focus,.field-textarea:focus{outline:none;border-color:var(--accent)}
+.field-textarea{resize:vertical;min-height:80px}.field-select option{background:var(--surface2)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:9px 12px;background:var(--surface2);color:var(--text2);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border)}
+td{padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:hover td{background:rgba(255,255,255,.02)}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600}
+.badge-draft{background:#1e2030;color:var(--text2)}.badge-review{background:#1e1535;color:#a78bfa}.badge-final{background:#0d2010;color:var(--success)}
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px}
+.page-title{font-size:22px;font-weight:700}.page-subtitle{font-size:13px;color:var(--text2);margin-top:3px}
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:1000;opacity:0;pointer-events:none;transition:.2s}
+.modal-backdrop.open{opacity:1;pointer-events:all}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:26px;width:min(580px,94vw);max-height:90vh;overflow-y:auto;transform:translateY(16px);transition:.2s}
+.modal-backdrop.open .modal{transform:translateY(0)}
+.modal-lg{width:min(820px,96vw)}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.modal-title{font-size:17px;font-weight:700}
+.modal-close{background:none;border:none;color:var(--text2);cursor:pointer;font-size:20px;padding:2px 6px;border-radius:4px}.modal-close:hover{color:var(--text)}
+.modal-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:18px;padding-top:14px;border-top:1px solid var(--border)}
+.section-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:10px}
+.section-head{display:flex;align-items:center;gap:10px;padding:11px 14px;cursor:pointer}.section-head:hover{background:rgba(255,255,255,.03)}
+.section-name{flex:1;font-weight:600;font-size:13px}
+.section-type{font-size:11px;color:var(--text2);background:var(--surface);padding:2px 7px;border-radius:8px}
+.section-body{padding:0 14px 14px;border-top:1px solid var(--border);display:none}.section-body.open{display:block}
+.field-row{display:flex;align-items:center;gap:7px;margin-top:7px;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:7px 9px}
+.rpt-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:14px}
+.rpt-section-head{padding:13px 16px;display:flex;align-items:center;gap:8px;cursor:pointer}.rpt-section-head:hover{background:rgba(255,255,255,.02)}
+.rpt-section-title{font-weight:600;font-size:14px;flex:1}
+.rpt-section-body{padding:14px 16px;border-top:1px solid var(--border)}
+.finding-item{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:13px 14px;margin-bottom:8px;display:flex;align-items:flex-start;gap:10px}
+.sev-bar{width:5px;border-radius:3px;align-self:stretch;flex-shrink:0}
+.sev-critical{background:#f44}.sev-high{background:#f80}.sev-medium{background:#fa0}.sev-low{background:#4c9}.sev-info{background:#4af}
+.finding-content{flex:1}.finding-title{font-weight:600;font-size:13px;margin-bottom:3px}
+.finding-desc{font-size:12px;color:var(--text2);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.finding-meta{display:flex;gap:10px;margin-top:6px;font-size:11px;color:var(--text2)}
+.finding-actions{display:flex;gap:4px}
+.empty{text-align:center;padding:50px 20px;color:var(--text2)}
+.empty .eicon{font-size:44px;margin-bottom:14px}
+.empty h3{font-size:15px;color:var(--text);margin-bottom:7px}
+.empty p{font-size:13px;max-width:300px;margin:0 auto 16px}
+#toast-root{position:fixed;bottom:20px;right:20px;display:flex;flex-direction:column;gap:7px;z-index:9999}
+.toast{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 16px;font-size:13px;display:flex;align-items:center;gap:9px;min-width:220px;box-shadow:0 4px 20px rgba(0,0,0,.4);animation:tsin .2s ease}
+@keyframes tsin{from{transform:translateX(100%);opacity:0}}
+.toast-success{border-color:var(--success)}.toast-error{border-color:var(--danger)}
+.divider{height:1px;background:var(--border);margin:18px 0}
+.flex{display:flex}.gap8{gap:8px}.gap12{gap:12px}.ac{align-items:center}
+.mt16{margin-top:16px}.mb16{margin-bottom:16px}.muted{color:var(--text2)}.small{font-size:12px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 22px}
+.stat-label{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.stat-val{font-size:30px;font-weight:700}
+.etab{display:none}.etab.active{display:block}
+</style>
+</head><body>
+<div class="app">
+<div class="topbar">
+  <div class="logo">Report<span>Forge</span></div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" id="tab-dashboard" onclick="showView('dashboard',this)">📊 Dashboard</button>
+    <button class="nav-tab" id="tab-reports" onclick="showView('reports',this)">📄 Reports</button>
+    <button class="nav-tab" id="tab-templates" onclick="showView('templates',this)">🧩 Templates</button>
+    <button class="nav-tab" id="tab-findings" onclick="showView('findings',this)">🔍 Findings</button>
+  </div>
+  <div class="topbar-right">
+    <button class="btn btn-primary btn-sm" onclick="openModal('new-report-modal')">+ New Report</button>
+  </div>
+</div>
+<div class="main">
+
+<!-- DASHBOARD -->
+<div class="view active" id="view-dashboard">
+  <div class="page-header">
+    <div><div class="page-title">Dashboard</div><div class="page-subtitle">Your reports at a glance</div></div>
+    <button class="btn btn-primary" onclick="openModal('new-report-modal')">+ New Report</button>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px">
+    <div class="stat-card"><div class="stat-label">Total Reports</div><div class="stat-val" id="stat-total">—</div></div>
+    <div class="stat-card"><div class="stat-label">Draft</div><div class="stat-val muted" id="stat-draft">—</div></div>
+    <div class="stat-card"><div class="stat-label">In Review</div><div class="stat-val" style="color:#a78bfa" id="stat-review">—</div></div>
+    <div class="stat-card"><div class="stat-label">Final</div><div class="stat-val" style="color:var(--success)" id="stat-final">—</div></div>
+  </div>
+  <div class="divider"></div>
+  <div style="font-size:15px;font-weight:600;margin-bottom:14px">Recent Reports</div>
+  <div id="dash-recent"></div>
+</div>
+
+<!-- REPORTS -->
+<div class="view" id="view-reports">
+  <div class="page-header">
+    <div><div class="page-title">Reports</div><div class="page-subtitle">All security reports</div></div>
+    <div class="flex gap8 ac">
+      <select class="field-select" style="width:140px" id="reports-filter" onchange="renderReportsList()">
+        <option value="">All Status</option><option value="draft">Draft</option><option value="review">In Review</option><option value="final">Final</option>
+      </select>
+      <button class="btn btn-primary" onclick="openModal('new-report-modal')">+ New Report</button>
+    </div>
+  </div>
+  <div id="reports-list"></div>
+</div>
+
+<!-- TEMPLATES -->
+<div class="view" id="view-templates">
+  <div class="page-header">
+    <div><div class="page-title">Templates</div><div class="page-subtitle">Reusable report structures with custom sections and fields</div></div>
+    <button class="btn btn-primary" onclick="openModal('new-template-modal')">+ New Template</button>
+  </div>
+  <div id="templates-list"></div>
+</div>
+
+<!-- FINDINGS -->
+<div class="view" id="view-findings">
+  <div class="page-header">
+    <div><div class="page-title">Findings</div><div class="page-subtitle" id="findings-sub">Select a report to view findings</div></div>
+    <div class="flex gap8 ac">
+      <select class="field-select" style="width:230px" id="findings-rpt-sel" onchange="onFindingsReportChange()">
+        <option value="">— Select a Report —</option>
+      </select>
+      <button class="btn btn-primary btn-sm" id="add-finding-btn" style="display:none" onclick="openFindingModal()">+ Add Finding</button>
+    </div>
+  </div>
+  <div id="findings-list"></div>
+</div>
+
+</div><!-- .main -->
+</div><!-- .app -->
+
+<!-- REPORT EDITOR MODAL -->
+<div class="modal-backdrop" id="report-editor-modal">
+<div class="modal modal-lg">
+  <div class="modal-header">
+    <div>
+      <div class="modal-title" id="ed-report-title">Report Editor</div>
+      <div class="small muted" id="ed-report-meta"></div>
+    </div>
+    <div class="flex gap8 ac">
+      <select class="field-select" style="width:125px;padding:5px 8px;font-size:12px" id="ed-status" onchange="updateReportStatus()">
+        <option value="draft">Draft</option><option value="review">In Review</option><option value="final">Final</option>
+      </select>
+      <button class="modal-close" onclick="closeModal('report-editor-modal')">✕</button>
+    </div>
+  </div>
+  <div class="nav-tabs mb16" style="border-bottom:1px solid var(--border);padding-bottom:0;margin-bottom:0">
+    <button class="nav-tab active" id="etab-info-btn" onclick="switchEdTab('info',this)">Info</button>
+    <button class="nav-tab" id="etab-sections-btn" onclick="switchEdTab('sections',this)">Sections</button>
+    <button class="nav-tab" id="etab-findings-btn" onclick="switchEdTab('findings',this)">Findings</button>
+    <button class="nav-tab" id="etab-preview-btn" onclick="switchEdTab('preview',this)">Preview</button>
+  </div>
+  <div style="height:12px"></div>
+  <div class="etab active" id="etab-info">
+    <div class="form-row">
+      <div class="field-group"><label class="field-label">Report Title</label><input class="field-input" id="e-title" oninput="markDirty()"></div>
+      <div class="field-group"><label class="field-label">Organization</label><input class="field-input" id="e-org" oninput="markDirty()"></div>
+    </div>
+    <div class="form-row">
+      <div class="field-group"><label class="field-label">Report Type</label>
+        <select class="field-select" id="e-type" onchange="markDirty()">
+          <option>Security Assessment</option><option>Penetration Test</option><option>Vulnerability Assessment</option><option>Red Team Exercise</option><option>Compliance Audit</option><option>Risk Assessment</option>
+        </select>
+      </div>
+      <div class="field-group"><label class="field-label">Classification</label>
+        <select class="field-select" id="e-cls" onchange="markDirty()">
+          <option>Confidential</option><option>Restricted</option><option>Internal</option><option>Public</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="field-group"><label class="field-label">Assessment Date</label><input class="field-input" id="e-date" type="date" oninput="markDirty()"></div>
+      <div class="field-group"><label class="field-label">Authors</label><input class="field-input" id="e-authors" placeholder="comma-separated" oninput="markDirty()"></div>
+    </div>
+    <div class="field-group"><label class="field-label">Executive Summary</label><textarea class="field-textarea" id="e-exec" rows="4" placeholder="High-level summary of the assessment…" oninput="markDirty()"></textarea></div>
+    <div class="field-group"><label class="field-label">Scope &amp; Methodology</label><textarea class="field-textarea" id="e-scope" rows="3" placeholder="What was tested and how…" oninput="markDirty()"></textarea></div>
+  </div>
+  <div class="etab" id="etab-sections"><div id="ed-sections"></div></div>
+  <div class="etab" id="etab-findings">
+    <div class="flex" style="justify-content:flex-end;margin-bottom:12px">
+      <button class="btn btn-primary btn-sm" onclick="openFindingModal()">+ Add Finding</button>
+    </div>
+    <div id="ed-findings-list"></div>
+  </div>
+  <div class="etab" id="etab-preview"><div id="ed-preview" style="font-size:13px;line-height:1.8"></div></div>
+  <div class="modal-footer">
+    <span class="small muted" id="ed-save-status">All saved</span>
+    <button class="btn btn-ghost btn-sm" onclick="closeModal('report-editor-modal')">Close</button>
+    <button class="btn btn-primary btn-sm" onclick="saveEditorNow()">Save</button>
+  </div>
+</div>
+</div>
+
+<!-- TEMPLATE EDITOR MODAL -->
+<div class="modal-backdrop" id="template-editor-modal">
+<div class="modal modal-lg">
+  <div class="modal-header">
+    <div><div class="modal-title" id="ted-title">Template Editor</div></div>
+    <button class="modal-close" onclick="closeModal('template-editor-modal')">✕</button>
+  </div>
+  <div class="form-row mb16">
+    <div class="field-group"><label class="field-label">Template Name</label><input class="field-input" id="t-name" oninput="markTDirty()"></div>
+    <div class="field-group"><label class="field-label">Description</label><input class="field-input" id="t-desc" oninput="markTDirty()"></div>
+  </div>
+  <div class="flex ac" style="justify-content:space-between;margin-bottom:12px">
+    <span style="font-weight:600;font-size:14px">Sections</span>
+    <div class="flex gap8">
+      <button class="btn btn-secondary btn-sm" onclick="addSection('text')">+ Text</button>
+      <button class="btn btn-secondary btn-sm" onclick="addSection('table')">+ Table</button>
+      <button class="btn btn-secondary btn-sm" onclick="addSection('findings')">+ Findings</button>
+      <button class="btn btn-secondary btn-sm" onclick="addSection('checklist')">+ Checklist</button>
+    </div>
+  </div>
+  <div id="template-sections"></div>
+  <div id="template-sections-empty" class="empty" style="padding:20px 0">
+    <div class="eicon">🧩</div><h3>No sections yet</h3><p>Add sections above to build your template.</p>
+  </div>
+  <div class="modal-footer">
+    <span class="small muted" id="ted-save-status"></span>
+    <button class="btn btn-ghost btn-sm" onclick="closeModal('template-editor-modal')">Cancel</button>
+    <button class="btn btn-primary btn-sm" onclick="saveTemplateNow()">Save Template</button>
+  </div>
+</div>
+</div>
+
+<!-- NEW REPORT MODAL -->
+<div class="modal-backdrop" id="new-report-modal">
+<div class="modal">
+  <div class="modal-header"><div class="modal-title">New Report</div><button class="modal-close" onclick="closeModal('new-report-modal')">✕</button></div>
+  <div class="form-row">
+    <div class="field-group"><label class="field-label">Title *</label><input class="field-input" id="nr-title" placeholder="e.g. Q1 Pentest"></div>
+    <div class="field-group"><label class="field-label">Organization</label><input class="field-input" id="nr-org" placeholder="Client name"></div>
+  </div>
+  <div class="form-row">
+    <div class="field-group"><label class="field-label">Report Type</label>
+      <select class="field-select" id="nr-type">
+        <option>Security Assessment</option><option>Penetration Test</option><option>Vulnerability Assessment</option><option>Red Team Exercise</option><option>Compliance Audit</option><option>Risk Assessment</option>
+      </select>
+    </div>
+    <div class="field-group"><label class="field-label">Start from Template</label>
+      <select class="field-select" id="nr-template"><option value="">Blank Report</option></select>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-ghost" onclick="closeModal('new-report-modal')">Cancel</button>
+    <button class="btn btn-primary" onclick="createReport()">Create Report →</button>
+  </div>
+</div>
+</div>
+
+<!-- NEW TEMPLATE MODAL -->
+<div class="modal-backdrop" id="new-template-modal">
+<div class="modal">
+  <div class="modal-header"><div class="modal-title">New Template</div><button class="modal-close" onclick="closeModal('new-template-modal')">✕</button></div>
+  <div class="field-group"><label class="field-label">Name *</label><input class="field-input" id="nt-name" placeholder="e.g. Pentest Report Template"></div>
+  <div class="field-group"><label class="field-label">Description</label><input class="field-input" id="nt-desc" placeholder="Brief description…"></div>
+  <div class="modal-footer">
+    <button class="btn btn-ghost" onclick="closeModal('new-template-modal')">Cancel</button>
+    <button class="btn btn-primary" onclick="createTemplate()">Create &amp; Edit →</button>
+  </div>
+</div>
+</div>
+
+<!-- FINDING MODAL -->
+<div class="modal-backdrop" id="finding-modal">
+<div class="modal">
+  <div class="modal-header"><div class="modal-title" id="fm-title">Add Finding</div><button class="modal-close" onclick="closeModal('finding-modal')">✕</button></div>
+  <div class="field-group"><label class="field-label">Title *</label><input class="field-input" id="f-title" placeholder="Finding title"></div>
+  <div class="form-row">
+    <div class="field-group"><label class="field-label">Severity</label>
+      <select class="field-select" id="f-sev"><option>Critical</option><option>High</option><option selected>Medium</option><option>Low</option><option>Info</option></select>
+    </div>
+    <div class="field-group"><label class="field-label">Status</label>
+      <select class="field-select" id="f-stat"><option>Open</option><option>In Progress</option><option>Remediated</option><option>Accepted</option></select>
+    </div>
+  </div>
+  <div class="field-group"><label class="field-label">Description</label><textarea class="field-textarea" id="f-desc" rows="3" placeholder="Describe the finding…"></textarea></div>
+  <div class="field-group"><label class="field-label">Impact</label><textarea class="field-textarea" id="f-impact" rows="2" placeholder="Business or technical impact…"></textarea></div>
+  <div class="field-group"><label class="field-label">Recommendation</label><textarea class="field-textarea" id="f-rec" rows="2" placeholder="Steps to remediate…"></textarea></div>
+  <div class="field-group"><label class="field-label">References / CVSS</label><input class="field-input" id="f-refs" placeholder="CVE IDs, CVSS score, links…"></div>
+  <div class="modal-footer">
+    <button class="btn btn-ghost" onclick="closeModal('finding-modal')">Cancel</button>
+    <button class="btn btn-primary" id="f-save-btn" onclick="saveFinding()">Add Finding</button>
+  </div>
+</div>
+</div>
+
+<!-- CONFIRM MODAL -->
+<div class="modal-backdrop" id="confirm-modal">
+<div class="modal" style="width:min(400px,94vw)">
+  <div class="modal-header"><div class="modal-title" id="conf-title">Confirm</div><button class="modal-close" onclick="closeModal('confirm-modal')">✕</button></div>
+  <p class="small muted" id="conf-body"></p>
+  <div class="modal-footer">
+    <button class="btn btn-ghost" onclick="closeModal('confirm-modal')">Cancel</button>
+    <button class="btn btn-danger" id="conf-ok">Delete</button>
+  </div>
+</div>
+</div>
+
+<div id="toast-root"></div>
+<script>
+// ── State ──────────────────────────────────────────────────────────────
+const S = { reports:[], templates:[], activeRptId:null, activeTplId:null, dirty:false, tSections:[], editFindingIdx:null, findingsRptId:null };
+let saveTimer = null;
+
+// ── Utilities ──────────────────────────────────────────────────────────
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function fmtDate(iso){if(!iso)return'—';try{return new Date(iso).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'});}catch{return iso;}}
+function badge(s){const m={draft:'badge-draft',review:'badge-review',final:'badge-final'};return '<span class="badge '+(m[s]||'badge-draft')+'">'+s+'</span>';}
+function toast(msg,type='success'){const el=document.createElement('div');el.className='toast toast-'+type;el.textContent=msg;document.getElementById('toast-root').appendChild(el);setTimeout(()=>el.remove(),3500);}
+
+// ── API ────────────────────────────────────────────────────────────────
+async function api(path,opts={}){
+  const res=await fetch(path,{headers:{'Content-Type':'application/json',...(opts.headers||{})}, ...opts});
+  if(!res.ok){const e=await res.json().catch(()=>({detail:res.statusText}));throw new Error(e.detail||res.statusText);}
+  return res.json();
+}
+
+// ── Modals ─────────────────────────────────────────────────────────────
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.addEventListener('click',e=>{if(e.target.classList.contains('modal-backdrop'))closeModal(e.target.id);});
+
+// ── Navigation ─────────────────────────────────────────────────────────
+function showView(name,btn){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  (btn||document.getElementById('tab-'+name))?.classList.add('active');
+  if(name==='findings')populateFindingsSelect();
+}
+
+// ── Load Data ──────────────────────────────────────────────────────────
+async function loadAll(){
+  await Promise.all([loadReports(),loadTemplates()]);
+}
+async function loadReports(){
+  try{S.reports=await api('/api/reports');}catch{S.reports=[];}
+  renderDash();renderReportsList();populateFindingsSelect();populateNRTemplates();
+}
+async function loadTemplates(){
+  try{S.templates=await api('/api/templates');}catch{S.templates=[];}
+  renderTemplatesList();populateNRTemplates();
+}
+
+// ── Dashboard ──────────────────────────────────────────────────────────
+function renderDash(){
+  const r=S.reports;
+  document.getElementById('stat-total').textContent=r.length;
+  document.getElementById('stat-draft').textContent=r.filter(x=>x.status==='draft').length;
+  document.getElementById('stat-review').textContent=r.filter(x=>x.status==='review').length;
+  document.getElementById('stat-final').textContent=r.filter(x=>x.status==='final').length;
+  const el=document.getElementById('dash-recent');
+  if(!r.length){el.innerHTML='<div class="empty"><div class="eicon">📋</div><h3>No reports yet</h3><p>Create your first report to get started.</p><button class="btn btn-primary mt16" onclick="openModal('new-report-modal')">+ New Report</button></div>';return;}
+  el.innerHTML='<div class="card-grid">'+r.slice(0,6).map(x=>'<div class="card-item" onclick="openReportEditor(''+x.id+'')">'+'<div class="item-title">'+esc(x.title)+'</div>'+'<div class="item-meta">'+esc(x.org||'—')+' · '+esc(x.type)+'</div>'+'<div class="item-meta" style="margin-top:4px">'+badge(x.status)+' <span style="margin-left:6px">'+fmtDate(x.updated_at)+'</span></div></div>').join('')+'</div>';
+}
+
+// ── Reports List ───────────────────────────────────────────────────────
+function renderReportsList(){
+  const filter=document.getElementById('reports-filter').value;
+  const rows=filter?S.reports.filter(r=>r.status===filter):S.reports;
+  const el=document.getElementById('reports-list');
+  if(!rows.length){el.innerHTML='<div class="empty"><div class="eicon">📄</div><h3>No reports</h3><p>Create your first security report.</p></div>';return;}
+  el.innerHTML='<div style="overflow-x:auto"><table><thead><tr><th>Title</th><th>Organization</th><th>Type</th><th>Status</th><th>Updated</th><th></th></tr></thead><tbody>'+
+    rows.map(r=>'<tr><td><a href="#" onclick="openReportEditor(''+r.id+'');return false" style="color:var(--text);font-weight:500">'+esc(r.title)+'</a></td>'+'<td class="muted">'+esc(r.org||'—')+'</td>'+'<td class="muted small">'+esc(r.type)+'</td>'+'<td>'+badge(r.status)+'</td>'+'<td class="muted small">'+fmtDate(r.updated_at)+'</td>'+'<td><div class="flex gap8"><button class="btn btn-ghost btn-sm btn-icon" onclick="openReportEditor(''+r.id+'')">✏️</button>'+'<button class="btn btn-danger btn-sm btn-icon" onclick="confirmDel('report',''+r.id+'',''+esc(r.title)+'')">🗑️</button></div></td></tr>').join('')+
+  '</tbody></table></div>';
+}
+
+// ── Report Editor ──────────────────────────────────────────────────────
+async function openReportEditor(id){
+  S.activeRptId=id; S.dirty=false; S.editFindingIdx=null;
+  document.getElementById('ed-save-status').textContent='Loading…';
+  openModal('report-editor-modal');
+  switchEdTab('info',document.getElementById('etab-info-btn'));
+  try{
+    const r=await api('/api/reports/'+id);
+    const rep=(r.data||{}).report||{};
+    document.getElementById('e-title').value=r.title||'';
+    document.getElementById('e-org').value=r.org||'';
+    document.getElementById('e-type').value=r.type||'Security Assessment';
+    document.getElementById('e-cls').value=r.classification||'Confidential';
+    document.getElementById('e-date').value=r.date||'';
+    document.getElementById('e-authors').value=r.authors||'';
+    document.getElementById('e-exec').value=rep.exec_summary||'';
+    document.getElementById('e-scope').value=rep.scope||'';
+    document.getElementById('ed-report-title').textContent=r.title;
+    document.getElementById('ed-report-meta').textContent=(r.org?r.org+' · ':'')+r.type;
+    document.getElementById('ed-status').value=r.status||'draft';
+    renderEdSections(r.data||{});
+    renderEdFindings(r.data||{});
+    document.getElementById('ed-save-status').textContent='All saved';
+  }catch(e){toast('Failed to load report: '+e.message,'error');closeModal('report-editor-modal');}
+}
+
+function switchEdTab(tab,btn){
+  document.querySelectorAll('.etab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('[id^="etab-"][id$="-btn"]').forEach(b=>b.classList.remove('active'));
+  document.getElementById('etab-'+tab).classList.add('active');
+  if(btn)btn.classList.add('active');
+  if(tab==='preview')renderEdPreview();
+}
+
+function markDirty(){
+  S.dirty=true;
+  document.getElementById('ed-save-status').textContent='Unsaved…';
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(saveEditorNow,1800);
+}
+
+async function saveEditorNow(){
+  if(!S.activeRptId)return;
+  clearTimeout(saveTimer);
+  try{
+    const existing=await api('/api/reports/'+S.activeRptId);
+    const data={...(existing.data||{}),report:{...((existing.data||{}).report||{}),title:document.getElementById('e-title').value,org:document.getElementById('e-org').value,type:document.getElementById('e-type').value,classification:document.getElementById('e-cls').value,date:document.getElementById('e-date').value,authors:document.getElementById('e-authors').value,exec_summary:document.getElementById('e-exec').value,scope:document.getElementById('e-scope').value}};
+    await api('/api/reports/'+S.activeRptId,{method:'PUT',body:JSON.stringify({title:data.report.title,org:data.report.org,type:data.report.type,classification:data.report.classification,date:data.report.date,authors:data.report.authors,data})});
+    S.dirty=false;
+    document.getElementById('ed-save-status').textContent='Saved ✓';
+    document.getElementById('ed-report-title').textContent=data.report.title;
+    await loadReports();
+  }catch(e){document.getElementById('ed-save-status').textContent='Save failed';}
+}
+
+async function updateReportStatus(){
+  if(!S.activeRptId)return;
+  try{await api('/api/reports/'+S.activeRptId,{method:'PUT',body:JSON.stringify({status:document.getElementById('ed-status').value})});await loadReports();}catch{}
+}
+
+function renderEdSections(data){
+  const sections=data.sections||[];
+  const el=document.getElementById('ed-sections');
+  if(!sections.length){el.innerHTML='<div class="empty" style="padding:24px 0"><div class="eicon">🧩</div><h3>No template sections</h3><p>Create a template, then start a new report from it to see sections here.</p></div>';return;}
+  el.innerHTML=sections.map((s,i)=>'<div class="rpt-section"><div class="rpt-section-head" onclick="toggleRptSec('rsec'+i+'')">'+'<span class="rpt-section-title">'+esc(s.title||'Section')+'</span><span class="small muted">'+esc(s.type||'text')+'</span><span id="rsec'+i+'-arr">▼</span></div>'+'<div class="rpt-section-body" id="rsec'+i+'" style="display:none">'+renderSecFields(s,i)+'</div></div>').join('');
+}
+
+function toggleRptSec(id){const el=document.getElementById(id);const arr=document.getElementById(id+'-arr');const open=el.style.display!=='none';el.style.display=open?'none':'block';if(arr)arr.textContent=open?'▼':'▲';}
+
+function renderSecFields(s,si){
+  const fields=s.fields||[];
+  if(!fields.length)return'<p class="small muted">No fields defined.</p>';
+  return fields.map((f,fi)=>'<div class="field-group"><label class="field-label">'+esc(f.label||f.id||'Field')+'</label>'+renderFieldInput(f,si,fi)+'</div>').join('');
+}
+
+function renderFieldInput(f,si,fi){
+  const id='sf_'+si+'_'+fi,t=f.type||'text';
+  if(t==='textarea')return'<textarea class="field-textarea" id="'+id+'" oninput="markDirty()" rows="3" placeholder="'+esc(f.placeholder||'')+'"></textarea>';
+  if(t==='select'){const opts=(f.options||[]).map(o=>'<option>'+esc(o)+'</option>').join('');return'<select class="field-select" id="'+id+'" onchange="markDirty()">'+opts+'</select>';}
+  return'<input class="field-input" id="'+id+'" type="'+(t==='date'?'date':'text')+'" placeholder="'+esc(f.placeholder||'')+'" oninput="markDirty()">';
+}
+
+function renderEdPreview(){
+  const title=document.getElementById('e-title').value||'Untitled Report';
+  const org=document.getElementById('e-org').value,type=document.getElementById('e-type').value,cls=document.getElementById('e-cls').value,date=document.getElementById('e-date').value,authors=document.getElementById('e-authors').value,exec=document.getElementById('e-exec').value,scope=document.getElementById('e-scope').value;
+  document.getElementById('ed-preview').innerHTML='<div style="border-bottom:2px solid var(--accent);padding-bottom:14px;margin-bottom:20px"><h1 style="font-size:22px;font-weight:700;margin-bottom:8px">'+esc(title)+'</h1><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;color:var(--text2)">'+(org?'<span><b>Organization:</b> '+esc(org)+'</span>':'')+(type?'<span><b>Type:</b> '+esc(type)+'</span>':'')+(cls?'<span><b>Classification:</b> '+esc(cls)+'</span>':'')+(date?'<span><b>Date:</b> '+esc(date)+'</span>':'')+(authors?'<span><b>Authors:</b> '+esc(authors)+'</span>':'')+'</div></div>'+(exec?'<h2 style="font-size:15px;font-weight:700;color:var(--accent2);margin-bottom:8px">Executive Summary</h2><p style="margin-bottom:18px;white-space:pre-wrap">'+esc(exec)+'</p>':'')+(scope?'<h2 style="font-size:15px;font-weight:700;color:var(--accent2);margin-bottom:8px">Scope &amp; Methodology</h2><p style="white-space:pre-wrap">'+esc(scope)+'</p>':'');
+}
+
+// ── Create Report ──────────────────────────────────────────────────────
+async function createReport(){
+  const title=document.getElementById('nr-title').value.trim();
+  if(!title){toast('Title is required','error');return;}
+  try{
+    const res=await api('/api/reports',{method:'POST',body:JSON.stringify({title,org:document.getElementById('nr-org').value,type:document.getElementById('nr-type').value,template_id:document.getElementById('nr-template').value||null})});
+    closeModal('new-report-modal');
+    document.getElementById('nr-title').value='';document.getElementById('nr-org').value='';
+    toast('Report created');await loadReports();openReportEditor(res.id);
+  }catch(e){toast('Failed: '+e.message,'error');}
+}
+
+// ── Delete ─────────────────────────────────────────────────────────────
+function confirmDel(type,id,name){
+  document.getElementById('conf-title').textContent='Delete '+(type==='report'?'Report':'Template');
+  document.getElementById('conf-body').textContent='Delete "'+name+'"? This cannot be undone.';
+  const btn=document.getElementById('conf-ok');
+  btn.onclick=async()=>{
+    try{await api('/api/'+type+'s/'+id,{method:'DELETE'});closeModal('confirm-modal');toast((type==='report'?'Report':'Template')+' deleted');type==='report'?await loadReports():await loadTemplates();}
+    catch(e){toast('Delete failed: '+e.message,'error');}
+  };
+  openModal('confirm-modal');
+}
+
+// ── Findings ───────────────────────────────────────────────────────────
+function renderEdFindings(data){
+  const findings=data.findings||[];
+  const el=document.getElementById('ed-findings-list');
+  if(!findings.length){el.innerHTML='<div class="empty" style="padding:24px 0"><div class="eicon">🔍</div><h3>No findings yet</h3><p>Add findings to document vulnerabilities.</p></div>';return;}
+  el.innerHTML=findings.map((f,i)=>buildFindingCard(f,i,'ed')).join('');
+}
+
+function buildFindingCard(f,i,ctx){
+  return'<div class="finding-item">'+'<div class="sev-bar sev-'+(f.severity||'info').toLowerCase()+'"></div>'+'<div class="finding-content">'+'<div class="finding-title">'+esc(f.title||'Untitled')+'</div>'+(f.description?'<div class="finding-desc">'+esc(f.description)+'</div>':'')+'<div class="finding-meta"><span>'+esc(f.severity||'Info')+'</span><span>'+esc(f.status||'Open')+'</span>'+(f.refs?'<span>'+esc(f.refs)+'</span>':'')+'</div></div>'+'<div class="finding-actions"><button class="btn btn-ghost btn-sm btn-icon" onclick="editFinding('+i+',''+ctx+'')">✏️</button><button class="btn btn-danger btn-sm btn-icon" onclick="deleteFinding('+i+',''+ctx+'')">🗑️</button></div></div>';
+}
+
+function openFindingModal(){
+  S.editFindingIdx=null;
+  document.getElementById('fm-title').textContent='Add Finding';
+  document.getElementById('f-save-btn').textContent='Add Finding';
+  ['f-title','f-desc','f-impact','f-rec','f-refs'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f-sev').value='Medium';document.getElementById('f-stat').value='Open';
+  openModal('finding-modal');
+}
+
+async function editFinding(idx,ctx){
+  const rptId=ctx==='ed'?S.activeRptId:S.findingsRptId;
+  if(!rptId)return;
+  const r=await api('/api/reports/'+rptId);
+  const f=(r.data?.findings||[])[idx];
+  if(!f)return;
+  S.editFindingIdx=idx;S.activeRptId=rptId;
+  document.getElementById('fm-title').textContent='Edit Finding';
+  document.getElementById('f-save-btn').textContent='Save Changes';
+  document.getElementById('f-title').value=f.title||'';
+  document.getElementById('f-sev').value=f.severity||'Medium';
+  document.getElementById('f-stat').value=f.status||'Open';
+  document.getElementById('f-desc').value=f.description||'';
+  document.getElementById('f-impact').value=f.impact||'';
+  document.getElementById('f-rec').value=f.recommendation||'';
+  document.getElementById('f-refs').value=f.refs||'';
+  openModal('finding-modal');
+}
+
+async function saveFinding(){
+  if(!S.activeRptId)return;
+  const title=document.getElementById('f-title').value.trim();
+  if(!title){toast('Title is required','error');return;}
+  const f={title,severity:document.getElementById('f-sev').value,status:document.getElementById('f-stat').value,description:document.getElementById('f-desc').value,impact:document.getElementById('f-impact').value,recommendation:document.getElementById('f-rec').value,refs:document.getElementById('f-refs').value};
+  try{
+    const r=await api('/api/reports/'+S.activeRptId);
+    const data=r.data||{};
+    const findings=data.findings||[];
+    if(S.editFindingIdx!==null){f.id=findings[S.editFindingIdx].id;findings[S.editFindingIdx]=f;}
+    else{f.id=crypto.randomUUID();findings.push(f);}
+    data.findings=findings;
+    await api('/api/reports/'+S.activeRptId,{method:'PUT',body:JSON.stringify({data})});
+    closeModal('finding-modal');
+    renderEdFindings(data);
+    if(S.findingsRptId===S.activeRptId)renderFindingsView(data);
+    toast(S.editFindingIdx!==null?'Finding updated':'Finding added');
+    S.editFindingIdx=null;
+  }catch(e){toast('Save failed: '+e.message,'error');}
+}
+
+async function deleteFinding(idx,ctx){
+  const rptId=ctx==='ed'?S.activeRptId:S.findingsRptId;
+  if(!rptId)return;
+  const r=await api('/api/reports/'+rptId);
+  const data=r.data||{};
+  data.findings=(data.findings||[]).filter((_,i)=>i!==idx);
+  await api('/api/reports/'+rptId,{method:'PUT',body:JSON.stringify({data})});
+  renderEdFindings(data);
+  if(S.findingsRptId===rptId)renderFindingsView(data);
+  toast('Finding deleted');
+}
+
+// ── Findings View ──────────────────────────────────────────────────────
+function populateFindingsSelect(){
+  const sel=document.getElementById('findings-rpt-sel');
+  const cur=sel.value;
+  sel.innerHTML='<option value="">— Select a Report —</option>'+S.reports.map(r=>'<option value="'+r.id+'"'+(r.id===cur?' selected':'')+'>'+esc(r.title)+'</option>').join('');
+}
+
+async function onFindingsReportChange(){
+  const id=document.getElementById('findings-rpt-sel').value;
+  S.findingsRptId=id;S.activeRptId=id;
+  document.getElementById('add-finding-btn').style.display=id?'inline-flex':'none';
+  if(!id){document.getElementById('findings-list').innerHTML='<div class="empty"><div class="eicon">🔍</div><h3>Select a report</h3><p>Choose a report above.</p></div>';document.getElementById('findings-sub').textContent='Select a report to view findings';return;}
+  try{
+    const r=await api('/api/reports/'+id);
+    const rpt=S.reports.find(x=>x.id===id);
+    document.getElementById('findings-sub').textContent=(rpt?.title||'')+' — '+(r.data?.findings||[]).length+' finding(s)';
+    renderFindingsView(r.data||{});
+  }catch{toast('Failed to load findings','error');}
+}
+
+function renderFindingsView(data){
+  const findings=data.findings||[];
+  const el=document.getElementById('findings-list');
+  if(!findings.length){el.innerHTML='<div class="empty"><div class="eicon">🔍</div><h3>No findings</h3><p>Add findings to document vulnerabilities.</p></div>';return;}
+  const sev={Critical:0,High:1,Medium:2,Low:3,Info:4};
+  const sorted=[...findings].sort((a,b)=>(sev[a.severity]??5)-(sev[b.severity]??5));
+  el.innerHTML=sorted.map((f,i)=>buildFindingCard(f,i,'fv')).join('');
+}
+
+// ── Templates ──────────────────────────────────────────────────────────
+function populateNRTemplates(){
+  const sel=document.getElementById('nr-template');
+  sel.innerHTML='<option value="">Blank Report</option>'+S.templates.map(t=>'<option value="'+t.id+'">'+esc(t.name)+'</option>').join('');
+}
+
+function renderTemplatesList(){
+  const el=document.getElementById('templates-list');
+  if(!S.templates.length){el.innerHTML='<div class="empty"><div class="eicon">🧩</div><h3>No templates yet</h3><p>Build a reusable report structure with custom sections and fields.</p><button class="btn btn-primary mt16" onclick="openModal('new-template-modal')">+ New Template</button></div>';return;}
+  el.innerHTML='<div class="card-grid">'+S.templates.map(t=>'<div class="card-item"><div class="item-title">'+esc(t.name)+'</div><div class="item-meta">'+esc(t.description||'No description')+'</div><div class="item-meta">'+fmtDate(t.updated_at)+'</div><div class="item-actions"><button class="btn btn-secondary btn-sm" onclick="openTemplateEditor(''+t.id+'')">Edit</button><button class="btn btn-danger btn-sm" onclick="confirmDel('template',''+t.id+'',''+esc(t.name)+'')">Delete</button></div></div>').join('')+'</div>';
+}
+
+async function createTemplate(){
+  const name=document.getElementById('nt-name').value.trim();
+  if(!name){toast('Name is required','error');return;}
+  try{
+    const res=await api('/api/templates',{method:'POST',body:JSON.stringify({name,description:document.getElementById('nt-desc').value,sections:[]})});
+    closeModal('new-template-modal');document.getElementById('nt-name').value='';document.getElementById('nt-desc').value='';
+    await loadTemplates();openTemplateEditor(res.id);
+  }catch(e){toast('Failed: '+e.message,'error');}
+}
+
+async function openTemplateEditor(id){
+  S.activeTplId=id;S.tSections=[];
+  try{
+    const t=await api('/api/templates/'+id);
+    document.getElementById('t-name').value=t.name;
+    document.getElementById('t-desc').value=t.description||'';
+    document.getElementById('ted-title').textContent='Editing: '+t.name;
+    S.tSections=(t.sections||[]).map(s=>({...s,fields:(s.fields||[]).map(f=>({...f}))}));
+    renderTSections();openModal('template-editor-modal');
+  }catch(e){toast('Failed to load template','error');}
+}
+
+function markTDirty(){document.getElementById('ted-save-status').textContent='Unsaved…';}
+
+function addSection(type){
+  const defaults={text:'Text Section',table:'Data Table',findings:'Findings',checklist:'Checklist'};
+  const defaultFields={
+    text:[{id:'content',label:'Content',type:'textarea',placeholder:'Enter text…'}],
+    table:[{id:'headers',label:'Column Headers (comma-separated)',type:'text',placeholder:'Host, Port, Service, Notes'},{id:'data',label:'Table Data (one row per line, comma-separated)',type:'textarea',placeholder:'192.168.1.1, 80, HTTP, Open'}],
+    findings:[],
+    checklist:[{id:'items',label:'Checklist Items (one per line)',type:'textarea',placeholder:'Item 1
+Item 2
+Item 3'}]
+  };
+  S.tSections.push({id:'s_'+Date.now(),type,title:defaults[type]||'Section',fields:defaultFields[type]||[]});
+  renderTSections();markTDirty();
+}
+
+function renderTSections(){
+  const el=document.getElementById('template-sections');
+  const empty=document.getElementById('template-sections-empty');
+  if(!S.tSections.length){el.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  el.innerHTML=S.tSections.map((s,i)=>'<div class="section-card"><div class="section-head" onclick="toggleTSec('+i+')">'+'<input class="field-input" style="flex:1;padding:4px 8px;font-size:13px" value="'+esc(s.title)+'" onclick="event.stopPropagation()" oninput="S.tSections['+i+'].title=this.value;markTDirty()"><span class="section-type">'+s.type+'</span><button class="btn btn-danger btn-sm btn-icon" onclick="event.stopPropagation();removeSection('+i+')">✕</button></div>'+'<div class="section-body" id="tsec-body-'+i+'">'+(s.type==='findings'?'<p class="small muted" style="padding-top:10px">Findings section — displays all report findings automatically.</p>':renderTFields(s,i)+'
+<div style="margin-top:8px"><button class="btn btn-ghost btn-sm" onclick="addField('+i+')">+ Add Field</button></div>')+'</div></div>').join('');
+}
+
+function toggleTSec(i){const b=document.getElementById('tsec-body-'+i);b.classList.toggle('open');}
+function removeSection(i){S.tSections.splice(i,1);renderTSections();markTDirty();}
+
+function renderTFields(s,si){
+  if(!s.fields.length)return'<p class="small muted" style="padding-top:8px">No fields. Add a field below.</p>';
+  return s.fields.map((f,fi)=>'<div class="field-row"><input class="field-input" style="flex:1;padding:4px 8px;font-size:12px" placeholder="Field label" value="'+esc(f.label||'')+'" oninput="S.tSections['+si+'].fields['+fi+'].label=this.value;markTDirty()">'+'<select class="field-select" style="width:110px;padding:4px 6px;font-size:12px" onchange="S.tSections['+si+'].fields['+fi+'].type=this.value;markTDirty()">'+['text','textarea','date','number','select'].map(t=>'<option'+(f.type===t?' selected':'')+'>'+t+'</option>').join('')+'</select>'+'<button class="btn btn-danger btn-sm btn-icon" onclick="removeField('+si+','+fi+')">✕</button></div>').join('');
+}
+
+function addField(si){S.tSections[si].fields.push({id:'f_'+Date.now(),label:'New Field',type:'text',placeholder:''});renderTSections();markTDirty();}
+function removeField(si,fi){S.tSections[si].fields.splice(fi,1);renderTSections();markTDirty();}
+
+async function saveTemplateNow(){
+  if(!S.activeTplId)return;
+  const name=document.getElementById('t-name').value.trim();
+  if(!name){toast('Name is required','error');return;}
+  try{
+    await api('/api/templates/'+S.activeTplId,{method:'PUT',body:JSON.stringify({name,description:document.getElementById('t-desc').value,sections:S.tSections})});
+    document.getElementById('ted-save-status').textContent='Saved ✓';
+    document.getElementById('ted-title').textContent='Editing: '+name;
+    await loadTemplates();toast('Template saved');
+  }catch(e){toast('Save failed: '+e.message,'error');}
+}
+
+// ── Init ───────────────────────────────────────────────────────────────
+loadAll();
+</script>
+</body>
+</html>
