@@ -1,0 +1,9 @@
+services:
+  reportforge:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - reportforge_data:/root/.reportforge
+volumes:
+  reportforge_data:
