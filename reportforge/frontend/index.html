@@ -310,7 +310,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
 (function() {
 "use strict";
 
-// ── State ──────────────────────────────────────────────────────────
+//  State 
 var S = {
   reports: [], templates: [], findings: [],
   currentReport: null, currentTemplate: null,
@@ -318,7 +318,7 @@ var S = {
   saveTimer: null, editingFindingId: null
 };
 
-// ── Helpers ────────────────────────────────────────────────────────
+//  Helpers 
 function esc(s) {
   return String(s == null ? '' : s)
     .replace(/&/g,'&amp;').replace(/</g,'&lt;')
@@ -366,7 +366,7 @@ function showView(name) {
   if (name === 'dash') renderDash();
 }
 
-// ── Load ──────────────────────────────────────────────────────────
+//  Load 
 async function loadAll() {
   try {
     var res = await Promise.all([api('/api/reports'), api('/api/templates'), api('/api/findings')]);
@@ -379,7 +379,7 @@ async function loadAll() {
   } catch(e) { toast('Load error: ' + e.message, 'error'); }
 }
 
-// ── Dashboard ─────────────────────────────────────────────────────
+//  Dashboard 
 function renderDash() {
   var r = S.reports;
   $('stat-total').textContent  = r.length;
@@ -396,7 +396,7 @@ function renderDash() {
   el.innerHTML = '<table><thead><tr><th>Title</th><th>Status</th><th>Updated</th></tr></thead><tbody>' + rows + '</tbody></table>';
 }
 
-// ── Reports ───────────────────────────────────────────────────────
+//  Reports 
 function renderReportsList() {
   var q = val('rpt-search').toLowerCase();
   var list = S.reports.filter(function(r){ return !q || (r.title||'').toLowerCase().includes(q); });
@@ -441,7 +441,7 @@ async function createReport() {
   } catch(e) { toast('Create failed: '+e.message,'error'); }
 }
 
-// ── Editor ────────────────────────────────────────────────────────
+//  Editor 
 async function openReportEditor(id) {
   try {
     var r = await api('/api/reports/' + id);
@@ -471,7 +471,7 @@ function switchEdTab(name) {
 }
 function markDirty() {
   S.edDirty = true;
-  $('editor-dirty').textContent = '● unsaved';
+  $('editor-dirty').textContent = ' unsaved';
   clearTimeout(S.saveTimer);
   S.saveTimer = setTimeout(saveEditorNow, 2000);
 }
@@ -535,7 +535,7 @@ function renderEdPreview() {
   $('preview-content').innerHTML = html;
 }
 
-// ── Findings ──────────────────────────────────────────────────────
+//  Findings 
 function renderEdFindings() {
   var el = $('ed-findings-list'); if (!el || !S.currentReport) return;
   var list = S.findings.filter(function(f){ return f.report_id === S.currentReport.id; });
@@ -624,7 +624,7 @@ function renderFindingsView() {
   el.innerHTML = list.map(buildFindingCard).join('');
 }
 
-// ── Templates ─────────────────────────────────────────────────────
+//  Templates 
 function renderTemplatesList() {
   var el = $('templates-list'); if (!el) return;
   if (!S.templates.length) { el.innerHTML='<div class="empty-state"><p>No templates yet.</p></div>'; return; }
@@ -666,7 +666,7 @@ async function openTemplateEditor(id) {
 }
 function markTDirty() {
   S.tedDirty = true;
-  $('ted-dirty').textContent = '● unsaved';
+  $('ted-dirty').textContent = ' unsaved';
 }
 function addSection() {
   if (!S.currentTemplate) return;
@@ -741,7 +741,7 @@ async function saveTemplate() {
   } catch(e) { toast('Save failed: '+e.message,'error'); }
 }
 
-// ── Delete ────────────────────────────────────────────────────────
+//  Delete 
 function confirmDelete(type, id, name) {
   $('confirm-msg').textContent = 'Delete "' + name + '"? This cannot be undone.';
   $('confirm-ok').onclick = function(){ doDelete(type, id); closeModal('modal-confirm'); };
@@ -765,7 +765,7 @@ async function doDelete(type, id) {
   } catch(e) { toast('Delete failed: '+e.message,'error'); }
 }
 
-// ── Event Delegation ──────────────────────────────────────────────
+//  Event Delegation 
 document.addEventListener('click', function(e) {
   var t = e.target;
 
@@ -871,7 +871,7 @@ document.addEventListener('input', function(e) {
   }
 });
 
-// ── Boot ──────────────────────────────────────────────────────────
+//  Boot 
 loadAll();
 
 })();
