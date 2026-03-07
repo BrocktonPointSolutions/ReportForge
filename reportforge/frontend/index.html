@@ -307,573 +307,875 @@ tr:hover td{background:rgba(255,255,255,.02)}
 <div class="toast-root" id="toast-root"></div>
 
 <script>
-(function() {
+(function(){
 "use strict";
 
-//  State 
-var S = {
-  reports: [], templates: [], findings: [],
-  currentReport: null, currentTemplate: null,
-  edDirty: false, tedDirty: false,
-  saveTimer: null, editingFindingId: null
+var S={
+  reports:[],templates:[],findings:[],
+  currentReport:null,currentTemplate:null,
+  edDirty:false,tedDirty:false,
+  saveTimer:null,editingFindingId:null
 };
 
-//  Helpers 
-function esc(s) {
-  return String(s == null ? '' : s)
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+function esc(s){
+  s=String(s==null?'':s);
+  s=s.split('&').join('&amp;');
+  s=s.split('<').join('&lt;');
+  s=s.split('>').join('&gt;');
+  s=s.split('"').join('&quot;');
+  return s;
 }
-function fmtDate(s) {
-  if (!s) return '';
-  try { return new Date(s).toLocaleDateString(); } catch(e) { return s; }
+function fmtDate(s){
+  if(!s)return '';
+  try{return new Date(s).toLocaleDateString();}
+  catch(e){return s;}
 }
-function badge(status) {
-  var map = {draft:'badge-draft',review:'badge-review',final:'badge-final',
-             open:'badge-open',info:'badge-info',remediated:'badge-info',accepted:'badge-info'};
-  return '<span class="badge ' + (map[String(status).toLowerCase()] || 'badge-info') + '">' + esc(status) + '</span>';
+function bdg(st){
+  var m={
+    draft:'badge-draft',review:'badge-review',
+    final:'badge-final',open:'badge-open',
+    info:'badge-info',remediated:'badge-info',
+    accepted:'badge-info'
+  };
+  var k=(st||'').toLowerCase();
+  return '<span class="badge '+(m[k]||'badge-info')+'">'
+    +esc(st)+'</span>';
 }
-function toast(msg, type) {
-  var el = document.createElement('div');
-  el.className = 'toast toast-' + (type || 'success');
-  el.textContent = msg;
-  document.getElementById('toast-root').appendChild(el);
-  setTimeout(function(){ el.remove(); }, 3000);
+function toast(msg,tp){
+  var el=document.createElement('div');
+  el.className='toast t-'+(tp||'ok');
+  el.textContent=msg;
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(function(){el.remove();},3000);
 }
-function $(id) { return document.getElementById(id); }
-function val(id) { return $(id) ? $(id).value : ''; }
-function setVal(id, v) { if ($(id)) $(id).value = v == null ? '' : v; }
+function $(id){return document.getElementById(id);}
+function gv(id){return $(id)?$(id).value:'';}
+function sv(id,v){if($(id))$(id).value=(v==null?'':v);}
 
-async function api(path, opts) {
-  var res = await fetch(path, Object.assign({headers:{'Content-Type':'application/json'}}, opts || {}));
-  if (!res.ok) { var t = await res.text(); throw new Error(t || res.statusText); }
-  if (res.status === 204) return null;
+async function api(path,opts){
+  var h={'Content-Type':'application/json'};
+  var o=Object.assign({headers:h},opts||{});
+  var res=await fetch(path,o);
+  if(!res.ok){
+    var t=await res.text();
+    throw new Error(t||res.statusText);
+  }
+  if(res.status===204)return null;
   return res.json();
 }
 
-function openModal(id) { $(id).classList.add('open'); }
-function closeModal(id) { $(id).classList.remove('open'); }
+function openM(id){$(id).classList.add('open');}
+function closeM(id){$(id).classList.remove('open');}
 
-function showView(name) {
-  document.querySelectorAll('.view').forEach(function(v){ v.classList.remove('active'); });
-  document.querySelectorAll('.nav-tab').forEach(function(t){ t.classList.remove('active'); });
-  var v = $('view-' + name);
-  if (v) v.classList.add('active');
-  document.querySelectorAll('.nav-tab[data-nav="' + name + '"]').forEach(function(t){ t.classList.add('active'); });
-  if (name === 'reports') renderReportsList();
-  if (name === 'findings') { populateFindingsSelect(); renderFindingsView(); }
-  if (name === 'templates') renderTemplatesList();
-  if (name === 'dash') renderDash();
+function showView(name){
+  var vs=document.querySelectorAll('.view');
+  var ts=document.querySelectorAll('.nav-tab');
+  for(var i=0;i<vs.length;i++){
+    vs[i].classList.remove('active');
+  }
+  for(var i=0;i<ts.length;i++){
+    ts[i].classList.remove('active');
+  }
+  var v=$('view-'+name);
+  if(v)v.classList.add('active');
+  var nt=document.querySelectorAll(
+    '.nav-tab[data-nav="'+name+'"]');
+  for(var i=0;i<nt.length;i++){
+    nt[i].classList.add('active');
+  }
+  if(name==='reports')renderReports();
+  if(name==='findings'){
+    popFindSel();renderFindings();
+  }
+  if(name==='templates')renderTemplates();
+  if(name==='dash')renderDash();
 }
 
-//  Load 
-async function loadAll() {
-  try {
-    var res = await Promise.all([api('/api/reports'), api('/api/templates'), api('/api/findings')]);
-    S.reports   = res[0] || [];
-    S.templates = res[1] || [];
-    S.findings  = res[2] || [];
+async function loadAll(){
+  try{
+    var r=await Promise.all([
+      api('/api/reports'),
+      api('/api/templates'),
+      api('/api/findings')
+    ]);
+    S.reports=r[0]||[];
+    S.templates=r[1]||[];
+    S.findings=r[2]||[];
     renderDash();
-    populateNRTemplates();
-    populateFindingsSelect();
-  } catch(e) { toast('Load error: ' + e.message, 'error'); }
+    popNRTemplates();
+    popFindSel();
+  }catch(e){
+    toast('Load error: '+e.message,'err');
+  }
 }
 
-//  Dashboard 
-function renderDash() {
-  var r = S.reports;
-  $('stat-total').textContent  = r.length;
-  $('stat-draft').textContent  = r.filter(function(x){ return x.status==='draft'; }).length;
-  $('stat-review').textContent = r.filter(function(x){ return x.status==='review'; }).length;
-  $('stat-final').textContent  = r.filter(function(x){ return x.status==='final'; }).length;
-  var recent = r.slice().sort(function(a,b){ return (b.updated_at||'').localeCompare(a.updated_at||''); }).slice(0,5);
-  var el = $('dash-recent');
-  if (!recent.length) { el.innerHTML='<div class="empty-state"><p>No reports yet.</p></div>'; return; }
-  var rows = recent.map(function(r){
-    return '<tr data-open-report="' + r.id + '" style="cursor:pointer">' +
-      '<td>' + esc(r.title) + '</td><td>' + badge(r.status) + '</td><td>' + fmtDate(r.updated_at) + '</td></tr>';
-  }).join('');
-  el.innerHTML = '<table><thead><tr><th>Title</th><th>Status</th><th>Updated</th></tr></thead><tbody>' + rows + '</tbody></table>';
-}
-
-//  Reports 
-function renderReportsList() {
-  var q = val('rpt-search').toLowerCase();
-  var list = S.reports.filter(function(r){ return !q || (r.title||'').toLowerCase().includes(q); });
-  var el = $('reports-list');
-  if (!list.length) {
-    el.innerHTML = '<div class="empty-state"><p>' + (q ? 'No matching reports.' : 'No reports yet. Create one!') + '</p></div>';
+function renderDash(){
+  var r=S.reports;
+  $('stat-total').textContent=r.length;
+  $('stat-draft').textContent=
+    r.filter(function(x){
+      return x.status==='draft';
+    }).length;
+  $('stat-review').textContent=
+    r.filter(function(x){
+      return x.status==='review';
+    }).length;
+  $('stat-final').textContent=
+    r.filter(function(x){
+      return x.status==='final';
+    }).length;
+  var recent=r.slice().sort(function(a,b){
+    return (b.updated_at||'')
+      .localeCompare(a.updated_at||'');
+  }).slice(0,5);
+  var el=$('dash-recent');
+  if(!recent.length){
+    el.innerHTML=
+      '<div class="empty"><p>No reports.</p></div>';
     return;
   }
-  el.innerHTML = '<div class="card-grid">' + list.map(function(r){
-    return '<div class="card-item">' +
-      '<div class="item-title">' + esc(r.title) + '</div>' +
-      '<div class="item-meta">' + badge(r.status) + ' &bull; ' + fmtDate(r.updated_at) + '</div>' +
-      '<div class="item-actions">' +
-        '<button class="btn btn-primary btn-sm" data-open-report="' + r.id + '">Open</button>' +
-        '<button class="btn btn-danger btn-sm" data-del-type="report" data-del-id="' + r.id + '" data-del-name="' + esc(r.title) + '">Delete</button>' +
-      '</div></div>';
-  }).join('') + '</div>';
+  var rows=recent.map(function(r){
+    return '<tr data-open-rpt="'+r.id+'"'
+      +' style="cursor:pointer"><td>'
+      +esc(r.title)+'</td><td>'
+      +bdg(r.status)+'</td><td>'
+      +fmtDate(r.updated_at)+'</td></tr>';
+  }).join('');
+  el.innerHTML='<table><thead><tr>'
+    +'<th>Title</th><th>Status</th>'
+    +'<th>Updated</th></tr></thead><tbody>'
+    +rows+'</tbody></table>';
 }
 
-function openNewReportModal() {
-  populateNRTemplates();
-  setVal('nr-title','');
-  openModal('modal-new-report');
+function renderReports(){
+  var q=gv('rpt-search').toLowerCase();
+  var list=S.reports.filter(function(r){
+    return !q||(r.title||'').toLowerCase()
+      .indexOf(q)>=0;
+  });
+  var el=$('reports-list');
+  if(!list.length){
+    el.innerHTML='<div class="empty"><p>'
+      +(q?'No matches.':'No reports yet.')
+      +'</p></div>';
+    return;
+  }
+  el.innerHTML='<div class="card-grid">'
+    +list.map(function(r){
+      return '<div class="card-item">'
+        +'<div class="item-title">'
+        +esc(r.title)+'</div>'
+        +'<div class="item-meta">'
+        +bdg(r.status)+' &bull; '
+        +fmtDate(r.updated_at)+'</div>'
+        +'<div class="item-actions">'
+        +'<button class="btn btn-primary btn-sm"'
+        +' data-open-rpt="'+r.id+'">'
+        +'Open</button>'
+        +'<button class="btn btn-danger btn-sm"'
+        +' data-del-t="report"'
+        +' data-del-id="'+r.id+'"'
+        +' data-del-n="'+esc(r.title)+'">'
+        +'Delete</button>'
+        +'</div></div>';
+    }).join('')+'</div>';
 }
-function populateNRTemplates() {
-  var sel = $('nr-template'); if (!sel) return;
-  sel.innerHTML = '<option value="">None (blank)</option>' +
-    S.templates.map(function(t){ return '<option value="' + t.id + '">' + esc(t.name) + '</option>'; }).join('');
+
+function openNewReport(){
+  popNRTemplates();
+  sv('nr-title','');
+  openM('modal-new-report');
 }
-async function createReport() {
-  var title = val('nr-title').trim();
-  if (!title) { toast('Title required','error'); return; }
-  var tid = val('nr-template');
-  try {
-    var r = await api('/api/reports',{method:'POST',body:JSON.stringify({
-      title:title, template_id: tid ? parseInt(tid) : null, status:'draft', sections:[], meta:{}
-    })});
+function popNRTemplates(){
+  var sel=$('nr-template');
+  if(!sel)return;
+  sel.innerHTML=
+    '<option value="">None (blank)</option>'
+    +S.templates.map(function(t){
+      return '<option value="'+t.id+'">'
+        +esc(t.name)+'</option>';
+    }).join('');
+}
+async function createReport(){
+  var title=gv('nr-title').trim();
+  if(!title){toast('Title required','err');return;}
+  var tid=gv('nr-template');
+  try{
+    var r=await api('/api/reports',{
+      method:'POST',
+      body:JSON.stringify({
+        title:title,
+        template_id:tid?parseInt(tid):null,
+        status:'draft',sections:[],meta:{}
+      })
+    });
     S.reports.unshift(r);
-    closeModal('modal-new-report');
+    closeM('modal-new-report');
     toast('Report created');
-    openReportEditor(r.id);
-  } catch(e) { toast('Create failed: '+e.message,'error'); }
+    openEditor(r.id);
+  }catch(e){
+    toast('Create failed: '+e.message,'err');
+  }
 }
 
-//  Editor 
-async function openReportEditor(id) {
-  try {
-    var r = await api('/api/reports/' + id);
-    S.currentReport = r; S.edDirty = false;
-    $('editor-title').textContent = r.title || 'Untitled';
-    $('editor-dirty').textContent = '';
-    setVal('editor-status', r.status || 'draft');
-    setVal('ed-title', r.title);
-    var m = r.meta || {};
-    setVal('ed-org',       m.org        || '');
-    setVal('ed-assessor',  m.assessor   || '');
-    setVal('ed-start',     m.start_date || '');
-    setVal('ed-end',       m.end_date   || '');
-    setVal('ed-summary',   m.summary    || '');
+async function openEditor(id){
+  try{
+    var r=await api('/api/reports/'+id);
+    S.currentReport=r;
+    S.edDirty=false;
+    $('editor-title').textContent=
+      r.title||'Untitled';
+    $('editor-dirty').textContent='';
+    sv('editor-status',r.status||'draft');
+    sv('ed-title',r.title);
+    var m=r.meta||{};
+    sv('ed-org',m.org||'');
+    sv('ed-assessor',m.assessor||'');
+    sv('ed-start',m.start_date||'');
+    sv('ed-end',m.end_date||'');
+    sv('ed-summary',m.summary||'');
     renderEdSections();
     renderEdFindings();
-    switchEdTab('info');
+    switchTab('info');
     showView('editor');
-  } catch(e) { toast('Open failed: '+e.message,'error'); }
+  }catch(e){
+    toast('Open failed: '+e.message,'err');
+  }
 }
-function switchEdTab(name) {
-  document.querySelectorAll('.editor-tab').forEach(function(t){ t.classList.remove('active'); });
-  document.querySelectorAll('.editor-panel').forEach(function(p){ p.classList.remove('active'); });
-  var p = $('ed-' + name); if (p) p.classList.add('active');
-  document.querySelectorAll('.editor-tab[data-tab="' + name + '"]').forEach(function(t){ t.classList.add('active'); });
-  if (name === 'preview') renderEdPreview();
+function switchTab(name){
+  var tabs=document.querySelectorAll('.ed-tab');
+  var panels=document.querySelectorAll('.ed-panel');
+  for(var i=0;i<tabs.length;i++){
+    tabs[i].classList.remove('active');
+  }
+  for(var i=0;i<panels.length;i++){
+    panels[i].classList.remove('active');
+  }
+  var p=$('ed-'+name);
+  if(p)p.classList.add('active');
+  var et=document.querySelectorAll(
+    '.ed-tab[data-tab="'+name+'"]');
+  for(var i=0;i<et.length;i++){
+    et[i].classList.add('active');
+  }
+  if(name==='preview')renderPreview();
 }
-function markDirty() {
-  S.edDirty = true;
-  $('editor-dirty').textContent = ' unsaved';
+function markDirty(){
+  S.edDirty=true;
+  $('editor-dirty').textContent='unsaved';
   clearTimeout(S.saveTimer);
-  S.saveTimer = setTimeout(saveEditorNow, 2000);
+  S.saveTimer=setTimeout(saveEditor,2000);
 }
-async function saveEditorNow() {
-  if (!S.currentReport) return;
-  var title = val('ed-title').trim() || S.currentReport.title;
-  try {
-    var updated = await api('/api/reports/' + S.currentReport.id, {method:'PUT', body:JSON.stringify({
-      title: title, status: S.currentReport.status,
-      sections: S.currentReport.sections || [],
-      meta: { org: val('ed-org'), assessor: val('ed-assessor'),
-              start_date: val('ed-start'), end_date: val('ed-end'), summary: val('ed-summary') }
-    })});
-    S.currentReport = updated; S.edDirty = false;
-    $('editor-dirty').textContent = '';
-    $('editor-title').textContent = updated.title;
-    var idx = S.reports.findIndex(function(r){ return r.id === updated.id; });
-    if (idx >= 0) S.reports[idx] = updated;
+async function saveEditor(){
+  if(!S.currentReport)return;
+  var title=gv('ed-title').trim()
+    ||S.currentReport.title;
+  try{
+    var u=await api(
+      '/api/reports/'+S.currentReport.id,{
+      method:'PUT',
+      body:JSON.stringify({
+        title:title,
+        status:S.currentReport.status,
+        sections:S.currentReport.sections||[],
+        meta:{
+          org:gv('ed-org'),
+          assessor:gv('ed-assessor'),
+          start_date:gv('ed-start'),
+          end_date:gv('ed-end'),
+          summary:gv('ed-summary')
+        }
+      })
+    });
+    S.currentReport=u;
+    S.edDirty=false;
+    $('editor-dirty').textContent='';
+    $('editor-title').textContent=u.title;
+    var idx=S.reports.findIndex(function(r){
+      return r.id===u.id;
+    });
+    if(idx>=0)S.reports[idx]=u;
     toast('Saved');
-  } catch(e) { toast('Save failed: '+e.message,'error'); }
+  }catch(e){
+    toast('Save failed: '+e.message,'err');
+  }
 }
-async function updateReportStatus() {
-  if (!S.currentReport) return;
-  S.currentReport.status = val('editor-status');
-  await saveEditorNow();
+async function updateStatus(){
+  if(!S.currentReport)return;
+  S.currentReport.status=gv('editor-status');
+  await saveEditor();
 }
-function renderEdSections() {
-  var el = $('ed-sections-body'); if (!el) return;
-  var secs = (S.currentReport && S.currentReport.sections) || [];
-  if (!secs.length) { el.innerHTML='<div class="empty-state"><p>No sections. Apply a template or add sections.</p></div>'; return; }
-  el.innerHTML = secs.map(function(sec, i){
-    var fields = (sec.fields||[]).map(function(f){
-      return '<div class="field-group"><label class="field-label">' + esc(f.label) + '</label>' +
-        (f.type==='textarea'
-          ? '<textarea class="field-textarea">' + esc(f.value||'') + '</textarea>'
-          : '<input class="field-input" type="' + esc(f.type||'text') + '" value="' + esc(f.value||'') + '">') +
-        '</div>';
+function renderEdSections(){
+  var el=$('ed-sections-body');
+  if(!el)return;
+  var secs=
+    (S.currentReport&&S.currentReport.sections)||[];
+  if(!secs.length){
+    el.innerHTML=
+      '<div class="empty"><p>No sections.</p></div>';
+    return;
+  }
+  el.innerHTML=secs.map(function(sec,i){
+    var flds=(sec.fields||[]).map(function(f){
+      var inp=f.type==='textarea'
+        ?'<textarea class="field-textarea">'
+          +esc(f.value||'')+'</textarea>'
+        :'<input class="field-input" type="'
+          +esc(f.type||'text')+'" value="'
+          +esc(f.value||'')+'">';
+      return '<div class="field-group">'
+        +'<label class="field-label">'
+        +esc(f.label)+'</label>'
+        +inp+'</div>';
     }).join('');
-    return '<div class="section-hdr" data-toggle-sec="' + i + '">' +
-        esc(sec.title||'Section '+(i+1)) + '<span style="font-size:11px;color:var(--text2)">' + esc(sec.type||'') + '</span></div>' +
-      '<div class="section-body" id="rpt-sec-' + i + '">' + (fields || '<p style="color:var(--text2);font-size:13px">No fields.</p>') + '</div>';
+    return '<div class="sec-hdr"'
+      +' data-tog-sec="'+i+'">'
+      +esc(sec.title||'Section '+(i+1))
+      +'</div>'
+      +'<div class="sec-body" id="rsec-'+i+'">'
+      +(flds||'<p>No fields.</p>')
+      +'</div>';
   }).join('');
 }
-function renderEdPreview() {
-  var r = S.currentReport; if (!r) return;
-  var m = r.meta || {};
-  var html = '<h1 style="font-size:18px;font-weight:700;margin-bottom:8px">' + esc(r.title) + '</h1>';
-  if (m.org)       html += '<p><strong>Organization:</strong> ' + esc(m.org) + '</p>';
-  if (m.assessor)  html += '<p><strong>Assessor:</strong> ' + esc(m.assessor) + '</p>';
-  if (m.summary)   html += '<h2>Executive Summary</h2><p>' + esc(m.summary).replace(/
-/g,'<br>') + '</p>';
+function renderPreview(){
+  var r=S.currentReport;if(!r)return;
+  var m=r.meta||{};
+  var h='<h1 style="font-size:18px;font-weight:700;'
+    +'margin-bottom:8px">'+esc(r.title)+'</h1>';
+  if(m.org)
+    h+='<p><b>Org:</b> '+esc(m.org)+'</p>';
+  if(m.assessor)
+    h+='<p><b>Assessor:</b> '+esc(m.assessor)+'</p>';
+  if(m.summary)
+    h+='<h2>Summary</h2><p>'+esc(m.summary)+'</p>';
   (r.sections||[]).forEach(function(sec){
-    html += '<h2>' + esc(sec.title) + '</h2>';
-    (sec.fields||[]).forEach(function(f){ html += '<p><strong>' + esc(f.label) + ':</strong> ' + esc(f.value||'') + '</p>'; });
+    h+='<h2>'+esc(sec.title)+'</h2>';
+    (sec.fields||[]).forEach(function(f){
+      h+='<p><b>'+esc(f.label)+':</b> '
+        +esc(f.value||'')+'</p>';
+    });
   });
-  var rf = S.findings.filter(function(f){ return f.report_id === r.id; });
-  if (rf.length) {
-    html += '<h2>Findings (' + rf.length + ')</h2>';
-    rf.forEach(function(f){ html += '<div style="margin-bottom:10px"><strong>' + esc(f.title) + '</strong> ' + badge(f.severity||'info') + '<p style="margin-top:4px">' + esc(f.description||'') + '</p></div>'; });
+  var rf=S.findings.filter(function(f){
+    return f.report_id===r.id;
+  });
+  if(rf.length){
+    h+='<h2>Findings ('+rf.length+')</h2>';
+    rf.forEach(function(f){
+      h+='<div style="margin-bottom:10px"><b>'
+        +esc(f.title)+'</b> '
+        +bdg(f.severity||'info')+'<p>'
+        +esc(f.description||'')+'</p></div>';
+    });
   }
-  $('preview-content').innerHTML = html;
+  $('preview-content').innerHTML=h;
 }
 
-//  Findings 
-function renderEdFindings() {
-  var el = $('ed-findings-list'); if (!el || !S.currentReport) return;
-  var list = S.findings.filter(function(f){ return f.report_id === S.currentReport.id; });
-  if (!list.length) { el.innerHTML='<div class="empty-state"><p>No findings for this report.</p></div>'; return; }
-  el.innerHTML = list.map(buildFindingCard).join('');
+function renderEdFindings(){
+  var el=$('ed-findings-list');
+  if(!el||!S.currentReport)return;
+  var list=S.findings.filter(function(f){
+    return f.report_id===S.currentReport.id;
+  });
+  if(!list.length){
+    el.innerHTML=
+      '<div class="empty"><p>No findings.</p></div>';
+    return;
+  }
+  el.innerHTML=list.map(fCard).join('');
 }
-function buildFindingCard(f) {
-  var sev = (f.severity||'info').toLowerCase();
-  return '<div class="finding-card">' +
-    '<div style="display:flex;align-items:center;margin-bottom:6px">' +
-      '<span class="finding-sev sev-' + sev + '">' + esc(f.severity) + '</span>' +
-      '<strong>' + esc(f.title) + '</strong>' +
-      '<span style="margin-left:auto">' + badge(f.status||'open') + '</span>' +
-    '</div>' +
-    '<div style="color:var(--text2);font-size:12px;margin-bottom:8px">' + esc(f.description||'') + '</div>' +
-    '<div class="item-actions">' +
-      '<button class="btn btn-ghost btn-sm" data-edit-finding="' + f.id + '">Edit</button>' +
-      '<button class="btn btn-danger btn-sm" data-del-type="finding" data-del-id="' + f.id + '" data-del-name="' + esc(f.title) + '">Delete</button>' +
-    '</div></div>';
+function fCard(f){
+  var sev=(f.severity||'info').toLowerCase();
+  return '<div class="fcard">'
+    +'<div style="display:flex;align-items:center;'
+    +'margin-bottom:6px">'
+    +'<span class="fsev sev-'+esc(sev)+'">'
+    +esc(f.severity)+'</span>'
+    +'<strong>'+esc(f.title)+'</strong>'
+    +'<span style="margin-left:auto">'
+    +bdg(f.status||'open')+'</span></div>'
+    +'<div style="color:var(--text2);'
+    +'font-size:12px;margin-bottom:8px">'
+    +esc(f.description||'')+'</div>'
+    +'<div class="item-actions">'
+    +'<button class="btn btn-ghost btn-sm"'
+    +' data-edit-f="'+f.id+'">Edit</button>'
+    +'<button class="btn btn-danger btn-sm"'
+    +' data-del-t="finding"'
+    +' data-del-id="'+f.id+'"'
+    +' data-del-n="'+esc(f.title)+'">'
+    +'Delete</button>'
+    +'</div></div>';
 }
-function openFindingModal(reportId) {
-  S.editingFindingId = null;
-  $('fm-title').textContent = 'Add Finding';
-  setVal('fm-ftitle',''); setVal('fm-desc',''); setVal('fm-rec','');
-  setVal('fm-cvss',''); setVal('fm-severity','Medium'); setVal('fm-status','open');
-  populateFmReport(reportId != null ? reportId : (S.currentReport ? S.currentReport.id : null));
-  openModal('modal-finding');
+function openFinding(rptId){
+  S.editingFindingId=null;
+  $('fm-title').textContent='Add Finding';
+  sv('fm-ftitle','');sv('fm-desc','');
+  sv('fm-rec','');sv('fm-cvss','');
+  sv('fm-severity','Medium');
+  sv('fm-status','open');
+  popFmReport(rptId!=null?rptId
+    :(S.currentReport?S.currentReport.id:null));
+  openM('modal-finding');
 }
-function editFinding(id) {
-  var f = S.findings.find(function(x){ return x.id === id; }); if (!f) return;
-  S.editingFindingId = id;
-  $('fm-title').textContent = 'Edit Finding';
-  setVal('fm-ftitle', f.title); setVal('fm-desc', f.description||'');
-  setVal('fm-rec', f.recommendation||''); setVal('fm-cvss', f.cvss||'');
-  setVal('fm-severity', f.severity||'Medium'); setVal('fm-status', f.status||'open');
-  populateFmReport(f.report_id);
-  openModal('modal-finding');
+function editFinding(id){
+  var f=S.findings.find(function(x){
+    return x.id===id;
+  });
+  if(!f)return;
+  S.editingFindingId=id;
+  $('fm-title').textContent='Edit Finding';
+  sv('fm-ftitle',f.title);
+  sv('fm-desc',f.description||'');
+  sv('fm-rec',f.recommendation||'');
+  sv('fm-cvss',f.cvss||'');
+  sv('fm-severity',f.severity||'Medium');
+  sv('fm-status',f.status||'open');
+  popFmReport(f.report_id);
+  openM('modal-finding');
 }
-function populateFmReport(selectedId) {
-  var sel = $('fm-report'); if (!sel) return;
-  sel.innerHTML = S.reports.map(function(r){
-    return '<option value="' + r.id + '"' + (r.id === selectedId ? ' selected' : '') + '>' + esc(r.title) + '</option>';
+function popFmReport(sel){
+  var el=$('fm-report');if(!el)return;
+  el.innerHTML=S.reports.map(function(r){
+    return '<option value="'+r.id+'"'
+      +(r.id===sel?' selected':'')+'>'
+      +esc(r.title)+'</option>';
   }).join('');
 }
-async function saveFinding() {
-  var title = val('fm-ftitle').trim();
-  if (!title) { toast('Title required','error'); return; }
-  var payload = { report_id: parseInt(val('fm-report')), title: title,
-    severity: val('fm-severity'), status: val('fm-status'),
-    description: val('fm-desc'), recommendation: val('fm-rec'),
-    cvss: parseFloat(val('fm-cvss')) || null };
-  try {
-    if (S.editingFindingId) {
-      var u = await api('/api/findings/' + S.editingFindingId, {method:'PUT',body:JSON.stringify(payload)});
-      var idx = S.findings.findIndex(function(f){ return f.id === S.editingFindingId; });
-      if (idx >= 0) S.findings[idx] = u;
+async function saveFinding(){
+  var title=gv('fm-ftitle').trim();
+  if(!title){toast('Title required','err');return;}
+  var p={
+    report_id:parseInt(gv('fm-report')),
+    title:title,
+    severity:gv('fm-severity'),
+    status:gv('fm-status'),
+    description:gv('fm-desc'),
+    recommendation:gv('fm-rec'),
+    cvss:parseFloat(gv('fm-cvss'))||null
+  };
+  try{
+    if(S.editingFindingId){
+      var u=await api(
+        '/api/findings/'+S.editingFindingId,
+        {method:'PUT',body:JSON.stringify(p)});
+      var idx=S.findings.findIndex(function(f){
+        return f.id===S.editingFindingId;
+      });
+      if(idx>=0)S.findings[idx]=u;
       toast('Finding updated');
-    } else {
-      var c = await api('/api/findings', {method:'POST',body:JSON.stringify(payload)});
+    }else{
+      var c=await api('/api/findings',
+        {method:'POST',body:JSON.stringify(p)});
       S.findings.push(c);
       toast('Finding added');
     }
-    closeModal('modal-finding');
-    renderEdFindings(); renderFindingsView();
-  } catch(e) { toast('Save failed: '+e.message,'error'); }
+    closeM('modal-finding');
+    renderEdFindings();
+    renderFindings();
+  }catch(e){
+    toast('Save failed: '+e.message,'err');
+  }
 }
-function populateFindingsSelect() {
-  var sel = $('findings-rpt-sel'); if (!sel) return;
-  var cur = sel.value;
-  sel.innerHTML = '<option value="">All Reports</option>' +
-    S.reports.map(function(r){ return '<option value="' + r.id + '">' + esc(r.title) + '</option>'; }).join('');
-  if (cur) sel.value = cur;
+function popFindSel(){
+  var sel=$('findings-rpt-sel');if(!sel)return;
+  var cur=sel.value;
+  sel.innerHTML=
+    '<option value="">All Reports</option>'
+    +S.reports.map(function(r){
+      return '<option value="'+r.id+'">'
+        +esc(r.title)+'</option>';
+    }).join('');
+  if(cur)sel.value=cur;
 }
-function renderFindingsView() {
-  var rptId = parseInt(val('findings-rpt-sel')) || 0;
-  var sev   = val('findings-sev-sel');
-  var list  = S.findings.filter(function(f){
-    if (rptId && f.report_id !== rptId) return false;
-    if (sev && f.severity !== sev) return false;
+function renderFindings(){
+  var rptId=parseInt(gv('findings-rpt-sel'))||0;
+  var sev=gv('findings-sev-sel');
+  var list=S.findings.filter(function(f){
+    if(rptId&&f.report_id!==rptId)return false;
+    if(sev&&f.severity!==sev)return false;
     return true;
   });
-  var el = $('findings-list'); if (!el) return;
-  if (!list.length) { el.innerHTML='<div class="empty-state"><p>No findings found.</p></div>'; return; }
-  var order = {Critical:0,High:1,Medium:2,Low:3,Info:4};
-  list.sort(function(a,b){ return (order[a.severity]||5)-(order[b.severity]||5); });
-  el.innerHTML = list.map(buildFindingCard).join('');
+  var el=$('findings-list');if(!el)return;
+  if(!list.length){
+    el.innerHTML=
+      '<div class="empty"><p>No findings.</p></div>';
+    return;
+  }
+  var ord={Critical:0,High:1,Medium:2,Low:3,Info:4};
+  list.sort(function(a,b){
+    return (ord[a.severity]||5)
+      -(ord[b.severity]||5);
+  });
+  el.innerHTML=list.map(fCard).join('');
 }
 
-//  Templates 
-function renderTemplatesList() {
-  var el = $('templates-list'); if (!el) return;
-  if (!S.templates.length) { el.innerHTML='<div class="empty-state"><p>No templates yet.</p></div>'; return; }
-  el.innerHTML = '<div class="card-grid">' + S.templates.map(function(t){
-    return '<div class="card-item">' +
-      '<div class="item-title">' + esc(t.name) + '</div>' +
-      '<div class="item-meta">' + esc(t.description||'') + ' &bull; ' + (t.sections||[]).length + ' sections</div>' +
-      '<div class="item-actions">' +
-        '<button class="btn btn-primary btn-sm" data-open-template="' + t.id + '">Edit</button>' +
-        '<button class="btn btn-danger btn-sm" data-del-type="template" data-del-id="' + t.id + '" data-del-name="' + esc(t.name) + '">Delete</button>' +
-      '</div></div>';
-  }).join('') + '</div>';
+function renderTemplates(){
+  var el=$('templates-list');if(!el)return;
+  if(!S.templates.length){
+    el.innerHTML=
+      '<div class="empty"><p>No templates.</p></div>';
+    return;
+  }
+  el.innerHTML='<div class="card-grid">'
+    +S.templates.map(function(t){
+      return '<div class="card-item">'
+        +'<div class="item-title">'
+        +esc(t.name)+'</div>'
+        +'<div class="item-meta">'
+        +esc(t.description||'')+' &bull; '
+        +(t.sections||[]).length
+        +' sections</div>'
+        +'<div class="item-actions">'
+        +'<button class="btn btn-primary btn-sm"'
+        +' data-open-tpl="'+t.id+'">'
+        +'Edit</button>'
+        +'<button class="btn btn-danger btn-sm"'
+        +' data-del-t="template"'
+        +' data-del-id="'+t.id+'"'
+        +' data-del-n="'+esc(t.name)+'">'
+        +'Delete</button>'
+        +'</div></div>';
+    }).join('')+'</div>';
 }
-function openNewTemplateModal() {
-  setVal('nt-name',''); setVal('nt-desc','');
-  openModal('modal-new-template');
+function openNewTemplate(){
+  sv('nt-name','');sv('nt-desc','');
+  openM('modal-new-template');
 }
-async function createTemplate() {
-  var name = val('nt-name').trim();
-  if (!name) { toast('Name required','error'); return; }
-  try {
-    var t = await api('/api/templates',{method:'POST',body:JSON.stringify({name:name,description:val('nt-desc'),sections:[]})});
+async function createTemplate(){
+  var name=gv('nt-name').trim();
+  if(!name){toast('Name required','err');return;}
+  try{
+    var t=await api('/api/templates',{
+      method:'POST',
+      body:JSON.stringify({
+        name:name,
+        description:gv('nt-desc'),
+        sections:[]
+      })
+    });
     S.templates.push(t);
-    closeModal('modal-new-template');
+    closeM('modal-new-template');
     toast('Template created');
-    openTemplateEditor(t.id);
-  } catch(e) { toast('Failed: '+e.message,'error'); }
+    openTplEditor(t.id);
+  }catch(e){
+    toast('Failed: '+e.message,'err');
+  }
 }
-async function openTemplateEditor(id) {
-  try {
-    var t = await api('/api/templates/' + id);
-    S.currentTemplate = t; S.tedDirty = false;
-    $('ted-title').textContent = t.name || 'Template Editor';
-    $('ted-dirty').textContent = '';
-    setVal('ted-name', t.name); setVal('ted-desc', t.description||'');
+async function openTplEditor(id){
+  try{
+    var t=await api('/api/templates/'+id);
+    S.currentTemplate=t;
+    S.tedDirty=false;
+    $('ted-title').textContent=
+      t.name||'Template Editor';
+    $('ted-dirty').textContent='';
+    sv('ted-name',t.name);
+    sv('ted-desc',t.description||'');
     renderTSections();
     showView('template-editor');
-  } catch(e) { toast('Failed: '+e.message,'error'); }
+  }catch(e){
+    toast('Failed: '+e.message,'err');
+  }
 }
-function markTDirty() {
-  S.tedDirty = true;
-  $('ted-dirty').textContent = ' unsaved';
+function markTDirty(){
+  S.tedDirty=true;
+  $('ted-dirty').textContent='unsaved';
 }
-function addSection() {
-  if (!S.currentTemplate) return;
-  var type = val('add-sec-type');
-  S.currentTemplate.sections = S.currentTemplate.sections || [];
-  S.currentTemplate.sections.push({title:'New '+type+' section', type:type, fields:[]});
-  markTDirty(); renderTSections();
+function addSection(){
+  if(!S.currentTemplate)return;
+  var tp=gv('add-sec-type');
+  S.currentTemplate.sections=
+    S.currentTemplate.sections||[];
+  S.currentTemplate.sections.push(
+    {title:'New section',type:tp,fields:[]});
+  markTDirty();renderTSections();
 }
-function renderTSections() {
-  var el = $('ted-sections'); if (!el) return;
-  var secs = (S.currentTemplate && S.currentTemplate.sections) || [];
-  if (!secs.length) { el.innerHTML='<div class="empty-state"><p>No sections yet.</p></div>'; return; }
-  el.innerHTML = secs.map(function(sec, si){
-    var fieldRows = (sec.fields||[]).map(function(f, fi){
-      return '<div class="form-row" style="margin-bottom:8px;align-items:end">' +
-        '<div class="field-group" style="margin:0"><label class="field-label">Label</label>' +
-          '<input class="field-input" data-sec="' + si + '" data-fi="' + fi + '" data-prop="label" value="' + esc(f.label||'') + '"></div>' +
-        '<div class="field-group" style="margin:0"><label class="field-label">Type</label>' +
-          '<select class="field-select" data-sec="' + si + '" data-fi="' + fi + '" data-prop="type">' +
-            ['text','textarea','date','number','select'].map(function(o){
-              return '<option value="' + o + '"' + (f.type===o?' selected':'') + '>' + o + '</option>';
-            }).join('') +
-          '</select></div>' +
-        '<button class="btn btn-danger btn-sm btn-icon" data-remove-field="' + fi + '" data-sec="' + si + '">&#10005;</button>' +
-      '</div>';
+function renderTSections(){
+  var el=$('ted-sections');if(!el)return;
+  var secs=(S.currentTemplate&&
+    S.currentTemplate.sections)||[];
+  if(!secs.length){
+    el.innerHTML=
+      '<div class="empty"><p>No sections.</p></div>';
+    return;
+  }
+  el.innerHTML=secs.map(function(sec,si){
+    var flds=(sec.fields||[]).map(function(f,fi){
+      var opts=
+        ['text','textarea','date','number','select']
+        .map(function(o){
+          return '<option value="'+o+'"'
+            +(f.type===o?' selected':'')+'>'
+            +o+'</option>';
+        }).join('');
+      return '<div class="form-row"'
+        +' style="margin-bottom:8px;'
+        +'align-items:end">'
+        +'<div class="field-group" style="margin:0">'
+        +'<label class="field-label">Label</label>'
+        +'<input class="field-input"'
+        +' data-si="'+si+'" data-fi="'+fi+'"'
+        +' data-prop="label"'
+        +' value="'+esc(f.label||'')+'"></div>'
+        +'<div class="field-group" style="margin:0">'
+        +'<label class="field-label">Type</label>'
+        +'<select class="field-select"'
+        +' data-si="'+si+'" data-fi="'+fi+'"'
+        +' data-prop="type">'+opts+'</select></div>'
+        +'<button class="btn btn-danger btn-sm'
+        +' btn-icon"'
+        +' data-rm-fi="'+fi+'" data-si="'+si+'">'
+        +'&#10005;</button></div>';
     }).join('');
-    return '<div class="card" style="margin-bottom:12px">' +
-      '<div class="section-hdr" style="margin-bottom:10px">' +
-        '<input class="field-input" style="width:auto;flex:1" data-sec-title="' + si + '" value="' + esc(sec.title) + '">' +
-        '<div style="display:flex;gap:6px;margin-left:8px">' +
-          '<span style="font-size:12px;color:var(--text2);align-self:center">' + esc(sec.type) + '</span>' +
-          '<button class="btn btn-danger btn-sm btn-icon" data-remove-sec="' + si + '">&#10005;</button>' +
-        '</div>' +
-      '</div>' +
-      (fieldRows || '<p style="color:var(--text2);font-size:12px">No fields.</p>') +
-      '<button class="btn btn-secondary btn-sm" style="margin-top:8px" data-add-field="' + si + '">+ Add Field</button>' +
-    '</div>';
+    return '<div class="card"'
+      +' style="margin-bottom:12px">'
+      +'<div style="display:flex;'
+      +'align-items:center;'
+      +'margin-bottom:10px;gap:8px">'
+      +'<input class="field-input" style="flex:1"'
+      +' data-sec-title="'+si+'"'
+      +' value="'+esc(sec.title)+'">'
+      +'<span style="font-size:12px;'
+      +'color:var(--text2)">'
+      +esc(sec.type)+'</span>'
+      +'<button class="btn btn-danger btn-sm btn-icon"'
+      +' data-rm-sec="'+si+'">'
+      +'&#10005;</button></div>'
+      +(flds||'<p style="color:var(--text2);'
+        +'font-size:12px">No fields.</p>')
+      +'<button class="btn btn-secondary btn-sm"'
+      +' style="margin-top:8px"'
+      +' data-add-fi="'+si+'">'
+      +'+ Add Field</button></div>';
   }).join('');
 }
-function removeSection(si) {
-  if (!S.currentTemplate) return;
-  S.currentTemplate.sections.splice(si, 1);
-  markTDirty(); renderTSections();
+function rmSection(si){
+  if(!S.currentTemplate)return;
+  S.currentTemplate.sections.splice(si,1);
+  markTDirty();renderTSections();
 }
-function addField(si) {
-  if (!S.currentTemplate) return;
-  S.currentTemplate.sections[si].fields = S.currentTemplate.sections[si].fields || [];
-  S.currentTemplate.sections[si].fields.push({label:'New Field',type:'text',value:''});
-  markTDirty(); renderTSections();
+function addField(si){
+  if(!S.currentTemplate)return;
+  S.currentTemplate.sections[si].fields=
+    S.currentTemplate.sections[si].fields||[];
+  S.currentTemplate.sections[si].fields.push(
+    {label:'New Field',type:'text',value:''});
+  markTDirty();renderTSections();
 }
-function removeField(si, fi) {
-  if (!S.currentTemplate) return;
-  S.currentTemplate.sections[si].fields.splice(fi, 1);
-  markTDirty(); renderTSections();
+function rmField(si,fi){
+  if(!S.currentTemplate)return;
+  S.currentTemplate.sections[si].fields
+    .splice(fi,1);
+  markTDirty();renderTSections();
 }
-async function saveTemplate() {
-  if (!S.currentTemplate) return;
-  var name = val('ted-name').trim();
-  if (!name) { toast('Name required','error'); return; }
-  S.currentTemplate.name = name;
-  S.currentTemplate.description = val('ted-desc');
-  try {
-    var u = await api('/api/templates/' + S.currentTemplate.id, {method:'PUT',body:JSON.stringify({
-      name: S.currentTemplate.name, description: S.currentTemplate.description,
-      sections: S.currentTemplate.sections
-    })});
-    S.currentTemplate = u; S.tedDirty = false;
-    $('ted-dirty').textContent = '';
-    var idx = S.templates.findIndex(function(t){ return t.id === u.id; });
-    if (idx >= 0) S.templates[idx] = u;
+async function saveTemplate(){
+  if(!S.currentTemplate)return;
+  var name=gv('ted-name').trim();
+  if(!name){toast('Name required','err');return;}
+  S.currentTemplate.name=name;
+  S.currentTemplate.description=gv('ted-desc');
+  try{
+    var u=await api(
+      '/api/templates/'+S.currentTemplate.id,{
+      method:'PUT',
+      body:JSON.stringify({
+        name:S.currentTemplate.name,
+        description:S.currentTemplate.description,
+        sections:S.currentTemplate.sections
+      })
+    });
+    S.currentTemplate=u;
+    S.tedDirty=false;
+    $('ted-dirty').textContent='';
+    var idx=S.templates.findIndex(function(t){
+      return t.id===u.id;
+    });
+    if(idx>=0)S.templates[idx]=u;
     toast('Template saved');
-  } catch(e) { toast('Save failed: '+e.message,'error'); }
+  }catch(e){
+    toast('Save failed: '+e.message,'err');
+  }
 }
 
-//  Delete 
-function confirmDelete(type, id, name) {
-  $('confirm-msg').textContent = 'Delete "' + name + '"? This cannot be undone.';
-  $('confirm-ok').onclick = function(){ doDelete(type, id); closeModal('modal-confirm'); };
-  openModal('modal-confirm');
+function confirmDel(type,id,name){
+  $('confirm-msg').textContent=
+    'Delete "'+name+'"? Cannot be undone.';
+  $('confirm-ok').onclick=function(){
+    doDel(type,id);
+    closeM('modal-confirm');
+  };
+  openM('modal-confirm');
 }
-async function doDelete(type, id) {
-  try {
-    await api('/api/' + type + 's/' + id, {method:'DELETE'});
-    if (type === 'report') {
-      S.reports  = S.reports.filter(function(r){ return r.id !== id; });
-      S.findings = S.findings.filter(function(f){ return f.report_id !== id; });
-      renderReportsList(); renderDash();
-    } else if (type === 'template') {
-      S.templates = S.templates.filter(function(t){ return t.id !== id; });
-      renderTemplatesList();
-    } else if (type === 'finding') {
-      S.findings = S.findings.filter(function(f){ return f.id !== id; });
-      renderEdFindings(); renderFindingsView();
+async function doDel(type,id){
+  try{
+    await api('/api/'+type+'s/'+id,
+      {method:'DELETE'});
+    if(type==='report'){
+      S.reports=S.reports.filter(function(r){
+        return r.id!==id;
+      });
+      S.findings=S.findings.filter(function(f){
+        return f.report_id!==id;
+      });
+      renderReports();renderDash();
+    }else if(type==='template'){
+      S.templates=S.templates.filter(function(t){
+        return t.id!==id;
+      });
+      renderTemplates();
+    }else if(type==='finding'){
+      S.findings=S.findings.filter(function(f){
+        return f.id!==id;
+      });
+      renderEdFindings();renderFindings();
     }
-    toast(type.charAt(0).toUpperCase()+type.slice(1)+' deleted');
-  } catch(e) { toast('Delete failed: '+e.message,'error'); }
+    toast(type.charAt(0).toUpperCase()
+      +type.slice(1)+' deleted');
+  }catch(e){
+    toast('Delete failed: '+e.message,'err');
+  }
 }
 
-//  Event Delegation 
-document.addEventListener('click', function(e) {
-  var t = e.target;
-
-  // nav tabs
-  var nav = t.closest('[data-nav]');
-  if (nav) { showView(nav.getAttribute('data-nav')); return; }
-
-  // close modal
-  var cm = t.closest('[data-close-modal]');
-  if (cm) { closeModal(cm.getAttribute('data-close-modal')); return; }
-
-  // editor tabs
-  var et = t.closest('[data-tab]');
-  if (et) { switchEdTab(et.getAttribute('data-tab')); return; }
-
-  // open report
-  var or = t.closest('[data-open-report]');
-  if (or) { e.stopPropagation(); openReportEditor(parseInt(or.getAttribute('data-open-report'))); return; }
-
-  // open template
-  var ot = t.closest('[data-open-template]');
-  if (ot) { openTemplateEditor(parseInt(ot.getAttribute('data-open-template'))); return; }
-
-  // edit finding
-  var ef = t.closest('[data-edit-finding]');
-  if (ef) { editFinding(parseInt(ef.getAttribute('data-edit-finding'))); return; }
-
-  // delete
-  var del = t.closest('[data-del-type]');
-  if (del) {
+document.addEventListener('click',function(e){
+  var t=e.target;
+  var nav=t.closest('[data-nav]');
+  if(nav){
+    showView(nav.getAttribute('data-nav'));
+    return;
+  }
+  var cm=t.closest('[data-close]');
+  if(cm){closeM(cm.getAttribute('data-close'));return;}
+  var et=t.closest('[data-tab]');
+  if(et){switchTab(et.getAttribute('data-tab'));return;}
+  var or=t.closest('[data-open-rpt]');
+  if(or){
     e.stopPropagation();
-    confirmDelete(del.getAttribute('data-del-type'), parseInt(del.getAttribute('data-del-id')), del.getAttribute('data-del-name'));
+    openEditor(
+      parseInt(or.getAttribute('data-open-rpt')));
     return;
   }
-
-  // toggle section
-  var ts = t.closest('[data-toggle-sec]');
-  if (ts) {
-    var idx = parseInt(ts.getAttribute('data-toggle-sec'));
-    var sb = $('rpt-sec-' + idx);
-    if (sb) sb.style.display = sb.style.display === 'none' ? '' : 'none';
+  var ot=t.closest('[data-open-tpl]');
+  if(ot){
+    openTplEditor(
+      parseInt(ot.getAttribute('data-open-tpl')));
     return;
   }
-
-  // template section actions
-  var rs = t.closest('[data-remove-sec]');
-  if (rs) { removeSection(parseInt(rs.getAttribute('data-remove-sec'))); return; }
-
-  var af = t.closest('[data-add-field]');
-  if (af) { addField(parseInt(af.getAttribute('data-add-field'))); return; }
-
-  var rf2 = t.closest('[data-remove-field]');
-  if (rf2) { removeField(parseInt(rf2.getAttribute('data-sec')), parseInt(rf2.getAttribute('data-remove-field'))); return; }
-
-  // static button IDs
-  var id = t.id || (t.closest('button') && t.closest('button').id);
-  if (id === 'btn-new-report')         { openNewReportModal(); return; }
-  if (id === 'btn-create-report')      { createReport(); return; }
-  if (id === 'btn-save-editor')        { saveEditorNow(); return; }
-  if (id === 'btn-add-finding-editor') { openFindingModal(S.currentReport ? S.currentReport.id : null); return; }
-  if (id === 'btn-add-finding-global') { openFindingModal(null); return; }
-  if (id === 'btn-save-finding')       { saveFinding(); return; }
-  if (id === 'btn-new-template')       { openNewTemplateModal(); return; }
-  if (id === 'btn-create-template')    { createTemplate(); return; }
-  if (id === 'btn-save-template')      { saveTemplate(); return; }
-  if (id === 'btn-add-section')        { addSection(); return; }
+  var ef=t.closest('[data-edit-f]');
+  if(ef){
+    editFinding(
+      parseInt(ef.getAttribute('data-edit-f')));
+    return;
+  }
+  var dl=t.closest('[data-del-t]');
+  if(dl){
+    e.stopPropagation();
+    confirmDel(
+      dl.getAttribute('data-del-t'),
+      parseInt(dl.getAttribute('data-del-id')),
+      dl.getAttribute('data-del-n'));
+    return;
+  }
+  var ts=t.closest('[data-tog-sec]');
+  if(ts){
+    var idx=parseInt(
+      ts.getAttribute('data-tog-sec'));
+    var sb=$('rsec-'+idx);
+    if(sb)sb.style.display=
+      sb.style.display==='none'?'':'none';
+    return;
+  }
+  var rs=t.closest('[data-rm-sec]');
+  if(rs){
+    rmSection(
+      parseInt(rs.getAttribute('data-rm-sec')));
+    return;
+  }
+  var af=t.closest('[data-add-fi]');
+  if(af){
+    addField(parseInt(af.getAttribute('data-add-fi')));
+    return;
+  }
+  var rf=t.closest('[data-rm-fi]');
+  if(rf){
+    rmField(
+      parseInt(rf.getAttribute('data-si')),
+      parseInt(rf.getAttribute('data-rm-fi')));
+    return;
+  }
+  var b=t.closest('button');
+  var bid=b?b.id:'';
+  if(bid==='btn-new-report'){
+    openNewReport();return;
+  }
+  if(bid==='btn-create-report'){
+    createReport();return;
+  }
+  if(bid==='btn-save-editor'){saveEditor();return;}
+  if(bid==='btn-add-finding-ed'){
+    openFinding(
+      S.currentReport?S.currentReport.id:null);
+    return;
+  }
+  if(bid==='btn-add-finding-global'){
+    openFinding(null);return;
+  }
+  if(bid==='btn-save-finding'){
+    saveFinding();return;
+  }
+  if(bid==='btn-new-template'){
+    openNewTemplate();return;
+  }
+  if(bid==='btn-create-template'){
+    createTemplate();return;
+  }
+  if(bid==='btn-save-template'){
+    saveTemplate();return;
+  }
+  if(bid==='btn-add-section'){addSection();return;}
 });
 
-// Change listeners
-document.addEventListener('change', function(e) {
-  var t = e.target;
-  if (t.id === 'editor-status') { updateReportStatus(); return; }
-  if (t.id === 'findings-rpt-sel' || t.id === 'findings-sev-sel') { renderFindingsView(); return; }
-  // template field property changes
-  var sec = t.getAttribute('data-sec');
-  var fi  = t.getAttribute('data-fi');
-  var prop = t.getAttribute('data-prop');
-  if (sec !== null && fi !== null && prop) {
-    S.currentTemplate.sections[parseInt(sec)].fields[parseInt(fi)][prop] = t.value;
-    markTDirty(); renderTSections();
+document.addEventListener('change',function(e){
+  var t=e.target;
+  if(t.id==='editor-status'){updateStatus();return;}
+  if(t.id==='findings-rpt-sel'
+    ||t.id==='findings-sev-sel'){
+    renderFindings();return;
+  }
+  var si=t.getAttribute('data-si');
+  var fi=t.getAttribute('data-fi');
+  var prop=t.getAttribute('data-prop');
+  if(si!==null&&fi!==null&&prop){
+    S.currentTemplate
+      .sections[parseInt(si)]
+      .fields[parseInt(fi)][prop]=t.value;
+    markTDirty();renderTSections();
   }
 });
 
-document.addEventListener('input', function(e) {
-  var t = e.target;
-  var edFields = ['ed-title','ed-org','ed-assessor','ed-start','ed-end','ed-summary'];
-  if (edFields.indexOf(t.id) >= 0) { markDirty(); return; }
-  if (t.id === 'rpt-search') { renderReportsList(); return; }
-  // template section title
-  var st = t.getAttribute('data-sec-title');
-  if (st !== null) {
-    S.currentTemplate.sections[parseInt(st)].title = t.value;
+document.addEventListener('input',function(e){
+  var t=e.target;
+  var edF=['ed-title','ed-org','ed-assessor',
+    'ed-start','ed-end','ed-summary'];
+  if(edF.indexOf(t.id)>=0){markDirty();return;}
+  if(t.id==='rpt-search'){renderReports();return;}
+  var st=t.getAttribute('data-sec-title');
+  if(st!==null){
+    S.currentTemplate
+      .sections[parseInt(st)].title=t.value;
+    markTDirty();return;
+  }
+  var si=t.getAttribute('data-si');
+  var fi=t.getAttribute('data-fi');
+  var prop=t.getAttribute('data-prop');
+  if(si!==null&&fi!==null&&prop){
+    S.currentTemplate
+      .sections[parseInt(si)]
+      .fields[parseInt(fi)][prop]=t.value;
     markTDirty();
-    return;
-  }
-  // template field label inline
-  var sec = t.getAttribute('data-sec');
-  var fi  = t.getAttribute('data-fi');
-  var prop = t.getAttribute('data-prop');
-  if (sec !== null && fi !== null && prop) {
-    S.currentTemplate.sections[parseInt(sec)].fields[parseInt(fi)][prop] = t.value;
-    markTDirty();
   }
 });
 
-//  Boot 
 loadAll();
-
 })();
 </script>
 </body>
