@@ -69,7 +69,6 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .stat-num{font-size:28px;font-weight:700;color:var(--accent)}.stat-label{font-size:12px;color:var(--text2);margin-top:4px}
 .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
 .empty-state{text-align:center;padding:48px 20px;color:var(--text2)}
-.empty-state svg{margin-bottom:12px;opacity:.4}
 .toast-root{position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;gap:8px;z-index:999}
 .toast{padding:10px 16px;border-radius:8px;font-size:13px;font-weight:500;animation:slideIn .2s ease;min-width:220px}
 .toast-success{background:#1a3a1a;color:#6fcf97;border:1px solid #2a5a2a}
@@ -83,10 +82,10 @@ tr:hover td{background:rgba(255,255,255,.02)}
   <div class="topbar">
     <div class="logo">Report<span>Forge</span></div>
     <nav class="nav-tabs">
-      <button class="nav-tab active" onclick="showView('dash')">Dashboard</button>
-      <button class="nav-tab" onclick="showView('reports')">Reports</button>
-      <button class="nav-tab" onclick="showView('findings')">Findings</button>
-      <button class="nav-tab" onclick="showView('templates')">Templates</button>
+      <button class="nav-tab active" data-nav="dash">Dashboard</button>
+      <button class="nav-tab" data-nav="reports">Reports</button>
+      <button class="nav-tab" data-nav="findings">Findings</button>
+      <button class="nav-tab" data-nav="templates">Templates</button>
     </nav>
     <div class="topbar-right" id="topbar-right"></div>
   </div>
@@ -111,9 +110,9 @@ tr:hover td{background:rgba(255,255,255,.02)}
     <div class="view" id="view-reports">
       <div class="page-hdr">
         <span class="page-title">Reports</span>
-        <button class="btn btn-primary" onclick="openNewReportModal()">+ New Report</button>
+        <button class="btn btn-primary" id="btn-new-report">+ New Report</button>
       </div>
-      <input class="field-input" id="rpt-search" placeholder="Search reports..." style="margin-bottom:14px" oninput="renderReportsList()">
+      <input class="field-input" id="rpt-search" placeholder="Search reports..." style="margin-bottom:14px">
       <div id="reports-list"></div>
     </div>
 
@@ -121,46 +120,44 @@ tr:hover td{background:rgba(255,255,255,.02)}
     <div class="view" id="view-editor">
       <div class="page-hdr" style="margin-bottom:10px">
         <div style="display:flex;align-items:center;gap:10px">
-          <button class="btn btn-ghost btn-sm" onclick="showView('reports')">&#8592; Reports</button>
+          <button class="btn btn-ghost btn-sm" data-nav="reports">&#8592; Reports</button>
           <span class="page-title" id="editor-title">Report Editor</span>
           <span id="editor-dirty" style="color:var(--text2);font-size:12px"></span>
         </div>
         <div style="display:flex;gap:8px">
-          <select class="field-select" id="editor-status" style="width:auto" onchange="updateReportStatus()">
+          <select class="field-select" id="editor-status" style="width:auto">
             <option value="draft">Draft</option>
             <option value="review">In Review</option>
             <option value="final">Final</option>
           </select>
-          <button class="btn btn-primary btn-sm" onclick="saveEditorNow()">Save</button>
+          <button class="btn btn-primary btn-sm" id="btn-save-editor">Save</button>
         </div>
       </div>
       <div class="editor-layout">
         <div class="editor-main">
           <div class="editor-tabs">
-            <button class="editor-tab active" onclick="switchEdTab('info')">Info</button>
-            <button class="editor-tab" onclick="switchEdTab('sections')">Sections</button>
-            <button class="editor-tab" onclick="switchEdTab('findings')">Findings</button>
-            <button class="editor-tab" onclick="switchEdTab('preview')">Preview</button>
+            <button class="editor-tab active" data-tab="info">Info</button>
+            <button class="editor-tab" data-tab="sections">Sections</button>
+            <button class="editor-tab" data-tab="findings">Findings</button>
+            <button class="editor-tab" data-tab="preview">Preview</button>
           </div>
           <div class="editor-panel active" id="ed-info">
-            <div class="field-group"><label class="field-label">Title</label><input class="field-input" id="ed-title" oninput="markDirty()"></div>
+            <div class="field-group"><label class="field-label">Title</label><input class="field-input" id="ed-title"></div>
             <div class="form-row">
-              <div class="field-group"><label class="field-label">Client / Org</label><input class="field-input" id="ed-org" oninput="markDirty()"></div>
-              <div class="field-group"><label class="field-label">Assessor</label><input class="field-input" id="ed-assessor" oninput="markDirty()"></div>
+              <div class="field-group"><label class="field-label">Client / Org</label><input class="field-input" id="ed-org"></div>
+              <div class="field-group"><label class="field-label">Assessor</label><input class="field-input" id="ed-assessor"></div>
             </div>
             <div class="form-row">
-              <div class="field-group"><label class="field-label">Start Date</label><input class="field-input" type="date" id="ed-start" oninput="markDirty()"></div>
-              <div class="field-group"><label class="field-label">End Date</label><input class="field-input" type="date" id="ed-end" oninput="markDirty()"></div>
+              <div class="field-group"><label class="field-label">Start Date</label><input class="field-input" type="date" id="ed-start"></div>
+              <div class="field-group"><label class="field-label">End Date</label><input class="field-input" type="date" id="ed-end"></div>
             </div>
-            <div class="field-group"><label class="field-label">Executive Summary</label><textarea class="field-textarea" id="ed-summary" rows="5" oninput="markDirty()"></textarea></div>
+            <div class="field-group"><label class="field-label">Executive Summary</label><textarea class="field-textarea" id="ed-summary" rows="5"></textarea></div>
           </div>
-          <div class="editor-panel" id="ed-sections">
-            <div id="ed-sections-body"></div>
-          </div>
+          <div class="editor-panel" id="ed-sections"><div id="ed-sections-body"></div></div>
           <div class="editor-panel" id="ed-findings">
             <div class="page-hdr" style="margin-bottom:10px">
               <span style="font-weight:600">Findings</span>
-              <button class="btn btn-primary btn-sm" onclick="openFindingModal()">+ Add Finding</button>
+              <button class="btn btn-primary btn-sm" id="btn-add-finding-editor">+ Add Finding</button>
             </div>
             <div id="ed-findings-list"></div>
           </div>
@@ -168,10 +165,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
             <div class="preview-box" id="preview-content"></div>
           </div>
         </div>
-        <div class="sidebar">
-          <div style="font-weight:600;font-size:13px;margin-bottom:14px">Report Details</div>
-          <div id="editor-sidebar"></div>
-        </div>
+        <div class="sidebar" id="editor-sidebar"></div>
       </div>
     </div>
 
@@ -179,13 +173,13 @@ tr:hover td{background:rgba(255,255,255,.02)}
     <div class="view" id="view-findings">
       <div class="page-hdr">
         <span class="page-title">Findings</span>
-        <button class="btn btn-primary" onclick="openFindingModal(null)">+ Add Finding</button>
+        <button class="btn btn-primary" id="btn-add-finding-global">+ Add Finding</button>
       </div>
       <div style="display:flex;gap:10px;margin-bottom:14px">
-        <select class="field-select" id="findings-rpt-sel" onchange="onFindingsReportChange()" style="flex:1">
+        <select class="field-select" id="findings-rpt-sel" style="flex:1">
           <option value="">All Reports</option>
         </select>
-        <select class="field-select" id="findings-sev-sel" onchange="renderFindingsView()" style="width:140px">
+        <select class="field-select" id="findings-sev-sel" style="width:140px">
           <option value="">All Severities</option>
           <option>Critical</option><option>High</option><option>Medium</option><option>Low</option><option>Info</option>
         </select>
@@ -197,7 +191,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
     <div class="view" id="view-templates">
       <div class="page-hdr">
         <span class="page-title">Templates</span>
-        <button class="btn btn-primary" onclick="openNewTemplateModal()">+ New Template</button>
+        <button class="btn btn-primary" id="btn-new-template">+ New Template</button>
       </div>
       <div id="templates-list"></div>
     </div>
@@ -206,15 +200,15 @@ tr:hover td{background:rgba(255,255,255,.02)}
     <div class="view" id="view-template-editor">
       <div class="page-hdr" style="margin-bottom:10px">
         <div style="display:flex;align-items:center;gap:10px">
-          <button class="btn btn-ghost btn-sm" onclick="showView('templates')">&#8592; Templates</button>
+          <button class="btn btn-ghost btn-sm" data-nav="templates">&#8592; Templates</button>
           <span class="page-title" id="ted-title">Template Editor</span>
           <span id="ted-dirty" style="color:var(--text2);font-size:12px"></span>
         </div>
-        <button class="btn btn-primary btn-sm" onclick="saveTemplate()">Save Template</button>
+        <button class="btn btn-primary btn-sm" id="btn-save-template">Save Template</button>
       </div>
       <div class="card" style="margin-bottom:14px">
-        <div class="field-group"><label class="field-label">Template Name</label><input class="field-input" id="ted-name" oninput="markTDirty()"></div>
-        <div class="field-group"><label class="field-label">Description</label><input class="field-input" id="ted-desc" oninput="markTDirty()"></div>
+        <div class="field-group"><label class="field-label">Template Name</label><input class="field-input" id="ted-name"></div>
+        <div class="field-group"><label class="field-label">Description</label><input class="field-input" id="ted-desc"></div>
       </div>
       <div class="page-hdr" style="margin-bottom:10px">
         <span style="font-weight:600">Sections</span>
@@ -225,7 +219,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
             <option value="findings">Findings</option>
             <option value="checklist">Checklist</option>
           </select>
-          <button class="btn btn-primary btn-sm" onclick="addSection()">+ Add Section</button>
+          <button class="btn btn-primary btn-sm" id="btn-add-section">+ Add Section</button>
         </div>
       </div>
       <div id="ted-sections"></div>
@@ -237,7 +231,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
 <!-- NEW REPORT MODAL -->
 <div class="modal-overlay" id="modal-new-report">
   <div class="modal">
-    <div class="modal-hdr"><span>New Report</span><button class="btn btn-ghost btn-sm" onclick="closeModal('modal-new-report')">&#10005;</button></div>
+    <div class="modal-hdr"><span>New Report</span><button class="btn btn-ghost btn-sm" data-close-modal="modal-new-report">&#10005;</button></div>
     <div class="modal-body">
       <div class="field-group"><label class="field-label">Title</label><input class="field-input" id="nr-title" placeholder="Report title"></div>
       <div class="field-group"><label class="field-label">Template</label>
@@ -245,8 +239,8 @@ tr:hover td{background:rgba(255,255,255,.02)}
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('modal-new-report')">Cancel</button>
-      <button class="btn btn-primary" onclick="createReport()">Create</button>
+      <button class="btn btn-ghost" data-close-modal="modal-new-report">Cancel</button>
+      <button class="btn btn-primary" id="btn-create-report">Create</button>
     </div>
   </div>
 </div>
@@ -254,14 +248,14 @@ tr:hover td{background:rgba(255,255,255,.02)}
 <!-- NEW TEMPLATE MODAL -->
 <div class="modal-overlay" id="modal-new-template">
   <div class="modal">
-    <div class="modal-hdr"><span>New Template</span><button class="btn btn-ghost btn-sm" onclick="closeModal('modal-new-template')">&#10005;</button></div>
+    <div class="modal-hdr"><span>New Template</span><button class="btn btn-ghost btn-sm" data-close-modal="modal-new-template">&#10005;</button></div>
     <div class="modal-body">
       <div class="field-group"><label class="field-label">Template Name</label><input class="field-input" id="nt-name" placeholder="e.g. Web App Pentest"></div>
       <div class="field-group"><label class="field-label">Description</label><input class="field-input" id="nt-desc" placeholder="Optional description"></div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('modal-new-template')">Cancel</button>
-      <button class="btn btn-primary" onclick="createTemplate()">Create</button>
+      <button class="btn btn-ghost" data-close-modal="modal-new-template">Cancel</button>
+      <button class="btn btn-primary" id="btn-create-template">Create</button>
     </div>
   </div>
 </div>
@@ -269,7 +263,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
 <!-- FINDING MODAL -->
 <div class="modal-overlay" id="modal-finding">
   <div class="modal">
-    <div class="modal-hdr"><span id="fm-title">Add Finding</span><button class="btn btn-ghost btn-sm" onclick="closeModal('modal-finding')">&#10005;</button></div>
+    <div class="modal-hdr"><span id="fm-title">Add Finding</span><button class="btn btn-ghost btn-sm" data-close-modal="modal-finding">&#10005;</button></div>
     <div class="modal-body">
       <div class="field-group"><label class="field-label">Report</label>
         <select class="field-select" id="fm-report"></select>
@@ -292,8 +286,8 @@ tr:hover td{background:rgba(255,255,255,.02)}
       <div class="field-group"><label class="field-label">CVSS Score</label><input class="field-input" id="fm-cvss" type="number" min="0" max="10" step="0.1" placeholder="0.0"></div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('modal-finding')">Cancel</button>
-      <button class="btn btn-primary" onclick="saveFinding()">Save Finding</button>
+      <button class="btn btn-ghost" data-close-modal="modal-finding">Cancel</button>
+      <button class="btn btn-primary" id="btn-save-finding">Save Finding</button>
     </div>
   </div>
 </div>
@@ -301,10 +295,10 @@ tr:hover td{background:rgba(255,255,255,.02)}
 <!-- CONFIRM DELETE MODAL -->
 <div class="modal-overlay" id="modal-confirm">
   <div class="modal" style="width:380px">
-    <div class="modal-hdr"><span>Confirm Delete</span><button class="btn btn-ghost btn-sm" onclick="closeModal('modal-confirm')">&#10005;</button></div>
+    <div class="modal-hdr"><span>Confirm Delete</span><button class="btn btn-ghost btn-sm" data-close-modal="modal-confirm">&#10005;</button></div>
     <div class="modal-body"><p id="confirm-msg" style="color:var(--text2)"></p></div>
     <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="closeModal('modal-confirm')">Cancel</button>
+      <button class="btn btn-ghost" data-close-modal="modal-confirm">Cancel</button>
       <button class="btn btn-danger" id="confirm-ok">Delete</button>
     </div>
   </div>
@@ -313,618 +307,574 @@ tr:hover td{background:rgba(255,255,255,.02)}
 <div class="toast-root" id="toast-root"></div>
 
 <script>
+(function() {
+"use strict";
+
 // ── State ──────────────────────────────────────────────────────────
-const S = {
-  reports: [],
-  templates: [],
-  findings: [],
-  currentReport: null,
-  currentTemplate: null,
-  edDirty: false,
-  tedDirty: false,
-  saveTimer: null,
-  editingFindingId: null,
+var S = {
+  reports: [], templates: [], findings: [],
+  currentReport: null, currentTemplate: null,
+  edDirty: false, tedDirty: false,
+  saveTimer: null, editingFindingId: null
 };
 
-// ── Utilities ──────────────────────────────────────────────────────
+// ── Helpers ────────────────────────────────────────────────────────
 function esc(s) {
-  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  return String(s == null ? '' : s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 function fmtDate(s) {
   if (!s) return '';
   try { return new Date(s).toLocaleDateString(); } catch(e) { return s; }
 }
 function badge(status) {
-  const map = { draft:'badge-draft', review:'badge-review', final:'badge-final', open:'badge-open', info:'badge-info', remediated:'badge-info', accepted:'badge-info' };
-  return '<span class="badge ' + (map[status] || 'badge-draft') + '">' + esc(status) + '</span>';
+  var map = {draft:'badge-draft',review:'badge-review',final:'badge-final',
+             open:'badge-open',info:'badge-info',remediated:'badge-info',accepted:'badge-info'};
+  return '<span class="badge ' + (map[String(status).toLowerCase()] || 'badge-info') + '">' + esc(status) + '</span>';
 }
 function toast(msg, type) {
-  type = type || 'success';
-  const el = document.createElement('div');
-  el.className = 'toast toast-' + type;
+  var el = document.createElement('div');
+  el.className = 'toast toast-' + (type || 'success');
   el.textContent = msg;
   document.getElementById('toast-root').appendChild(el);
-  setTimeout(function() { el.remove(); }, 3000);
+  setTimeout(function(){ el.remove(); }, 3000);
 }
+function $(id) { return document.getElementById(id); }
+function val(id) { return $(id) ? $(id).value : ''; }
+function setVal(id, v) { if ($(id)) $(id).value = v == null ? '' : v; }
+
 async function api(path, opts) {
-  opts = opts || {};
-  const res = await fetch(path, {
-    headers: { 'Content-Type': 'application/json' },
-    ...opts
-  });
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(text || res.statusText);
-  }
+  var res = await fetch(path, Object.assign({headers:{'Content-Type':'application/json'}}, opts || {}));
+  if (!res.ok) { var t = await res.text(); throw new Error(t || res.statusText); }
   if (res.status === 204) return null;
   return res.json();
 }
-function openModal(id) {
-  document.getElementById(id).classList.add('open');
-}
-function closeModal(id) {
-  document.getElementById(id).classList.remove('open');
-}
+
+function openModal(id) { $(id).classList.add('open'); }
+function closeModal(id) { $(id).classList.remove('open'); }
+
 function showView(name) {
-  document.querySelectorAll('.view').forEach(function(v) { v.classList.remove('active'); });
-  document.querySelectorAll('.nav-tab').forEach(function(t) { t.classList.remove('active'); });
-  var el = document.getElementById('view-' + name);
-  if (el) el.classList.add('active');
-  document.querySelectorAll('.nav-tab').forEach(function(t) {
-    if (t.getAttribute('onclick') && t.getAttribute('onclick').includes("'" + name + "'")) {
-      t.classList.add('active');
-    }
-  });
+  document.querySelectorAll('.view').forEach(function(v){ v.classList.remove('active'); });
+  document.querySelectorAll('.nav-tab').forEach(function(t){ t.classList.remove('active'); });
+  var v = $('view-' + name);
+  if (v) v.classList.add('active');
+  document.querySelectorAll('.nav-tab[data-nav="' + name + '"]').forEach(function(t){ t.classList.add('active'); });
   if (name === 'reports') renderReportsList();
-  if (name === 'findings') renderFindingsView();
+  if (name === 'findings') { populateFindingsSelect(); renderFindingsView(); }
   if (name === 'templates') renderTemplatesList();
   if (name === 'dash') renderDash();
 }
 
-// ── Load ───────────────────────────────────────────────────────────
+// ── Load ──────────────────────────────────────────────────────────
 async function loadAll() {
   try {
-    var results = await Promise.all([
-      api('/api/reports'),
-      api('/api/templates'),
-      api('/api/findings'),
-    ]);
-    S.reports = results[0] || [];
-    S.templates = results[1] || [];
-    S.findings = results[2] || [];
+    var res = await Promise.all([api('/api/reports'), api('/api/templates'), api('/api/findings')]);
+    S.reports   = res[0] || [];
+    S.templates = res[1] || [];
+    S.findings  = res[2] || [];
     renderDash();
-    renderReportsList();
-    renderTemplatesList();
-    renderFindingsView();
     populateNRTemplates();
     populateFindingsSelect();
-  } catch(e) {
-    toast('Failed to load data: ' + e.message, 'error');
-  }
+  } catch(e) { toast('Load error: ' + e.message, 'error'); }
 }
 
-// ── Dashboard ──────────────────────────────────────────────────────
+// ── Dashboard ─────────────────────────────────────────────────────
 function renderDash() {
-  var rpts = S.reports;
-  document.getElementById('stat-total').textContent = rpts.length;
-  document.getElementById('stat-draft').textContent = rpts.filter(function(r){ return r.status === 'draft'; }).length;
-  document.getElementById('stat-review').textContent = rpts.filter(function(r){ return r.status === 'review'; }).length;
-  document.getElementById('stat-final').textContent = rpts.filter(function(r){ return r.status === 'final'; }).length;
-  var recent = rpts.slice().sort(function(a,b){ return (b.updated_at||'').localeCompare(a.updated_at||''); }).slice(0,5);
-  var el = document.getElementById('dash-recent');
-  if (!recent.length) {
-    el.innerHTML = '<div class="empty-state"><p>No reports yet</p></div>';
-    return;
-  }
-  el.innerHTML = '<table><thead><tr><th>Title</th><th>Status</th><th>Updated</th></tr></thead><tbody>' +
-    recent.map(function(r) {
-      return '<tr style="cursor:pointer" onclick="openReportEditor(' + r.id + ')"><td>' + esc(r.title) + '</td><td>' + badge(r.status) + '</td><td>' + fmtDate(r.updated_at) + '</td></tr>';
-    }).join('') + '</tbody></table>';
+  var r = S.reports;
+  $('stat-total').textContent  = r.length;
+  $('stat-draft').textContent  = r.filter(function(x){ return x.status==='draft'; }).length;
+  $('stat-review').textContent = r.filter(function(x){ return x.status==='review'; }).length;
+  $('stat-final').textContent  = r.filter(function(x){ return x.status==='final'; }).length;
+  var recent = r.slice().sort(function(a,b){ return (b.updated_at||'').localeCompare(a.updated_at||''); }).slice(0,5);
+  var el = $('dash-recent');
+  if (!recent.length) { el.innerHTML='<div class="empty-state"><p>No reports yet.</p></div>'; return; }
+  var rows = recent.map(function(r){
+    return '<tr data-open-report="' + r.id + '" style="cursor:pointer">' +
+      '<td>' + esc(r.title) + '</td><td>' + badge(r.status) + '</td><td>' + fmtDate(r.updated_at) + '</td></tr>';
+  }).join('');
+  el.innerHTML = '<table><thead><tr><th>Title</th><th>Status</th><th>Updated</th></tr></thead><tbody>' + rows + '</tbody></table>';
 }
 
-// ── Reports List ───────────────────────────────────────────────────
+// ── Reports ───────────────────────────────────────────────────────
 function renderReportsList() {
-  var q = (document.getElementById('rpt-search') ? document.getElementById('rpt-search').value : '').toLowerCase();
-  var filtered = S.reports.filter(function(r){ return !q || (r.title||'').toLowerCase().includes(q); });
-  var el = document.getElementById('reports-list');
-  if (!filtered.length) {
-    el.innerHTML = '<div class="empty-state"><p>' + (q ? 'No matching reports' : 'No reports yet. Create one!') + '</p></div>';
+  var q = val('rpt-search').toLowerCase();
+  var list = S.reports.filter(function(r){ return !q || (r.title||'').toLowerCase().includes(q); });
+  var el = $('reports-list');
+  if (!list.length) {
+    el.innerHTML = '<div class="empty-state"><p>' + (q ? 'No matching reports.' : 'No reports yet. Create one!') + '</p></div>';
     return;
   }
-  el.innerHTML = '<div class="card-grid">' +
-    filtered.map(function(r) {
-      return '<div class="card-item">' +
-        '<div class="item-title">' + esc(r.title) + '</div>' +
-        '<div class="item-meta">' + badge(r.status) + ' &bull; ' + fmtDate(r.updated_at) + '</div>' +
-        '<div class="item-actions">' +
-          '<button class="btn btn-primary btn-sm" onclick="event.stopPropagation();openReportEditor(' + r.id + ')">Open</button>' +
-          '<button class="btn btn-danger btn-sm" onclick="event.stopPropagation();confirmDelete('report',' + r.id + ','' + esc(r.title) + '')">Delete</button>' +
-        '</div>' +
-      '</div>';
-    }).join('') + '</div>';
+  el.innerHTML = '<div class="card-grid">' + list.map(function(r){
+    return '<div class="card-item">' +
+      '<div class="item-title">' + esc(r.title) + '</div>' +
+      '<div class="item-meta">' + badge(r.status) + ' &bull; ' + fmtDate(r.updated_at) + '</div>' +
+      '<div class="item-actions">' +
+        '<button class="btn btn-primary btn-sm" data-open-report="' + r.id + '">Open</button>' +
+        '<button class="btn btn-danger btn-sm" data-del-type="report" data-del-id="' + r.id + '" data-del-name="' + esc(r.title) + '">Delete</button>' +
+      '</div></div>';
+  }).join('') + '</div>';
 }
+
 function openNewReportModal() {
   populateNRTemplates();
-  var el = document.getElementById('nr-title');
-  if (el) el.value = '';
+  setVal('nr-title','');
   openModal('modal-new-report');
 }
 function populateNRTemplates() {
-  var sel = document.getElementById('nr-template');
-  if (!sel) return;
+  var sel = $('nr-template'); if (!sel) return;
   sel.innerHTML = '<option value="">None (blank)</option>' +
     S.templates.map(function(t){ return '<option value="' + t.id + '">' + esc(t.name) + '</option>'; }).join('');
 }
 async function createReport() {
-  var title = document.getElementById('nr-title').value.trim();
-  if (!title) { toast('Title is required', 'error'); return; }
-  var tid = document.getElementById('nr-template').value;
+  var title = val('nr-title').trim();
+  if (!title) { toast('Title required','error'); return; }
+  var tid = val('nr-template');
   try {
-    var r = await api('/api/reports', {
-      method: 'POST',
-      body: JSON.stringify({ title: title, template_id: tid ? parseInt(tid) : null, status: 'draft', sections: [], meta: {} })
-    });
+    var r = await api('/api/reports',{method:'POST',body:JSON.stringify({
+      title:title, template_id: tid ? parseInt(tid) : null, status:'draft', sections:[], meta:{}
+    })});
     S.reports.unshift(r);
     closeModal('modal-new-report');
     toast('Report created');
     openReportEditor(r.id);
-  } catch(e) {
-    toast('Failed to create: ' + e.message, 'error');
-  }
+  } catch(e) { toast('Create failed: '+e.message,'error'); }
 }
 
-// ── Report Editor ──────────────────────────────────────────────────
+// ── Editor ────────────────────────────────────────────────────────
 async function openReportEditor(id) {
   try {
     var r = await api('/api/reports/' + id);
-    S.currentReport = r;
-    S.edDirty = false;
-    document.getElementById('editor-title').textContent = r.title || 'Untitled';
-    document.getElementById('editor-dirty').textContent = '';
-    document.getElementById('editor-status').value = r.status || 'draft';
-    document.getElementById('ed-title').value = r.title || '';
-    document.getElementById('ed-org').value = r.meta && r.meta.org ? r.meta.org : '';
-    document.getElementById('ed-assessor').value = r.meta && r.meta.assessor ? r.meta.assessor : '';
-    document.getElementById('ed-start').value = r.meta && r.meta.start_date ? r.meta.start_date : '';
-    document.getElementById('ed-end').value = r.meta && r.meta.end_date ? r.meta.end_date : '';
-    document.getElementById('ed-summary').value = r.meta && r.meta.summary ? r.meta.summary : '';
+    S.currentReport = r; S.edDirty = false;
+    $('editor-title').textContent = r.title || 'Untitled';
+    $('editor-dirty').textContent = '';
+    setVal('editor-status', r.status || 'draft');
+    setVal('ed-title', r.title);
+    var m = r.meta || {};
+    setVal('ed-org',       m.org        || '');
+    setVal('ed-assessor',  m.assessor   || '');
+    setVal('ed-start',     m.start_date || '');
+    setVal('ed-end',       m.end_date   || '');
+    setVal('ed-summary',   m.summary    || '');
     renderEdSections();
     renderEdFindings();
-    renderEdPreview();
     switchEdTab('info');
     showView('editor');
-  } catch(e) {
-    toast('Failed to open report: ' + e.message, 'error');
-  }
+  } catch(e) { toast('Open failed: '+e.message,'error'); }
 }
 function switchEdTab(name) {
   document.querySelectorAll('.editor-tab').forEach(function(t){ t.classList.remove('active'); });
   document.querySelectorAll('.editor-panel').forEach(function(p){ p.classList.remove('active'); });
-  var panel = document.getElementById('ed-' + name);
-  if (panel) panel.classList.add('active');
-  document.querySelectorAll('.editor-tab').forEach(function(t){
-    if (t.getAttribute('onclick') && t.getAttribute('onclick').includes("'" + name + "'")) t.classList.add('active');
-  });
+  var p = $('ed-' + name); if (p) p.classList.add('active');
+  document.querySelectorAll('.editor-tab[data-tab="' + name + '"]').forEach(function(t){ t.classList.add('active'); });
   if (name === 'preview') renderEdPreview();
 }
 function markDirty() {
   S.edDirty = true;
-  document.getElementById('editor-dirty').textContent = '● unsaved';
+  $('editor-dirty').textContent = '● unsaved';
   clearTimeout(S.saveTimer);
   S.saveTimer = setTimeout(saveEditorNow, 2000);
 }
 async function saveEditorNow() {
   if (!S.currentReport) return;
-  var title = document.getElementById('ed-title').value.trim() || S.currentReport.title;
-  var meta = {
-    org: document.getElementById('ed-org').value,
-    assessor: document.getElementById('ed-assessor').value,
-    start_date: document.getElementById('ed-start').value,
-    end_date: document.getElementById('ed-end').value,
-    summary: document.getElementById('ed-summary').value,
-  };
+  var title = val('ed-title').trim() || S.currentReport.title;
   try {
-    var updated = await api('/api/reports/' + S.currentReport.id, {
-      method: 'PUT',
-      body: JSON.stringify({ title: title, status: S.currentReport.status, sections: S.currentReport.sections || [], meta: meta })
-    });
-    S.currentReport = updated;
-    S.edDirty = false;
-    document.getElementById('editor-dirty').textContent = '';
-    document.getElementById('editor-title').textContent = updated.title;
+    var updated = await api('/api/reports/' + S.currentReport.id, {method:'PUT', body:JSON.stringify({
+      title: title, status: S.currentReport.status,
+      sections: S.currentReport.sections || [],
+      meta: { org: val('ed-org'), assessor: val('ed-assessor'),
+              start_date: val('ed-start'), end_date: val('ed-end'), summary: val('ed-summary') }
+    })});
+    S.currentReport = updated; S.edDirty = false;
+    $('editor-dirty').textContent = '';
+    $('editor-title').textContent = updated.title;
     var idx = S.reports.findIndex(function(r){ return r.id === updated.id; });
     if (idx >= 0) S.reports[idx] = updated;
     toast('Saved');
-  } catch(e) {
-    toast('Save failed: ' + e.message, 'error');
-  }
+  } catch(e) { toast('Save failed: '+e.message,'error'); }
 }
 async function updateReportStatus() {
   if (!S.currentReport) return;
-  S.currentReport.status = document.getElementById('editor-status').value;
+  S.currentReport.status = val('editor-status');
   await saveEditorNow();
 }
 function renderEdSections() {
-  var el = document.getElementById('ed-sections-body');
-  if (!el) return;
-  var sections = (S.currentReport && S.currentReport.sections) || [];
-  if (!sections.length) {
-    el.innerHTML = '<div class="empty-state"><p>No sections. Apply a template or add sections manually.</p></div>';
-    return;
-  }
-  el.innerHTML = sections.map(function(sec, i) {
-    return '<div class="section-hdr" onclick="toggleRptSec(' + i + ')">' +
-      '<span>' + esc(sec.title || 'Section ' + (i+1)) + '</span><span>' + esc(sec.type || '') + '</span>' +
-      '</div>' +
-      '<div class="section-body" id="rpt-sec-' + i + '">' +
-        renderSecFields(sec) +
-      '</div>';
+  var el = $('ed-sections-body'); if (!el) return;
+  var secs = (S.currentReport && S.currentReport.sections) || [];
+  if (!secs.length) { el.innerHTML='<div class="empty-state"><p>No sections. Apply a template or add sections.</p></div>'; return; }
+  el.innerHTML = secs.map(function(sec, i){
+    var fields = (sec.fields||[]).map(function(f){
+      return '<div class="field-group"><label class="field-label">' + esc(f.label) + '</label>' +
+        (f.type==='textarea'
+          ? '<textarea class="field-textarea">' + esc(f.value||'') + '</textarea>'
+          : '<input class="field-input" type="' + esc(f.type||'text') + '" value="' + esc(f.value||'') + '">') +
+        '</div>';
+    }).join('');
+    return '<div class="section-hdr" data-toggle-sec="' + i + '">' +
+        esc(sec.title||'Section '+(i+1)) + '<span style="font-size:11px;color:var(--text2)">' + esc(sec.type||'') + '</span></div>' +
+      '<div class="section-body" id="rpt-sec-' + i + '">' + (fields || '<p style="color:var(--text2);font-size:13px">No fields.</p>') + '</div>';
   }).join('');
-}
-function toggleRptSec(i) {
-  var el = document.getElementById('rpt-sec-' + i);
-  if (el) el.style.display = el.style.display === 'none' ? '' : 'none';
-}
-function renderSecFields(sec) {
-  var fields = sec.fields || [];
-  if (!fields.length) return '<p style="color:var(--text2);font-size:13px">No fields defined.</p>';
-  return fields.map(function(f) {
-    return '<div class="field-group"><label class="field-label">' + esc(f.label) + '</label>' +
-      renderFieldInput(f, sec.id || '') +
-    '</div>';
-  }).join('');
-}
-function renderFieldInput(f, secId) {
-  var val = esc(f.value || '');
-  if (f.type === 'textarea') {
-    return '<textarea class="field-textarea" oninput="markDirty()">' + val + '</textarea>';
-  } else if (f.type === 'select') {
-    var opts = (f.options || '').split(',').map(function(o){ return '<option>' + esc(o.trim()) + '</option>'; }).join('');
-    return '<select class="field-select" onchange="markDirty()">' + opts + '</select>';
-  } else {
-    return '<input class="field-input" type="' + esc(f.type || 'text') + '" value="' + val + '" oninput="markDirty()">';
-  }
 }
 function renderEdPreview() {
-  var r = S.currentReport;
-  if (!r) return;
-  var html = '<h1 style="font-size:18px;font-weight:700;margin-bottom:4px">' + esc(r.title) + '</h1>';
-  var meta = r.meta || {};
-  if (meta.org) html += '<p><strong>Organization:</strong> ' + esc(meta.org) + '</p>';
-  if (meta.assessor) html += '<p><strong>Assessor:</strong> ' + esc(meta.assessor) + '</p>';
-  if (meta.summary) { html += '<h2>Executive Summary</h2><p>' + esc(meta.summary).replace(/
-/g,'<br>') + '</p>'; }
-  var sections = r.sections || [];
-  sections.forEach(function(sec) {
+  var r = S.currentReport; if (!r) return;
+  var m = r.meta || {};
+  var html = '<h1 style="font-size:18px;font-weight:700;margin-bottom:8px">' + esc(r.title) + '</h1>';
+  if (m.org)       html += '<p><strong>Organization:</strong> ' + esc(m.org) + '</p>';
+  if (m.assessor)  html += '<p><strong>Assessor:</strong> ' + esc(m.assessor) + '</p>';
+  if (m.summary)   html += '<h2>Executive Summary</h2><p>' + esc(m.summary).replace(/
+/g,'<br>') + '</p>';
+  (r.sections||[]).forEach(function(sec){
     html += '<h2>' + esc(sec.title) + '</h2>';
-    (sec.fields || []).forEach(function(f) {
-      html += '<p><strong>' + esc(f.label) + ':</strong> ' + esc(f.value || '') + '</p>';
-    });
+    (sec.fields||[]).forEach(function(f){ html += '<p><strong>' + esc(f.label) + ':</strong> ' + esc(f.value||'') + '</p>'; });
   });
-  var rFindings = S.findings.filter(function(f){ return f.report_id === r.id; });
-  if (rFindings.length) {
-    html += '<h2>Findings (' + rFindings.length + ')</h2>';
-    rFindings.forEach(function(f) {
-      html += '<div style="margin-bottom:12px"><strong>' + esc(f.title) + '</strong> ' + badge(f.severity ? f.severity.toLowerCase() : '') + '<p>' + esc(f.description || '') + '</p></div>';
-    });
+  var rf = S.findings.filter(function(f){ return f.report_id === r.id; });
+  if (rf.length) {
+    html += '<h2>Findings (' + rf.length + ')</h2>';
+    rf.forEach(function(f){ html += '<div style="margin-bottom:10px"><strong>' + esc(f.title) + '</strong> ' + badge(f.severity||'info') + '<p style="margin-top:4px">' + esc(f.description||'') + '</p></div>'; });
   }
-  document.getElementById('preview-content').innerHTML = html;
+  $('preview-content').innerHTML = html;
 }
 
-// ── Findings ───────────────────────────────────────────────────────
+// ── Findings ──────────────────────────────────────────────────────
 function renderEdFindings() {
-  var el = document.getElementById('ed-findings-list');
-  if (!el || !S.currentReport) return;
-  var findings = S.findings.filter(function(f){ return f.report_id === S.currentReport.id; });
-  if (!findings.length) {
-    el.innerHTML = '<div class="empty-state"><p>No findings for this report.</p></div>';
-    return;
-  }
-  el.innerHTML = findings.map(function(f) { return buildFindingCard(f); }).join('');
+  var el = $('ed-findings-list'); if (!el || !S.currentReport) return;
+  var list = S.findings.filter(function(f){ return f.report_id === S.currentReport.id; });
+  if (!list.length) { el.innerHTML='<div class="empty-state"><p>No findings for this report.</p></div>'; return; }
+  el.innerHTML = list.map(buildFindingCard).join('');
 }
 function buildFindingCard(f) {
-  var sev = (f.severity || 'info').toLowerCase();
+  var sev = (f.severity||'info').toLowerCase();
   return '<div class="finding-card">' +
     '<div style="display:flex;align-items:center;margin-bottom:6px">' +
-      '<span class="finding-sev sev-' + esc(sev) + '">' + esc(f.severity) + '</span>' +
+      '<span class="finding-sev sev-' + sev + '">' + esc(f.severity) + '</span>' +
       '<strong>' + esc(f.title) + '</strong>' +
-      '<span style="margin-left:auto">' + badge(f.status || 'open') + '</span>' +
+      '<span style="margin-left:auto">' + badge(f.status||'open') + '</span>' +
     '</div>' +
-    '<div style="color:var(--text2);font-size:12px;margin-bottom:8px">' + esc(f.description || '') + '</div>' +
+    '<div style="color:var(--text2);font-size:12px;margin-bottom:8px">' + esc(f.description||'') + '</div>' +
     '<div class="item-actions">' +
-      '<button class="btn btn-ghost btn-sm" onclick="editFinding(' + f.id + ')">Edit</button>' +
-      '<button class="btn btn-danger btn-sm" onclick="confirmDelete('finding',' + f.id + ','' + esc(f.title) + '')">Delete</button>' +
-    '</div>' +
-  '</div>';
+      '<button class="btn btn-ghost btn-sm" data-edit-finding="' + f.id + '">Edit</button>' +
+      '<button class="btn btn-danger btn-sm" data-del-type="finding" data-del-id="' + f.id + '" data-del-name="' + esc(f.title) + '">Delete</button>' +
+    '</div></div>';
 }
 function openFindingModal(reportId) {
   S.editingFindingId = null;
-  document.getElementById('fm-title').textContent = 'Add Finding';
-  document.getElementById('fm-ftitle').value = '';
-  document.getElementById('fm-desc').value = '';
-  document.getElementById('fm-rec').value = '';
-  document.getElementById('fm-cvss').value = '';
-  document.getElementById('fm-severity').value = 'Medium';
-  document.getElementById('fm-status').value = 'open';
-  populateFmReport(reportId || (S.currentReport ? S.currentReport.id : null));
+  $('fm-title').textContent = 'Add Finding';
+  setVal('fm-ftitle',''); setVal('fm-desc',''); setVal('fm-rec','');
+  setVal('fm-cvss',''); setVal('fm-severity','Medium'); setVal('fm-status','open');
+  populateFmReport(reportId != null ? reportId : (S.currentReport ? S.currentReport.id : null));
   openModal('modal-finding');
 }
 function editFinding(id) {
-  var f = S.findings.find(function(x){ return x.id === id; });
-  if (!f) return;
+  var f = S.findings.find(function(x){ return x.id === id; }); if (!f) return;
   S.editingFindingId = id;
-  document.getElementById('fm-title').textContent = 'Edit Finding';
-  document.getElementById('fm-ftitle').value = f.title || '';
-  document.getElementById('fm-desc').value = f.description || '';
-  document.getElementById('fm-rec').value = f.recommendation || '';
-  document.getElementById('fm-cvss').value = f.cvss || '';
-  document.getElementById('fm-severity').value = f.severity || 'Medium';
-  document.getElementById('fm-status').value = f.status || 'open';
+  $('fm-title').textContent = 'Edit Finding';
+  setVal('fm-ftitle', f.title); setVal('fm-desc', f.description||'');
+  setVal('fm-rec', f.recommendation||''); setVal('fm-cvss', f.cvss||'');
+  setVal('fm-severity', f.severity||'Medium'); setVal('fm-status', f.status||'open');
   populateFmReport(f.report_id);
   openModal('modal-finding');
 }
 function populateFmReport(selectedId) {
-  var sel = document.getElementById('fm-report');
-  sel.innerHTML = S.reports.map(function(r) {
-    return '<option value="' + r.id + '" ' + (r.id === selectedId ? 'selected' : '') + '>' + esc(r.title) + '</option>';
+  var sel = $('fm-report'); if (!sel) return;
+  sel.innerHTML = S.reports.map(function(r){
+    return '<option value="' + r.id + '"' + (r.id === selectedId ? ' selected' : '') + '>' + esc(r.title) + '</option>';
   }).join('');
 }
 async function saveFinding() {
-  var title = document.getElementById('fm-ftitle').value.trim();
-  if (!title) { toast('Title required', 'error'); return; }
-  var payload = {
-    report_id: parseInt(document.getElementById('fm-report').value),
-    title: title,
-    severity: document.getElementById('fm-severity').value,
-    status: document.getElementById('fm-status').value,
-    description: document.getElementById('fm-desc').value,
-    recommendation: document.getElementById('fm-rec').value,
-    cvss: parseFloat(document.getElementById('fm-cvss').value) || null,
-  };
+  var title = val('fm-ftitle').trim();
+  if (!title) { toast('Title required','error'); return; }
+  var payload = { report_id: parseInt(val('fm-report')), title: title,
+    severity: val('fm-severity'), status: val('fm-status'),
+    description: val('fm-desc'), recommendation: val('fm-rec'),
+    cvss: parseFloat(val('fm-cvss')) || null };
   try {
     if (S.editingFindingId) {
-      var updated = await api('/api/findings/' + S.editingFindingId, { method: 'PUT', body: JSON.stringify(payload) });
+      var u = await api('/api/findings/' + S.editingFindingId, {method:'PUT',body:JSON.stringify(payload)});
       var idx = S.findings.findIndex(function(f){ return f.id === S.editingFindingId; });
-      if (idx >= 0) S.findings[idx] = updated;
+      if (idx >= 0) S.findings[idx] = u;
       toast('Finding updated');
     } else {
-      var created = await api('/api/findings', { method: 'POST', body: JSON.stringify(payload) });
-      S.findings.push(created);
+      var c = await api('/api/findings', {method:'POST',body:JSON.stringify(payload)});
+      S.findings.push(c);
       toast('Finding added');
     }
     closeModal('modal-finding');
-    renderEdFindings();
-    renderFindingsView();
-  } catch(e) {
-    toast('Save failed: ' + e.message, 'error');
-  }
+    renderEdFindings(); renderFindingsView();
+  } catch(e) { toast('Save failed: '+e.message,'error'); }
 }
 function populateFindingsSelect() {
-  var sel = document.getElementById('findings-rpt-sel');
-  if (!sel) return;
+  var sel = $('findings-rpt-sel'); if (!sel) return;
   var cur = sel.value;
   sel.innerHTML = '<option value="">All Reports</option>' +
     S.reports.map(function(r){ return '<option value="' + r.id + '">' + esc(r.title) + '</option>'; }).join('');
   if (cur) sel.value = cur;
 }
-function onFindingsReportChange() {
-  renderFindingsView();
-}
 function renderFindingsView() {
-  populateFindingsSelect();
-  var rptId = document.getElementById('findings-rpt-sel') ? parseInt(document.getElementById('findings-rpt-sel').value) || 0 : 0;
-  var sev = document.getElementById('findings-sev-sel') ? document.getElementById('findings-sev-sel').value : '';
-  var filtered = S.findings.filter(function(f) {
+  var rptId = parseInt(val('findings-rpt-sel')) || 0;
+  var sev   = val('findings-sev-sel');
+  var list  = S.findings.filter(function(f){
     if (rptId && f.report_id !== rptId) return false;
     if (sev && f.severity !== sev) return false;
     return true;
   });
-  var el = document.getElementById('findings-list');
-  if (!el) return;
-  if (!filtered.length) {
-    el.innerHTML = '<div class="empty-state"><p>No findings found.</p></div>';
-    return;
-  }
-  var sevOrder = { Critical:0, High:1, Medium:2, Low:3, Info:4 };
-  filtered.sort(function(a,b){ return (sevOrder[a.severity]||5) - (sevOrder[b.severity]||5); });
-  el.innerHTML = filtered.map(function(f) { return buildFindingCard(f); }).join('');
+  var el = $('findings-list'); if (!el) return;
+  if (!list.length) { el.innerHTML='<div class="empty-state"><p>No findings found.</p></div>'; return; }
+  var order = {Critical:0,High:1,Medium:2,Low:3,Info:4};
+  list.sort(function(a,b){ return (order[a.severity]||5)-(order[b.severity]||5); });
+  el.innerHTML = list.map(buildFindingCard).join('');
 }
 
-// ── Templates ──────────────────────────────────────────────────────
+// ── Templates ─────────────────────────────────────────────────────
 function renderTemplatesList() {
-  var el = document.getElementById('templates-list');
-  if (!el) return;
-  if (!S.templates.length) {
-    el.innerHTML = '<div class="empty-state"><p>No templates yet. Create one!</p></div>';
-    return;
-  }
-  el.innerHTML = '<div class="card-grid">' +
-    S.templates.map(function(t) {
-      return '<div class="card-item">' +
-        '<div class="item-title">' + esc(t.name) + '</div>' +
-        '<div class="item-meta">' + esc(t.description || '') + ' &bull; ' + ((t.sections||[]).length) + ' sections</div>' +
-        '<div class="item-actions">' +
-          '<button class="btn btn-primary btn-sm" onclick="openTemplateEditor(' + t.id + ')">Edit</button>' +
-          '<button class="btn btn-danger btn-sm" onclick="confirmDelete('template',' + t.id + ','' + esc(t.name) + '')">Delete</button>' +
-        '</div>' +
-      '</div>';
-    }).join('') + '</div>';
+  var el = $('templates-list'); if (!el) return;
+  if (!S.templates.length) { el.innerHTML='<div class="empty-state"><p>No templates yet.</p></div>'; return; }
+  el.innerHTML = '<div class="card-grid">' + S.templates.map(function(t){
+    return '<div class="card-item">' +
+      '<div class="item-title">' + esc(t.name) + '</div>' +
+      '<div class="item-meta">' + esc(t.description||'') + ' &bull; ' + (t.sections||[]).length + ' sections</div>' +
+      '<div class="item-actions">' +
+        '<button class="btn btn-primary btn-sm" data-open-template="' + t.id + '">Edit</button>' +
+        '<button class="btn btn-danger btn-sm" data-del-type="template" data-del-id="' + t.id + '" data-del-name="' + esc(t.name) + '">Delete</button>' +
+      '</div></div>';
+  }).join('') + '</div>';
 }
 function openNewTemplateModal() {
-  document.getElementById('nt-name').value = '';
-  document.getElementById('nt-desc').value = '';
+  setVal('nt-name',''); setVal('nt-desc','');
   openModal('modal-new-template');
 }
 async function createTemplate() {
-  var name = document.getElementById('nt-name').value.trim();
-  if (!name) { toast('Name required', 'error'); return; }
+  var name = val('nt-name').trim();
+  if (!name) { toast('Name required','error'); return; }
   try {
-    var t = await api('/api/templates', {
-      method: 'POST',
-      body: JSON.stringify({ name: name, description: document.getElementById('nt-desc').value, sections: [] })
-    });
+    var t = await api('/api/templates',{method:'POST',body:JSON.stringify({name:name,description:val('nt-desc'),sections:[]})});
     S.templates.push(t);
     closeModal('modal-new-template');
     toast('Template created');
     openTemplateEditor(t.id);
-  } catch(e) {
-    toast('Failed: ' + e.message, 'error');
-  }
+  } catch(e) { toast('Failed: '+e.message,'error'); }
 }
 async function openTemplateEditor(id) {
   try {
     var t = await api('/api/templates/' + id);
-    S.currentTemplate = t;
-    S.tedDirty = false;
-    document.getElementById('ted-title').textContent = t.name || 'Template Editor';
-    document.getElementById('ted-dirty').textContent = '';
-    document.getElementById('ted-name').value = t.name || '';
-    document.getElementById('ted-desc').value = t.description || '';
+    S.currentTemplate = t; S.tedDirty = false;
+    $('ted-title').textContent = t.name || 'Template Editor';
+    $('ted-dirty').textContent = '';
+    setVal('ted-name', t.name); setVal('ted-desc', t.description||'');
     renderTSections();
     showView('template-editor');
-  } catch(e) {
-    toast('Failed to open template: ' + e.message, 'error');
-  }
+  } catch(e) { toast('Failed: '+e.message,'error'); }
 }
 function markTDirty() {
   S.tedDirty = true;
-  document.getElementById('ted-dirty').textContent = '● unsaved';
+  $('ted-dirty').textContent = '● unsaved';
 }
 function addSection() {
   if (!S.currentTemplate) return;
-  var type = document.getElementById('add-sec-type').value;
+  var type = val('add-sec-type');
   S.currentTemplate.sections = S.currentTemplate.sections || [];
-  S.currentTemplate.sections.push({ title: 'New ' + type + ' Section', type: type, fields: [] });
-  markTDirty();
-  renderTSections();
+  S.currentTemplate.sections.push({title:'New '+type+' section', type:type, fields:[]});
+  markTDirty(); renderTSections();
 }
 function renderTSections() {
-  var el = document.getElementById('ted-sections');
-  if (!el) return;
-  var sections = (S.currentTemplate && S.currentTemplate.sections) || [];
-  if (!sections.length) {
-    el.innerHTML = '<div class="empty-state"><p>No sections. Add one above.</p></div>';
-    return;
-  }
-  el.innerHTML = sections.map(function(sec, i) {
+  var el = $('ted-sections'); if (!el) return;
+  var secs = (S.currentTemplate && S.currentTemplate.sections) || [];
+  if (!secs.length) { el.innerHTML='<div class="empty-state"><p>No sections yet.</p></div>'; return; }
+  el.innerHTML = secs.map(function(sec, si){
+    var fieldRows = (sec.fields||[]).map(function(f, fi){
+      return '<div class="form-row" style="margin-bottom:8px;align-items:end">' +
+        '<div class="field-group" style="margin:0"><label class="field-label">Label</label>' +
+          '<input class="field-input" data-sec="' + si + '" data-fi="' + fi + '" data-prop="label" value="' + esc(f.label||'') + '"></div>' +
+        '<div class="field-group" style="margin:0"><label class="field-label">Type</label>' +
+          '<select class="field-select" data-sec="' + si + '" data-fi="' + fi + '" data-prop="type">' +
+            ['text','textarea','date','number','select'].map(function(o){
+              return '<option value="' + o + '"' + (f.type===o?' selected':'') + '>' + o + '</option>';
+            }).join('') +
+          '</select></div>' +
+        '<button class="btn btn-danger btn-sm btn-icon" data-remove-field="' + fi + '" data-sec="' + si + '">&#10005;</button>' +
+      '</div>';
+    }).join('');
     return '<div class="card" style="margin-bottom:12px">' +
-      '<div class="section-hdr" style="margin-bottom:10px" onclick="toggleTSec(' + i + ')">' +
-        '<span>' + esc(sec.title) + '</span>' +
-        '<div style="display:flex;gap:6px">' +
-          '<span style="font-size:12px;color:var(--text2)">' + esc(sec.type) + '</span>' +
-          '<button class="btn btn-danger btn-sm btn-icon" onclick="event.stopPropagation();removeSection(' + i + ')">&#10005;</button>' +
+      '<div class="section-hdr" style="margin-bottom:10px">' +
+        '<input class="field-input" style="width:auto;flex:1" data-sec-title="' + si + '" value="' + esc(sec.title) + '">' +
+        '<div style="display:flex;gap:6px;margin-left:8px">' +
+          '<span style="font-size:12px;color:var(--text2);align-self:center">' + esc(sec.type) + '</span>' +
+          '<button class="btn btn-danger btn-sm btn-icon" data-remove-sec="' + si + '">&#10005;</button>' +
         '</div>' +
       '</div>' +
-      '<div id="tsec-' + i + '">' +
-        '<div class="field-group"><label class="field-label">Section Title</label>' +
-          '<input class="field-input" value="' + esc(sec.title) + '" oninput="S.currentTemplate.sections[' + i + '].title=this.value;markTDirty();document.getElementById('ted-title').textContent=S.currentTemplate.name||'Template Editor'"></div>' +
-        renderTFields(sec, i) +
-        '<div style="margin-top:10px">' +
-          '<button class="btn btn-secondary btn-sm" onclick="addField(' + i + ')">+ Add Field</button>' +
-        '</div>' +
-      '</div>' +
+      (fieldRows || '<p style="color:var(--text2);font-size:12px">No fields.</p>') +
+      '<button class="btn btn-secondary btn-sm" style="margin-top:8px" data-add-field="' + si + '">+ Add Field</button>' +
     '</div>';
   }).join('');
 }
-function toggleTSec(i) {
-  var el = document.getElementById('tsec-' + i);
-  if (el) el.style.display = el.style.display === 'none' ? '' : 'none';
-}
-function removeSection(i) {
+function removeSection(si) {
   if (!S.currentTemplate) return;
-  S.currentTemplate.sections.splice(i, 1);
-  markTDirty();
-  renderTSections();
-}
-function renderTFields(sec, si) {
-  var fields = sec.fields || [];
-  if (!fields.length) return '<p style="color:var(--text2);font-size:12px;margin-top:6px">No fields yet.</p>';
-  return '<div style="margin-top:8px">' + fields.map(function(f, fi) {
-    return '<div class="form-row" style="margin-bottom:8px;align-items:end">' +
-      '<div class="field-group" style="margin:0"><label class="field-label">Label</label>' +
-        '<input class="field-input" value="' + esc(f.label||'') + '" oninput="S.currentTemplate.sections[' + si + '].fields[' + fi + '].label=this.value;markTDirty()"></div>' +
-      '<div class="field-group" style="margin:0"><label class="field-label">Type</label>' +
-        '<select class="field-select" onchange="S.currentTemplate.sections[' + si + '].fields[' + fi + '].type=this.value;markTDirty()">' +
-          '<option value="text"' + (f.type==='text'?' selected':'') + '>Text</option>' +
-          '<option value="textarea"' + (f.type==='textarea'?' selected':'') + '>Textarea</option>' +
-          '<option value="date"' + (f.type==='date'?' selected':'') + '>Date</option>' +
-          '<option value="number"' + (f.type==='number'?' selected':'') + '>Number</option>' +
-          '<option value="select"' + (f.type==='select'?' selected':'') + '>Select</option>' +
-        '</select></div>' +
-      '<button class="btn btn-danger btn-sm btn-icon" onclick="removeField(' + si + ',' + fi + ')">&#10005;</button>' +
-    '</div>';
-  }).join('') + '</div>';
+  S.currentTemplate.sections.splice(si, 1);
+  markTDirty(); renderTSections();
 }
 function addField(si) {
   if (!S.currentTemplate) return;
   S.currentTemplate.sections[si].fields = S.currentTemplate.sections[si].fields || [];
-  S.currentTemplate.sections[si].fields.push({ label: 'New Field', type: 'text', value: '' });
-  markTDirty();
-  renderTSections();
+  S.currentTemplate.sections[si].fields.push({label:'New Field',type:'text',value:''});
+  markTDirty(); renderTSections();
 }
 function removeField(si, fi) {
   if (!S.currentTemplate) return;
   S.currentTemplate.sections[si].fields.splice(fi, 1);
-  markTDirty();
-  renderTSections();
+  markTDirty(); renderTSections();
 }
 async function saveTemplate() {
   if (!S.currentTemplate) return;
-  var name = document.getElementById('ted-name').value.trim();
-  if (!name) { toast('Name required', 'error'); return; }
+  var name = val('ted-name').trim();
+  if (!name) { toast('Name required','error'); return; }
   S.currentTemplate.name = name;
-  S.currentTemplate.description = document.getElementById('ted-desc').value;
+  S.currentTemplate.description = val('ted-desc');
   try {
-    var updated = await api('/api/templates/' + S.currentTemplate.id, {
-      method: 'PUT',
-      body: JSON.stringify({ name: S.currentTemplate.name, description: S.currentTemplate.description, sections: S.currentTemplate.sections })
-    });
-    S.currentTemplate = updated;
-    S.tedDirty = false;
-    document.getElementById('ted-dirty').textContent = '';
-    var idx = S.templates.findIndex(function(t){ return t.id === updated.id; });
-    if (idx >= 0) S.templates[idx] = updated;
+    var u = await api('/api/templates/' + S.currentTemplate.id, {method:'PUT',body:JSON.stringify({
+      name: S.currentTemplate.name, description: S.currentTemplate.description,
+      sections: S.currentTemplate.sections
+    })});
+    S.currentTemplate = u; S.tedDirty = false;
+    $('ted-dirty').textContent = '';
+    var idx = S.templates.findIndex(function(t){ return t.id === u.id; });
+    if (idx >= 0) S.templates[idx] = u;
     toast('Template saved');
-  } catch(e) {
-    toast('Save failed: ' + e.message, 'error');
-  }
+  } catch(e) { toast('Save failed: '+e.message,'error'); }
 }
 
-// ── Delete ─────────────────────────────────────────────────────────
+// ── Delete ────────────────────────────────────────────────────────
 function confirmDelete(type, id, name) {
-  document.getElementById('confirm-msg').textContent = 'Delete "' + name + '"? This cannot be undone.';
-  document.getElementById('confirm-ok').onclick = function() {
-    doDelete(type, id);
-    closeModal('modal-confirm');
-  };
+  $('confirm-msg').textContent = 'Delete "' + name + '"? This cannot be undone.';
+  $('confirm-ok').onclick = function(){ doDelete(type, id); closeModal('modal-confirm'); };
   openModal('modal-confirm');
 }
 async function doDelete(type, id) {
   try {
-    await api('/api/' + type + 's/' + id, { method: 'DELETE' });
+    await api('/api/' + type + 's/' + id, {method:'DELETE'});
     if (type === 'report') {
-      S.reports = S.reports.filter(function(r){ return r.id !== id; });
+      S.reports  = S.reports.filter(function(r){ return r.id !== id; });
       S.findings = S.findings.filter(function(f){ return f.report_id !== id; });
-      renderReportsList();
-      renderDash();
+      renderReportsList(); renderDash();
     } else if (type === 'template') {
       S.templates = S.templates.filter(function(t){ return t.id !== id; });
       renderTemplatesList();
     } else if (type === 'finding') {
       S.findings = S.findings.filter(function(f){ return f.id !== id; });
-      renderEdFindings();
-      renderFindingsView();
+      renderEdFindings(); renderFindingsView();
     }
-    toast(type.charAt(0).toUpperCase() + type.slice(1) + ' deleted');
-  } catch(e) {
-    toast('Delete failed: ' + e.message, 'error');
-  }
+    toast(type.charAt(0).toUpperCase()+type.slice(1)+' deleted');
+  } catch(e) { toast('Delete failed: '+e.message,'error'); }
 }
 
-// ── Init ───────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', function() {
-  loadAll();
+// ── Event Delegation ──────────────────────────────────────────────
+document.addEventListener('click', function(e) {
+  var t = e.target;
+
+  // nav tabs
+  var nav = t.closest('[data-nav]');
+  if (nav) { showView(nav.getAttribute('data-nav')); return; }
+
+  // close modal
+  var cm = t.closest('[data-close-modal]');
+  if (cm) { closeModal(cm.getAttribute('data-close-modal')); return; }
+
+  // editor tabs
+  var et = t.closest('[data-tab]');
+  if (et) { switchEdTab(et.getAttribute('data-tab')); return; }
+
+  // open report
+  var or = t.closest('[data-open-report]');
+  if (or) { e.stopPropagation(); openReportEditor(parseInt(or.getAttribute('data-open-report'))); return; }
+
+  // open template
+  var ot = t.closest('[data-open-template]');
+  if (ot) { openTemplateEditor(parseInt(ot.getAttribute('data-open-template'))); return; }
+
+  // edit finding
+  var ef = t.closest('[data-edit-finding]');
+  if (ef) { editFinding(parseInt(ef.getAttribute('data-edit-finding'))); return; }
+
+  // delete
+  var del = t.closest('[data-del-type]');
+  if (del) {
+    e.stopPropagation();
+    confirmDelete(del.getAttribute('data-del-type'), parseInt(del.getAttribute('data-del-id')), del.getAttribute('data-del-name'));
+    return;
+  }
+
+  // toggle section
+  var ts = t.closest('[data-toggle-sec]');
+  if (ts) {
+    var idx = parseInt(ts.getAttribute('data-toggle-sec'));
+    var sb = $('rpt-sec-' + idx);
+    if (sb) sb.style.display = sb.style.display === 'none' ? '' : 'none';
+    return;
+  }
+
+  // template section actions
+  var rs = t.closest('[data-remove-sec]');
+  if (rs) { removeSection(parseInt(rs.getAttribute('data-remove-sec'))); return; }
+
+  var af = t.closest('[data-add-field]');
+  if (af) { addField(parseInt(af.getAttribute('data-add-field'))); return; }
+
+  var rf2 = t.closest('[data-remove-field]');
+  if (rf2) { removeField(parseInt(rf2.getAttribute('data-sec')), parseInt(rf2.getAttribute('data-remove-field'))); return; }
+
+  // static button IDs
+  var id = t.id || (t.closest('button') && t.closest('button').id);
+  if (id === 'btn-new-report')         { openNewReportModal(); return; }
+  if (id === 'btn-create-report')      { createReport(); return; }
+  if (id === 'btn-save-editor')        { saveEditorNow(); return; }
+  if (id === 'btn-add-finding-editor') { openFindingModal(S.currentReport ? S.currentReport.id : null); return; }
+  if (id === 'btn-add-finding-global') { openFindingModal(null); return; }
+  if (id === 'btn-save-finding')       { saveFinding(); return; }
+  if (id === 'btn-new-template')       { openNewTemplateModal(); return; }
+  if (id === 'btn-create-template')    { createTemplate(); return; }
+  if (id === 'btn-save-template')      { saveTemplate(); return; }
+  if (id === 'btn-add-section')        { addSection(); return; }
 });
+
+// Change listeners
+document.addEventListener('change', function(e) {
+  var t = e.target;
+  if (t.id === 'editor-status') { updateReportStatus(); return; }
+  if (t.id === 'findings-rpt-sel' || t.id === 'findings-sev-sel') { renderFindingsView(); return; }
+  // template field property changes
+  var sec = t.getAttribute('data-sec');
+  var fi  = t.getAttribute('data-fi');
+  var prop = t.getAttribute('data-prop');
+  if (sec !== null && fi !== null && prop) {
+    S.currentTemplate.sections[parseInt(sec)].fields[parseInt(fi)][prop] = t.value;
+    markTDirty(); renderTSections();
+  }
+});
+
+document.addEventListener('input', function(e) {
+  var t = e.target;
+  var edFields = ['ed-title','ed-org','ed-assessor','ed-start','ed-end','ed-summary'];
+  if (edFields.indexOf(t.id) >= 0) { markDirty(); return; }
+  if (t.id === 'rpt-search') { renderReportsList(); return; }
+  // template section title
+  var st = t.getAttribute('data-sec-title');
+  if (st !== null) {
+    S.currentTemplate.sections[parseInt(st)].title = t.value;
+    markTDirty();
+    return;
+  }
+  // template field label inline
+  var sec = t.getAttribute('data-sec');
+  var fi  = t.getAttribute('data-fi');
+  var prop = t.getAttribute('data-prop');
+  if (sec !== null && fi !== null && prop) {
+    S.currentTemplate.sections[parseInt(sec)].fields[parseInt(fi)][prop] = t.value;
+    markTDirty();
+  }
+});
+
+// ── Boot ──────────────────────────────────────────────────────────
+loadAll();
+
+})();
 </script>
 </body>
 </html>
