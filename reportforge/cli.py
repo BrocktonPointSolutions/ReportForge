@@ -7,7 +7,7 @@ cli = typer.Typer(add_completion=False, help="ReportForge")
 
 @cli.command()
 def serve(
-    host: str = typer.Option("127.0.0.1", help="Bind host"),
+    host: str = typer.Option("0.0.0.0", help="Bind host"),
     port: int = typer.Option(8000, help="Bind port"),
 ):
     """Start the ReportForge web server."""
