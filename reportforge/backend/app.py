@@ -118,15 +118,17 @@ def create_report(payload: ReportCreate):
 @app.get("/api/reports/{rid}")
 def get_report(rid: str):
     with SessionLocal() as db:
-        r = db.get(Report, rid)
-        if not r: raise HTTPException(404, "Report not found")
+        stmt = select(Report).where(Report.id == rid)
+        r = db.execute(stmt).scalar_one_or_none()
+        if not r: raise HTTPException(404, f"Report not found: {rid!r}")
         return _report_out(r, include_data=True)
 
 @app.put("/api/reports/{rid}")
 def update_report(rid: str, payload: ReportUpdate):
     with SessionLocal() as db:
-        r = db.get(Report, rid)
-        if not r: raise HTTPException(404, "Report not found")
+        stmt = select(Report).where(Report.id == rid)
+        r = db.execute(stmt).scalar_one_or_none()
+        if not r: raise HTTPException(404, f"Report not found: {rid!r}")
         if payload.title is not None: r.title = payload.title.strip() or r.title
         if payload.org is not None: r.org = payload.org
         if payload.report_type is not None: r.report_type = payload.report_type
