@@ -61,7 +61,11 @@ class Finding(Base):
         String(40), default='open')
     description: Mapped[str] = mapped_column(
         Text, default='')
+    discussion: Mapped[str] = mapped_column(
+        Text, default='')
     recommendation: Mapped[str] = mapped_column(
+        Text, default='')
+    refs: Mapped[str] = mapped_column(
         Text, default='')
     cvss: Mapped[Optional[float]] = mapped_column(
         Float, nullable=True)
