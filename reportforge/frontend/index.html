@@ -304,6 +304,22 @@ tr:hover td{background:rgba(255,255,255,.02)}
   </div>
 </div>
 
+<!-- ALERT MODAL -->
+<div class="modal-overlay" id="modal-alert">
+  <div class="modal" style="width:360px">
+    <div class="modal-hdr">
+      <span id="alert-title">Notice</span>
+    </div>
+    <div class="modal-body">
+      <p id="alert-msg"
+        style="color:var(--text2)"></p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary"
+        data-close-modal="modal-alert">OK</button>
+    </div>
+  </div>
+</div>
 <div class="toast-root" id="toast-root"></div>
 
 <script>
@@ -367,6 +383,12 @@ async function api(path,opts){
 
 function openM(id){$(id).classList.add('open');}
 function closeM(id){$(id).classList.remove('open');}
+function alertMsg(msg,title){
+  $('alert-msg').textContent=msg;
+  $('alert-title').textContent=
+    title||'Notice';
+  openM('modal-alert');
+}
 
 function showView(name){
   var vs=document.querySelectorAll('.view');
@@ -509,7 +531,7 @@ async function createReport(){
       .toLowerCase()===tl;
   });
   if(dup){
-    toast('Duplicate report name','err');
+    alertMsg('Duplicate report name');
     return;
   }
   var tid=gv('nr-template');
@@ -597,7 +619,7 @@ async function saveEditor(){
       (r.title||'').toLowerCase()===tl;
   });
   if(dup){
-    toast('Duplicate report name','err');
+    alertMsg('Duplicate report name');
     return;
   }
   try{
