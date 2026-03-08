@@ -531,7 +531,12 @@ async function openEditor(id){
     $('editor-dirty').textContent='';
     sv('editor-status',r.status||'draft');
     sv('ed-title',r.title);
-    var m=r.meta||{};
+    var d=r.data||{};
+    var m=d.report||{};
+    S.currentReport.sections=
+      d.sections||[];
+    S.currentReport.findings=
+      d.findings||[];
     sv('ed-org',m.org||'');
     sv('ed-assessor',m.assessor||'');
     sv('ed-start',m.start_date||'');
@@ -579,14 +584,23 @@ async function saveEditor(){
       method:'PUT',
       body:JSON.stringify({
         title:title,
+        org:gv('ed-org'),
         status:S.currentReport.status,
-        sections:S.currentReport.sections||[],
-        meta:{
-          org:gv('ed-org'),
-          assessor:gv('ed-assessor'),
-          start_date:gv('ed-start'),
-          end_date:gv('ed-end'),
-          summary:gv('ed-summary')
+        data:{
+          report:{
+            title:title,
+            org:gv('ed-org'),
+            assessor:gv('ed-assessor'),
+            start_date:gv('ed-start'),
+            end_date:gv('ed-end'),
+            exec_summary:
+              gv('ed-summary'),
+            scope:''
+          },
+          sections:
+            S.currentReport.sections||[],
+          findings:
+            S.currentReport.findings||[]
         }
       })
     });
@@ -642,7 +656,8 @@ function renderEdSections(){
 }
 function renderPreview(){
   var r=S.currentReport;if(!r)return;
-  var m=r.meta||{};
+  var d=(r.data||{});
+  var m=d.report||{};
   var h='<h1 style="font-size:18px;font-weight:700;'
     +'margin-bottom:8px">'+esc(r.title)+'</h1>';
   if(m.org)
