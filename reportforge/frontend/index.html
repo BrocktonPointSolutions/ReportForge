@@ -790,10 +790,29 @@ function renderPreview(){
   if(rf.length){
     h+='<h2>Findings ('+rf.length+')</h2>';
     rf.forEach(function(f){
-      h+='<div style="margin-bottom:10px"><b>'
-        +esc(f.title)+'</b> '
-        +bdg(f.severity||'info')+'<p>'
-        +esc(f.description||'')+'</p></div>';
+      var fd=f.description||'';
+      var fi=f.discussion||'';
+      var fr=f.recommendation||'';
+      var fx=f.refs||'';
+      h+='<div style="border:1px solid'
+        +' #ccc;border-radius:6px;'
+        +'padding:12px;margin-bottom'
+        +':14px"><div style="display'
+        +':flex;align-items:center;'
+        +'margin-bottom:8px"><b style'
+        +'="font-size:14px">'
+        +esc(f.title)+'<\/b>&nbsp;'
+        +bdg(f.severity||'info')
+        +'<\/div>';
+      if(fd)h+='<div><b>Observation'
+        +'<\/b>'+fd+'<\/div>';
+      if(fi)h+='<div><b>Discussion'
+        +'<\/b>'+fi+'<\/div>';
+      if(fr)h+='<div><b>Recommendations'
+        +'<\/b>'+fr+'<\/div>';
+      if(fx)h+='<div><b>References'
+        +'<\/b>'+fx+'<\/div>';
+      h+='<\/div>';
     });
   }
   $('preview-content').innerHTML=h;
@@ -830,7 +849,7 @@ function rfCard(f,idx){
     +bdg(f.status||'open')+'</span></div>'
     +'<div style="color:var(--text2);'
     +'font-size:12px;margin-bottom:8px">'
-    +esc(f.description||'')+'</div>'
+    +(f.description||'')+'</div>'
     +'<div class="item-actions">'
     +'<button class="btn btn-ghost btn-sm"'
     +' data-edit-rf="'+idx+'">'
@@ -853,7 +872,7 @@ function fCard(f){
     +'</div>'
     +'<div style="color:var(--text2);'
     +'font-size:12px;margin-bottom:8px">'
-    +esc(f.description||'')+'</div>'
+    +(f.description||'')+'</div>'
     +'<div class="item-actions">'
     +'<button class="btn btn-ghost btn-sm"'
     +' data-edit-f="'+f.id+'">'
@@ -973,7 +992,7 @@ function openAddFindingToReport(){
         +'</div>'
         +'<div style="color:var(--text2);'
         +'font-size:12px;margin-bottom:6px">'
-        +esc(f.description||'')+'</div>'
+        +(f.description||'')+'</div>'
         +'<button class="btn btn-primary btn-sm"'
         +' data-add-rf="'+f.id+'">'
         +'Add to Report</button>'
