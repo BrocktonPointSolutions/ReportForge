@@ -6,7 +6,7 @@
 <title>ReportForge</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#0f1117;--surface:#1a1d27;--surface2:#22263a;--border:#2d3154;--accent:#4f6ef7;--accent2:#7c9cff;--text:#e8eaf6;--text2:#9fa8c0;--danger:#f55;--success:#4caf50;--radius:8px}
+:root{--bg:#f5f6fa;--surface:#fff;--surface2:#f0f1f8;--border:#d0d4e8;--accent:#4f6ef7;--accent2:#3a55d4;--text:#1a1d27;--text2:#555e80;--danger:#d32f2f;--success:#2e7d32;--radius:8px}body.dark{--bg:#0f1117;--surface:#1a1d27;--surface2:#22263a;--border:#2d3154;--accent:#4f6ef7;--accent2:#7c9cff;--text:#e8eaf6;--text2:#9fa8c0;--danger:#f55;--success:#4caf50}.theme-btn{background:none;border:1px solid var(--border);color:var(--text2);border-radius:var(--radius);padding:4px 10px;cursor:pointer;font-size:12px;transition:.15s}.theme-btn:hover{border-color:var(--accent);color:var(--accent)}
 body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden}
 .app{display:flex;flex-direction:column;height:100vh}
 .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;gap:12px;height:52px;flex-shrink:0}
@@ -87,7 +87,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
       <button class="nav-tab" data-nav="findings">Findings</button>
       <button class="nav-tab" data-nav="templates">Templates</button>
     </nav>
-    <div class="topbar-right" id="topbar-right"></div>
+    <div class="topbar-right" id="topbar-right"><button class="theme-btn" id="theme-toggle">Dark Mode</button></div>
   </div>
   <div class="main">
 
@@ -499,7 +499,19 @@ function popNRTemplates(){
 }
 async function createReport(){
   var title=gv('nr-title').trim();
-  if(!title){toast('Title required','err');return;}
+  if(!title){
+    toast('Title required','err');
+    return;
+  }
+  var tl=title.toLowerCase();
+  var dup=S.reports.find(function(r){
+    return (r.title||'')
+      .toLowerCase()===tl;
+  });
+  if(dup){
+    toast('Duplicate report name','err');
+    return;
+  }
   var tid=gv('nr-template');
   try{
     var r=await api('/api/reports',{
@@ -578,6 +590,16 @@ async function saveEditor(){
   if(!S.currentReport)return;
   var title=gv('ed-title').trim()
     ||S.currentReport.title;
+  var tl=title.toLowerCase();
+  var rid=S.currentReportId;
+  var dup=S.reports.find(function(r){
+    return r.id!==rid&&
+      (r.title||'').toLowerCase()===tl;
+  });
+  if(dup){
+    toast('Duplicate report name','err');
+    return;
+  }
   try{
     var u=await api(
       '/api/reports/'+S.currentReportId,{
@@ -1071,8 +1093,12 @@ document.addEventListener('click',function(e){
     showView(nav.getAttribute('data-nav'));
     return;
   }
-  var cm=t.closest('[data-close]');
-  if(cm){closeM(cm.getAttribute('data-close'));return;}
+  var cm=t.closest('[data-close-modal]');
+  if(cm){
+    closeM(cm.getAttribute(
+      'data-close-modal'));
+    return;
+  }
   var et=t.closest('[data-tab]');
   if(et){switchTab(et.getAttribute('data-tab'));return;}
   var or=t.closest('[data-open-rpt]');
@@ -1132,6 +1158,9 @@ document.addEventListener('click',function(e){
   }
   var b=t.closest('button');
   var bid=b?b.id:'';
+  if(bid==='theme-toggle'){
+    toggleTheme();return;
+  }
   if(bid==='btn-new-report'){
     openNewReport();return;
   }
@@ -1203,6 +1232,32 @@ document.addEventListener('input',function(e){
   }
 });
 
+function _applyTheme(dark){
+  if(dark){
+    document.body.classList.add('dark');
+    var b=$('theme-toggle');
+    if(b)b.textContent='Light Mode';
+  }else{
+    document.body.classList.remove('dark');
+    var b=$('theme-toggle');
+    if(b)b.textContent='Dark Mode';
+  }
+}
+function toggleTheme(){
+  var dark=document.body
+    .classList.contains('dark');
+  _applyTheme(!dark);
+  try{
+    localStorage.setItem(
+      'rf-theme',dark?'light':'dark');
+  }catch(e){}
+}
+(function(){
+  try{
+    var t=localStorage.getItem('rf-theme');
+    _applyTheme(t==='dark');
+  }catch(e){_applyTheme(false);}
+})();
 loadAll();
 })();
 </script>
