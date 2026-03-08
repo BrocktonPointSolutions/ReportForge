@@ -29,6 +29,26 @@ _FRONTEND_DIR = (
     .parents[1] / 'frontend'
 ).resolve()
 
+def _migrate_findings_cols():
+    cols = [
+        ('discussion', 'TEXT'),
+        ('refs', 'TEXT'),
+    ]
+    from sqlalchemy import text
+    with engine.connect() as con:
+        for col, typ in cols:
+            sql = (
+                'ALTER TABLE findings'
+                ' ADD COLUMN '
+                + col + ' ' + typ
+                + ' DEFAULT ""'
+            )
+            try:
+                con.execute(text(sql))
+                con.commit()
+            except Exception:
+                pass
+
 @app.on_event('startup')
 def _startup():
     from reportforge.utils import get_db_path
@@ -38,6 +58,7 @@ def _startup():
         'DB: %s', get_db_path()
     )
     Base.metadata.create_all(bind=engine)
+    _migrate_findings_cols()
 
 @app.get('/', response_class=HTMLResponse)
 def serve_frontend():
