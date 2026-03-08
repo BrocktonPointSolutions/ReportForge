@@ -101,7 +101,9 @@ class FindingCreate(BaseModel):
     severity: str = 'Medium'
     status: str = 'open'
     description: str = ''
+    discussion: str = ''
     recommendation: str = ''
+    refs: str = ''
     cvss: Optional[float] = None
 
 class FindingUpdate(BaseModel):
@@ -110,7 +112,9 @@ class FindingUpdate(BaseModel):
     severity: Optional[str] = None
     status: Optional[str] = None
     description: Optional[str] = None
+    discussion: Optional[str] = None
     recommendation: Optional[str] = None
+    refs: Optional[str] = None
     cvss: Optional[float] = None
 
 class TemplateCreate(BaseModel):
@@ -307,8 +311,10 @@ def create_finding(
             severity=payload.severity,
             status=payload.status,
             description=payload.description,
+            discussion=payload.discussion,
             recommendation=(
                 payload.recommendation),
+            refs=payload.refs,
             cvss=payload.cvss,
         )
         db.add(f)
@@ -343,9 +349,13 @@ def update_finding(
             f.status = payload.status
         if payload.description is not None:
             f.description = payload.description
+        if payload.discussion is not None:
+            f.discussion = payload.discussion
         if payload.recommendation is not None:
             f.recommendation = (
                 payload.recommendation)
+        if payload.refs is not None:
+            f.refs = payload.refs
         if payload.cvss is not None:
             f.cvss = payload.cvss
         f.updated_at = dt.datetime.utcnow()
@@ -373,7 +383,9 @@ def _finding_out(f: Finding) -> dict:
         'severity': f.severity,
         'status': f.status,
         'description': f.description,
+        'discussion': f.discussion,
         'recommendation': f.recommendation,
+        'refs': f.refs,
         'cvss': f.cvss,
         'created_at': _ts(f.created_at),
         'updated_at': _ts(f.updated_at),
