@@ -26,6 +26,12 @@ _FRONTEND_DIR = (Path(__file__).resolve().parents[1] / "frontend").resolve()
 
 @app.on_event("startup")
 def _startup():
+    from reportforge.utils import get_db_path
+    import logging
+    logging.basicConfig(level=logging.INFO)
+    logging.getLogger("reportforge").info(
+        "DB: %s", get_db_path()
+    )
     Base.metadata.create_all(bind=engine)
 
 @app.get("/", response_class=HTMLResponse)
@@ -40,7 +46,12 @@ def _now_iso() -> str:
 
 @app.get("/api/health")
 def health():
-    return {"ok": True, "time": _now_iso()}
+    from reportforge.utils import get_db_path
+    return {
+        "ok": True,
+        "time": _now_iso(),
+        "db": str(get_db_path()),
+    }
 
 class ReportCreate(BaseModel):
     title: str = "Untitled Report"
