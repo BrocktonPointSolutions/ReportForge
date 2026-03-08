@@ -312,7 +312,8 @@ tr:hover td{background:rgba(255,255,255,.02)}
 
 var S={
   reports:[],templates:[],findings:[],
-  currentReport:null,currentTemplate:null,
+  currentReport:null,currentReportId:null,
+  currentTemplate:null,
   edDirty:false,tedDirty:false,
   saveTimer:null,editingFindingId:null
 };
@@ -512,6 +513,7 @@ async function createReport(){
     S.reports.unshift(r);
     closeM('modal-new-report');
     toast('Report created');
+    S.currentReportId=r.id;
     openEditor(r.id);
   }catch(e){
     toast('Create failed: '+e.message,'err');
@@ -522,6 +524,7 @@ async function openEditor(id){
   try{
     var r=await api('/api/reports/'+id);
     S.currentReport=r;
+    S.currentReportId=id;
     S.edDirty=false;
     $('editor-title').textContent=
       r.title||'Untitled';
@@ -572,7 +575,7 @@ async function saveEditor(){
     ||S.currentReport.title;
   try{
     var u=await api(
-      '/api/reports/'+S.currentReport.id,{
+      '/api/reports/'+S.currentReportId,{
       method:'PUT',
       body:JSON.stringify({
         title:title,
