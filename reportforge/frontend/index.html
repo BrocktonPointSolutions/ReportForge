@@ -394,20 +394,20 @@ function showView(name){
 
 async function loadAll(){
   try{
-    var r=await Promise.all([
-      api('/api/reports'),
-      api('/api/templates'),
-      api('/api/findings')
-    ]);
-    S.reports=r[0]||[];
-    S.templates=r[1]||[];
-    S.findings=r[2]||[];
-    renderDash();
-    popNRTemplates();
-    popFindSel();
-  }catch(e){
-    toast('Load error: '+e.message,'err');
-  }
+    var rep=await api('/api/reports');
+    S.reports=rep||[];
+  }catch(e){S.reports=[];}
+  try{
+    var tpl=await api('/api/templates');
+    S.templates=tpl||[];
+  }catch(e){S.templates=[];}
+  try{
+    var fin=await api('/api/findings');
+    S.findings=fin||[];
+  }catch(e){S.findings=[];}
+  renderDash();
+  popNRTemplates();
+  popFindSel();
 }
 
 function renderDash(){
@@ -604,14 +604,24 @@ async function saveEditor(){
         }
       })
     });
-    S.currentReport=u;
+    if(u&&u.updated_at){
+      S.currentReport.updated_at=u.updated_at;
+    }
+    S.currentReport.title=title;
     S.edDirty=false;
     $('editor-dirty').textContent='';
-    $('editor-title').textContent=u.title;
+    $('editor-title').textContent=title;
+    var rid=S.currentReportId;
     var idx=S.reports.findIndex(function(r){
-      return r.id===u.id;
+      return r.id===rid;
     });
-    if(idx>=0)S.reports[idx]=u;
+    if(idx>=0){
+      S.reports[idx].title=title;
+      if(u&&u.updated_at){
+        S.reports[idx].updated_at=
+          u.updated_at;
+      }
+    }
     toast('Saved');
   }catch(e){
     toast('Save failed: '+e.message,'err');
