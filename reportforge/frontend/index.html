@@ -84,7 +84,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
     <nav class="nav-tabs">
       <button class="nav-tab active" data-nav="dash">Dashboard</button>
       <button class="nav-tab" data-nav="reports">Reports</button>
-      <button class="nav-tab" data-nav="findings">Findings</button>
+      <button class="nav-tab" data-nav="findings">Finding Templates</button>
       <button class="nav-tab" data-nav="templates">Templates</button>
     </nav>
     <div class="topbar-right" id="topbar-right"><button class="theme-btn" id="theme-toggle">Dark Mode</button></div>
@@ -157,7 +157,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
           <div class="editor-panel" id="ed-findings">
             <div class="page-hdr" style="margin-bottom:10px">
               <span style="font-weight:600">Findings</span>
-              <button class="btn btn-primary btn-sm" id="btn-add-finding-editor">+ Add Finding</button>
+              <button class="btn btn-primary btn-sm" id="btn-add-finding-ed">+ Add from Template</button>
             </div>
             <div id="ed-findings-list"></div>
           </div>
@@ -172,8 +172,8 @@ tr:hover td{background:rgba(255,255,255,.02)}
     <!-- FINDINGS VIEW -->
     <div class="view" id="view-findings">
       <div class="page-hdr">
-        <span class="page-title">Findings</span>
-        <button class="btn btn-primary" id="btn-add-finding-global">+ Add Finding</button>
+        <span class="page-title">Finding Templates</span>
+        <button class="btn btn-primary" id="btn-new-finding-tpl">+ New Template</button>
       </div>
       <div style="display:flex;gap:10px;margin-bottom:14px">
         <select class="field-select" id="findings-rpt-sel" style="flex:1">
@@ -265,9 +265,6 @@ tr:hover td{background:rgba(255,255,255,.02)}
   <div class="modal">
     <div class="modal-hdr"><span id="fm-title">Add Finding</span><button class="btn btn-ghost btn-sm" data-close-modal="modal-finding">&#10005;</button></div>
     <div class="modal-body">
-      <div class="field-group"><label class="field-label">Report</label>
-        <select class="field-select" id="fm-report"></select>
-      </div>
       <div class="field-group"><label class="field-label">Title</label><input class="field-input" id="fm-ftitle" placeholder="Finding title"></div>
       <div class="form-row">
         <div class="field-group"><label class="field-label">Severity</label>
@@ -292,6 +289,26 @@ tr:hover td{background:rgba(255,255,255,.02)}
   </div>
 </div>
 
+<!-- ADD FINDING FROM TEMPLATE MODAL -->
+<div class="modal-overlay" id="modal-add-finding">
+  <div class="modal" style="width:520px">
+    <div class="modal-hdr">
+      <span>Add Finding from Template</span>
+      <button class="btn btn-ghost btn-sm"
+        data-close-modal="modal-add-finding">&#10005;</button>
+    </div>
+    <div class="modal-body">
+      <div id="add-finding-list"
+        style="max-height:360px;overflow-y:auto">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost"
+        data-close-modal="modal-add-finding">
+        Close</button>
+    </div>
+  </div>
+</div>
 <!-- CONFIRM DELETE MODAL -->
 <div class="modal-overlay" id="modal-confirm">
   <div class="modal" style="width:380px">
@@ -331,7 +348,8 @@ var S={
   currentReport:null,currentReportId:null,
   currentTemplate:null,
   edDirty:false,tedDirty:false,
-  saveTimer:null,editingFindingId:null
+  saveTimer:null,editingFindingId:null,
+  editingRFIdx:null
 };
 
 function esc(s){
@@ -382,7 +400,12 @@ async function api(path,opts){
 }
 
 function openM(id){$(id).classList.add('open');}
-function closeM(id){$(id).classList.remove('open');}
+function closeM(id){
+  $(id).classList.remove('open');
+  if(id==='modal-finding'){
+    S.editingRFIdx=null;
+  }
+}
 function alertMsg(msg,title){
   $('alert-msg').textContent=msg;
   $('alert-title').textContent=
@@ -408,7 +431,7 @@ function showView(name){
   }
   if(name==='reports')renderReports();
   if(name==='findings'){
-    popFindSel();renderFindings();
+    renderFindingTemplates();
   }
   if(name==='templates')renderTemplates();
   if(name==='dash')renderDash();
@@ -727,9 +750,7 @@ function renderPreview(){
         +esc(f.value||'')+'</p>';
     });
   });
-  var rf=S.findings.filter(function(f){
-    return f.report_id===r.id;
-  });
+  var rf=r.findings||[];
   if(rf.length){
     h+='<h2>Findings ('+rf.length+')</h2>';
     rf.forEach(function(f){
@@ -745,22 +766,28 @@ function renderPreview(){
 function renderEdFindings(){
   var el=$('ed-findings-list');
   if(!el||!S.currentReport)return;
-  var list=S.findings.filter(function(f){
-    return f.report_id===S.currentReport.id;
-  });
+  var list=
+    S.currentReport.findings||[];
   if(!list.length){
     el.innerHTML=
-      '<div class="empty"><p>No findings.</p></div>';
+      '<div class="empty"><p>'
+      +'No findings. Use &ldquo;Add from'
+      +' Template&rdquo; to insert one.'
+      +'</p></div>';
     return;
   }
-  el.innerHTML=list.map(fCard).join('');
+  el.innerHTML=list.map(function(f,i){
+    return rfCard(f,i);
+  }).join('');
 }
-function fCard(f){
+function rfCard(f,idx){
   var sev=(f.severity||'info').toLowerCase();
   return '<div class="fcard">'
-    +'<div style="display:flex;align-items:center;'
+    +'<div style="display:flex;'
+    +'align-items:center;'
     +'margin-bottom:6px">'
-    +'<span class="fsev sev-'+esc(sev)+'">'
+    +'<span class="fsev sev-'
+    +esc(sev)+'">'
     +esc(f.severity)+'</span>'
     +'<strong>'+esc(f.title)+'</strong>'
     +'<span style="margin-left:auto">'
@@ -770,7 +797,31 @@ function fCard(f){
     +esc(f.description||'')+'</div>'
     +'<div class="item-actions">'
     +'<button class="btn btn-ghost btn-sm"'
-    +' data-edit-f="'+f.id+'">Edit</button>'
+    +' data-edit-rf="'+idx+'">'
+    +'Edit</button>'
+    +'<button class="btn btn-danger btn-sm"'
+    +' data-rm-rf="'+idx+'">'
+    +'Remove</button>'
+    +'</div></div>';
+}
+function fCard(f){
+  var sev=(f.severity||'info').toLowerCase();
+  return '<div class="fcard">'
+    +'<div style="display:flex;'
+    +'align-items:center;'
+    +'margin-bottom:6px">'
+    +'<span class="fsev sev-'
+    +esc(sev)+'">'
+    +esc(f.severity)+'</span>'
+    +'<strong>'+esc(f.title)+'</strong>'
+    +'</div>'
+    +'<div style="color:var(--text2);'
+    +'font-size:12px;margin-bottom:8px">'
+    +esc(f.description||'')+'</div>'
+    +'<div class="item-actions">'
+    +'<button class="btn btn-ghost btn-sm"'
+    +' data-edit-f="'+f.id+'">'
+    +'Edit</button>'
     +'<button class="btn btn-danger btn-sm"'
     +' data-del-t="finding"'
     +' data-del-id="'+f.id+'"'
@@ -778,15 +829,14 @@ function fCard(f){
     +'Delete</button>'
     +'</div></div>';
 }
-function openFinding(rptId){
+function openFinding(){
   S.editingFindingId=null;
-  $('fm-title').textContent='Add Finding';
+  $('fm-title').textContent=
+    'New Finding Template';
   sv('fm-ftitle','');sv('fm-desc','');
   sv('fm-rec','');sv('fm-cvss','');
   sv('fm-severity','Medium');
   sv('fm-status','open');
-  popFmReport(rptId!=null?rptId
-    :(S.currentReport?S.currentReport.id:null));
   openM('modal-finding');
 }
 function editFinding(id){
@@ -795,29 +845,26 @@ function editFinding(id){
   });
   if(!f)return;
   S.editingFindingId=id;
-  $('fm-title').textContent='Edit Finding';
+  $('fm-title').textContent='Edit Template';
   sv('fm-ftitle',f.title);
   sv('fm-desc',f.description||'');
   sv('fm-rec',f.recommendation||'');
   sv('fm-cvss',f.cvss||'');
   sv('fm-severity',f.severity||'Medium');
   sv('fm-status',f.status||'open');
-  popFmReport(f.report_id);
   openM('modal-finding');
-}
-function popFmReport(sel){
-  var el=$('fm-report');if(!el)return;
-  el.innerHTML=S.reports.map(function(r){
-    return '<option value="'+r.id+'"'
-      +(r.id===sel?' selected':'')+'>'
-      +esc(r.title)+'</option>';
-  }).join('');
 }
 async function saveFinding(){
   var title=gv('fm-ftitle').trim();
-  if(!title){toast('Title required','err');return;}
+  if(!title){
+    toast('Title required','err');
+    return;
+  }
+  if(S.editingRFIdx!=null){
+    saveReportFinding();
+    return;
+  }
   var p={
-    report_id:gv('fm-report'),
     title:title,
     severity:gv('fm-severity'),
     status:gv('fm-status'),
@@ -830,56 +877,155 @@ async function saveFinding(){
       var u=await api(
         '/api/findings/'+S.editingFindingId,
         {method:'PUT',body:JSON.stringify(p)});
-      var idx=S.findings.findIndex(function(f){
-        return f.id===S.editingFindingId;
-      });
+      var idx=S.findings.findIndex(
+        function(f){
+          return f.id===S.editingFindingId;
+        });
       if(idx>=0)S.findings[idx]=u;
-      toast('Finding updated');
+      toast('Template updated');
     }else{
       var c=await api('/api/findings',
         {method:'POST',body:JSON.stringify(p)});
       S.findings.push(c);
-      toast('Finding added');
+      toast('Template created');
     }
     closeM('modal-finding');
-    renderEdFindings();
-    renderFindings();
+    renderFindingTemplates();
   }catch(e){
     toast('Save failed: '+e.message,'err');
   }
 }
-function popFindSel(){
-  var sel=$('findings-rpt-sel');if(!sel)return;
-  var cur=sel.value;
-  sel.innerHTML=
-    '<option value="">All Reports</option>'
-    +S.reports.map(function(r){
-      return '<option value="'+r.id+'">'
-        +esc(r.title)+'</option>';
-    }).join('');
-  if(cur)sel.value=cur;
-}
-function renderFindings(){
-  var rptId=gv('findings-rpt-sel');
-  var sev=gv('findings-sev-sel');
-  var list=S.findings.filter(function(f){
-    if(rptId&&f.report_id!==rptId)return false;
-    if(sev&&f.severity!==sev)return false;
-    return true;
-  });
-  var el=$('findings-list');if(!el)return;
-  if(!list.length){
+function openAddFindingToReport(){
+  var el=$('add-finding-list');
+  if(!el)return;
+  if(!S.findings.length){
     el.innerHTML=
-      '<div class="empty"><p>No findings.</p></div>';
+      '<div class="empty"><p>'
+      +'No finding templates. Create some'
+      +' in Finding Templates first.'
+      +'</p></div>';
+  }else{
+    var ord={
+      Critical:0,High:1,Medium:2,
+      Low:3,Info:4
+    };
+    var sorted=S.findings.slice().sort(
+      function(a,b){
+        return (ord[a.severity]||5)
+          -(ord[b.severity]||5);
+      });
+    el.innerHTML=sorted.map(function(f){
+      var sev=
+        (f.severity||'info').toLowerCase();
+      return '<div class="fcard"'
+        +' style="margin-bottom:10px">'
+        +'<div style="display:flex;'
+        +'align-items:center;'
+        +'margin-bottom:4px">'
+        +'<span class="fsev sev-'
+        +esc(sev)+'">'
+        +esc(f.severity)+'</span>'
+        +'<strong>'+esc(f.title)+'</strong>'
+        +'</div>'
+        +'<div style="color:var(--text2);'
+        +'font-size:12px;margin-bottom:6px">'
+        +esc(f.description||'')+'</div>'
+        +'<button class="btn btn-primary btn-sm"'
+        +' data-add-rf="'+f.id+'">'
+        +'Add to Report</button>'
+        +'</div>';
+    }).join('');
+  }
+  openM('modal-add-finding');
+}
+function addFindingToReport(tplId){
+  var f=S.findings.find(function(x){
+    return x.id===tplId;
+  });
+  if(!f||!S.currentReport)return;
+  var copy={
+    id:'rf-'+(Date.now()),
+    template_id:tplId,
+    title:f.title,
+    severity:f.severity,
+    status:f.status||'open',
+    description:f.description||'',
+    recommendation:f.recommendation||'',
+    cvss:f.cvss||null
+  };
+  S.currentReport.findings=
+    S.currentReport.findings||[];
+  S.currentReport.findings.push(copy);
+  closeM('modal-add-finding');
+  renderEdFindings();
+  markDirty();
+  toast('Finding added');
+}
+function editReportFinding(idx){
+  var list=S.currentReport&&
+    S.currentReport.findings||[];
+  var f=list[idx];
+  if(!f)return;
+  S.editingFindingId=null;
+  S.editingRFIdx=idx;
+  $('fm-title').textContent='Edit Finding';
+  sv('fm-ftitle',f.title);
+  sv('fm-desc',f.description||'');
+  sv('fm-rec',f.recommendation||'');
+  sv('fm-cvss',f.cvss||'');
+  sv('fm-severity',f.severity||'Medium');
+  sv('fm-status',f.status||'open');
+  openM('modal-finding');
+}
+async function saveReportFinding(){
+  var idx=S.editingRFIdx;
+  var list=S.currentReport&&
+    S.currentReport.findings||[];
+  if(idx==null||!list[idx])return;
+  var title=gv('fm-ftitle').trim();
+  if(!title){
+    toast('Title required','err');
     return;
   }
-  var ord={Critical:0,High:1,Medium:2,Low:3,Info:4};
-  list.sort(function(a,b){
-    return (ord[a.severity]||5)
-      -(ord[b.severity]||5);
-  });
+  list[idx].title=title;
+  list[idx].severity=gv('fm-severity');
+  list[idx].status=gv('fm-status');
+  list[idx].description=gv('fm-desc');
+  list[idx].recommendation=gv('fm-rec');
+  list[idx].cvss=
+    parseFloat(gv('fm-cvss'))||null;
+  closeM('modal-finding');
+  S.editingRFIdx=null;
+  renderEdFindings();
+  markDirty();
+  toast('Finding updated');
+}
+function popFindSel(){
+  var sel=$('findings-rpt-sel');
+  if(!sel)return;
+}
+function renderFindingTemplates(){
+  var el=$('findings-list');if(!el)return;
+  if(!S.findings.length){
+    el.innerHTML=
+      '<div class="empty"><p>'
+      +'No finding templates yet.'
+      +'</p></div>';
+    return;
+  }
+  var ord={Critical:0,High:1,Medium:2,
+    Low:3,Info:4};
+  var list=S.findings.slice().sort(
+    function(a,b){
+      return (ord[a.severity]||5)
+        -(ord[b.severity]||5);
+    });
   el.innerHTML=list.map(fCard).join('');
 }
+function renderFindings(){
+  renderFindingTemplates();
+}
+
 
 function renderTemplates(){
   var el=$('templates-list');if(!el)return;
@@ -1099,7 +1245,7 @@ async function doDel(type,id){
       S.findings=S.findings.filter(function(f){
         return f.id!==id;
       });
-      renderEdFindings();renderFindings();
+      renderFindingTemplates();
     }
     toast(type.charAt(0).toUpperCase()
       +type.slice(1)+' deleted');
@@ -1140,6 +1286,32 @@ document.addEventListener('click',function(e){
   if(ef){
     editFinding(
       ef.getAttribute('data-edit-f'));
+    return;
+  }
+  var erf=t.closest('[data-edit-rf]');
+  if(erf){
+    editReportFinding(
+      parseInt(
+        erf.getAttribute('data-edit-rf')));
+    return;
+  }
+  var arf=t.closest('[data-add-rf]');
+  if(arf){
+    addFindingToReport(
+      arf.getAttribute('data-add-rf'));
+    return;
+  }
+  var rrf=t.closest('[data-rm-rf]');
+  if(rrf){
+    var rfi=parseInt(
+      rrf.getAttribute('data-rm-rf'));
+    if(S.currentReport&&
+      S.currentReport.findings){
+      S.currentReport.findings
+        .splice(rfi,1);
+      renderEdFindings();
+      markDirty();
+    }
     return;
   }
   var dl=t.closest('[data-del-t]');
@@ -1191,12 +1363,11 @@ document.addEventListener('click',function(e){
   }
   if(bid==='btn-save-editor'){saveEditor();return;}
   if(bid==='btn-add-finding-ed'){
-    openFinding(
-      S.currentReport?S.currentReport.id:null);
+    openAddFindingToReport();
     return;
   }
-  if(bid==='btn-add-finding-global'){
-    openFinding(null);return;
+  if(bid==='btn-new-finding-tpl'){
+    openFinding();return;
   }
   if(bid==='btn-save-finding'){
     saveFinding();return;
