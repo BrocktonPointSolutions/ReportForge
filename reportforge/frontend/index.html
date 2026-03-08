@@ -278,9 +278,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
           </select>
         </div>
       </div>
-      <div class="field-group"><label class="field-label">Description</label><textarea class="field-textarea" id="fm-desc" rows="4"></textarea></div>
-      <div class="field-group"><label class="field-label">Recommendation</label><textarea class="field-textarea" id="fm-rec" rows="3"></textarea></div>
-      <div class="field-group"><label class="field-label">CVSS Score</label><input class="field-input" id="fm-cvss" type="number" min="0" max="10" step="0.1" placeholder="0.0"></div>
+      <div class="field-group"><label class="field-label">Observation</label><textarea class="field-textarea" id="fm-desc" rows="4"></textarea></div>      <div class="field-group"><label class="field-label">Discussion</label><textarea class="field-textarea" id="fm-discussion" rows="3"></textarea></div>      <div class="field-group"><label class="field-label">Recommendations</label><textarea class="field-textarea" id="fm-rec" rows="3"></textarea></div>      <div class="field-group"><label class="field-label">References</label><textarea class="field-textarea" id="fm-refs" rows="2" placeholder="URLs, CVEs, standards..."></textarea></div>      <div class="field-group"><label class="field-label">CVSS Score</label><input class="field-input" id="fm-cvss" type="number" min="0" max="10" step="0.1" placeholder="0.0"></div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" data-close-modal="modal-finding">Cancel</button>
@@ -833,8 +831,12 @@ function openFinding(){
   S.editingFindingId=null;
   $('fm-title').textContent=
     'New Finding Template';
-  sv('fm-ftitle','');sv('fm-desc','');
-  sv('fm-rec','');sv('fm-cvss','');
+  sv('fm-ftitle','');
+  sv('fm-desc','');
+  sv('fm-discussion','');
+  sv('fm-rec','');
+  sv('fm-refs','');
+  sv('fm-cvss','');
   sv('fm-severity','Medium');
   sv('fm-status','open');
   openM('modal-finding');
@@ -848,7 +850,9 @@ function editFinding(id){
   $('fm-title').textContent='Edit Template';
   sv('fm-ftitle',f.title);
   sv('fm-desc',f.description||'');
+  sv('fm-discussion',f.discussion||'');
   sv('fm-rec',f.recommendation||'');
+  sv('fm-refs',f.refs||'');
   sv('fm-cvss',f.cvss||'');
   sv('fm-severity',f.severity||'Medium');
   sv('fm-status',f.status||'open');
@@ -869,7 +873,9 @@ async function saveFinding(){
     severity:gv('fm-severity'),
     status:gv('fm-status'),
     description:gv('fm-desc'),
+    discussion:gv('fm-discussion'),
     recommendation:gv('fm-rec'),
+    refs:gv('fm-refs'),
     cvss:parseFloat(gv('fm-cvss'))||null
   };
   try{
@@ -950,7 +956,9 @@ function addFindingToReport(tplId){
     severity:f.severity,
     status:f.status||'open',
     description:f.description||'',
+    discussion:f.discussion||'',
     recommendation:f.recommendation||'',
+    refs:f.refs||'',
     cvss:f.cvss||null
   };
   S.currentReport.findings=
@@ -971,7 +979,9 @@ function editReportFinding(idx){
   $('fm-title').textContent='Edit Finding';
   sv('fm-ftitle',f.title);
   sv('fm-desc',f.description||'');
+  sv('fm-discussion',f.discussion||'');
   sv('fm-rec',f.recommendation||'');
+  sv('fm-refs',f.refs||'');
   sv('fm-cvss',f.cvss||'');
   sv('fm-severity',f.severity||'Medium');
   sv('fm-status',f.status||'open');
@@ -991,7 +1001,9 @@ async function saveReportFinding(){
   list[idx].severity=gv('fm-severity');
   list[idx].status=gv('fm-status');
   list[idx].description=gv('fm-desc');
+  list[idx].discussion=gv('fm-discussion');
   list[idx].recommendation=gv('fm-rec');
+  list[idx].refs=gv('fm-refs');
   list[idx].cvss=
     parseFloat(gv('fm-cvss'))||null;
   closeM('modal-finding');
