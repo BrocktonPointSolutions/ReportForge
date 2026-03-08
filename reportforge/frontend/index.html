@@ -75,7 +75,9 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .toast-error{background:#3a1010;color:#ff6b6b;border:1px solid #5a2020}
 .toast-info{background:#1a1a3a;color:#9b9bd4;border:1px solid #2a2a5a}
 @keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:none;opacity:1}}
-</style>
+.ql-wrap{background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;min-height:80px}.ql-wrap .ql-editor{min-height:80px;color:var(--text);font-size:13px;padding:8px 12px}.ql-wrap .ql-toolbar{border:none;border-bottom:1px solid var(--border);background:var(--surface2);padding:4px 8px}.ql-wrap .ql-stroke{stroke:var(--text)!important}.ql-wrap .ql-fill{fill:var(--text)!important}.ql-wrap .ql-picker{color:var(--text)!important}.ql-wrap .ql-picker-options{background:var(--surface2)!important;border-color:var(--border)!important}.ql-wrap.ql-snow{border-radius:6px}</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@2/dist/quill.snow.css">
+<script src="https://cdn.jsdelivr.net/npm/quill@2/dist/quill.js"></script>
 </head>
 <body>
 <div class="app">
@@ -278,7 +280,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
           </select>
         </div>
       </div>
-      <div class="field-group"><label class="field-label">Observation</label><textarea class="field-textarea" id="fm-desc" rows="4"></textarea></div>      <div class="field-group"><label class="field-label">Discussion</label><textarea class="field-textarea" id="fm-discussion" rows="3"></textarea></div>      <div class="field-group"><label class="field-label">Recommendations</label><textarea class="field-textarea" id="fm-rec" rows="3"></textarea></div>      <div class="field-group"><label class="field-label">References</label><textarea class="field-textarea" id="fm-refs" rows="2" placeholder="URLs, CVEs, standards..."></textarea></div>      <div class="field-group"><label class="field-label">CVSS Score</label><input class="field-input" id="fm-cvss" type="number" min="0" max="10" step="0.1" placeholder="0.0"></div>
+      <div class="field-group"><label class="field-label">Observation</label><div class="ql-wrap" id="fm-desc"></div></div>      <div class="field-group"><label class="field-label">Discussion</label><div class="ql-wrap" id="fm-discussion"></div></div>      <div class="field-group"><label class="field-label">Recommendations</label><div class="ql-wrap" id="fm-rec"></div></div>      <div class="field-group"><label class="field-label">References</label><div class="ql-wrap" id="fm-refs"></div></div>      <div class="field-group"><label class="field-label">CVSS Score</label><input class="field-input" id="fm-cvss" type="number" min="0" max="10" step="0.1" placeholder="0.0"></div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" data-close-modal="modal-finding">Cancel</button>
@@ -384,6 +386,42 @@ function toast(msg,tp){
 function $(id){return document.getElementById(id);}
 function gv(id){return $(id)?$(id).value:'';}
 function sv(id,v){if($(id))$(id).value=(v==null?'':v);}
+
+var _Q={};
+function _qv(k){
+  var q=_Q[k];
+  if(!q)return '';
+  var h=q.root.innerHTML;
+  if(h==='<p><br></p>')return '';
+  return h;
+}
+function _qs(k,html){
+  var q=_Q[k];
+  if(!q)return;
+  q.clipboard.dangerouslyPasteHTML(
+    html||''
+  );
+}
+function _initQ(id,ph){
+  var tb=[
+    [{header:[1,2,3,false]}],
+    ['bold','italic','underline'],
+    [{list:'ordered'},{list:'bullet'}],
+    ['link','clean']
+  ];
+  _Q[id]=new Quill(
+    '#'+id,
+    {theme:'snow',
+     placeholder:ph||'',
+     modules:{toolbar:tb}}
+  );
+}
+function initQuills(){
+  _initQ('fm-desc','Enter observation...');
+  _initQ('fm-discussion','Enter discussion...');
+  _initQ('fm-rec','Enter recommendations...');
+  _initQ('fm-refs','Enter references...');
+}
 
 async function api(path,opts){
   var h={'Content-Type':'application/json'};
@@ -832,10 +870,10 @@ function openFinding(){
   $('fm-title').textContent=
     'New Finding Template';
   sv('fm-ftitle','');
-  sv('fm-desc','');
-  sv('fm-discussion','');
-  sv('fm-rec','');
-  sv('fm-refs','');
+  _qs('fm-desc','');
+  _qs('fm-discussion','');
+  _qs('fm-rec','');
+  _qs('fm-refs','');
   sv('fm-cvss','');
   sv('fm-severity','Medium');
   sv('fm-status','open');
@@ -849,10 +887,10 @@ function editFinding(id){
   S.editingFindingId=id;
   $('fm-title').textContent='Edit Template';
   sv('fm-ftitle',f.title);
-  sv('fm-desc',f.description||'');
-  sv('fm-discussion',f.discussion||'');
-  sv('fm-rec',f.recommendation||'');
-  sv('fm-refs',f.refs||'');
+  _qs('fm-desc',f.description||'');
+  _qs('fm-discussion',f.discussion||'');
+  _qs('fm-rec',f.recommendation||'');
+  _qs('fm-refs',f.refs||'');
   sv('fm-cvss',f.cvss||'');
   sv('fm-severity',f.severity||'Medium');
   sv('fm-status',f.status||'open');
@@ -872,10 +910,10 @@ async function saveFinding(){
     title:title,
     severity:gv('fm-severity'),
     status:gv('fm-status'),
-    description:gv('fm-desc'),
-    discussion:gv('fm-discussion'),
-    recommendation:gv('fm-rec'),
-    refs:gv('fm-refs'),
+    description:_qv('fm-desc'),
+    discussion:_qv('fm-discussion'),
+    recommendation:_qv('fm-rec'),
+    refs:_qv('fm-refs'),
     cvss:parseFloat(gv('fm-cvss'))||null
   };
   try{
@@ -978,10 +1016,10 @@ function editReportFinding(idx){
   S.editingRFIdx=idx;
   $('fm-title').textContent='Edit Finding';
   sv('fm-ftitle',f.title);
-  sv('fm-desc',f.description||'');
-  sv('fm-discussion',f.discussion||'');
-  sv('fm-rec',f.recommendation||'');
-  sv('fm-refs',f.refs||'');
+  _qs('fm-desc',f.description||'');
+  _qs('fm-discussion',f.discussion||'');
+  _qs('fm-rec',f.recommendation||'');
+  _qs('fm-refs',f.refs||'');
   sv('fm-cvss',f.cvss||'');
   sv('fm-severity',f.severity||'Medium');
   sv('fm-status',f.status||'open');
@@ -1000,10 +1038,10 @@ async function saveReportFinding(){
   list[idx].title=title;
   list[idx].severity=gv('fm-severity');
   list[idx].status=gv('fm-status');
-  list[idx].description=gv('fm-desc');
-  list[idx].discussion=gv('fm-discussion');
-  list[idx].recommendation=gv('fm-rec');
-  list[idx].refs=gv('fm-refs');
+  list[idx].description=_qv('fm-desc');
+  list[idx].discussion=_qv('fm-discussion');
+  list[idx].recommendation=_qv('fm-rec');
+  list[idx].refs=_qv('fm-refs');
   list[idx].cvss=
     parseFloat(gv('fm-cvss'))||null;
   closeM('modal-finding');
@@ -1464,6 +1502,7 @@ function toggleTheme(){
   }catch(e){_applyTheme(false);}
 })();
 loadAll();
+initQuills();
 })();
 </script>
 </body>
