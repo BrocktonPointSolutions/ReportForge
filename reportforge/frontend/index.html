@@ -164,6 +164,11 @@ tr:hover td{background:rgba(255,255,255,.02)}
             <div id="ed-findings-list"></div>
           </div>
           <div class="editor-panel" id="ed-preview">
+            <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+              <button class="btn btn-secondary btn-sm" data-export-fmt="html">Export HTML</button>
+              <button class="btn btn-secondary btn-sm" data-export-fmt="pdf">Export PDF</button>
+              <button class="btn btn-secondary btn-sm" data-export-fmt="docx">Export DOCX</button>
+            </div>
             <div class="preview-box" id="preview-content"></div>
           </div>
         </div>
@@ -766,6 +771,18 @@ function renderEdSections(){
       +(flds||'<p>No fields.</p>')
       +'</div>';
   }).join('');
+}
+function exportReport(fmt){
+  if(!S.currentReport)return;
+  var rid=S.currentReport.id;
+  var url='/api/reports/'+rid
+    +'/export/'+fmt;
+  var a=document.createElement('a');
+  a.href=url;
+  a.download='';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
 }
 function renderPreview(){
   var r=S.currentReport;if(!r)return;
@@ -1451,6 +1468,12 @@ document.addEventListener('click',function(e){
     saveTemplate();return;
   }
   if(bid==='btn-add-section'){addSection();return;}
+  var ef=t.closest('[data-export-fmt]');
+  if(ef){
+    exportReport(
+      ef.getAttribute('data-export-fmt'));
+    return;
+  }
 });
 
 document.addEventListener('change',function(e){
