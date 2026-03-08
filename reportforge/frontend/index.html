@@ -1139,7 +1139,7 @@ document.addEventListener('click',function(e){
   var ef=t.closest('[data-edit-f]');
   if(ef){
     editFinding(
-      parseInt(ef.getAttribute('data-edit-f')));
+      ef.getAttribute('data-edit-f'));
     return;
   }
   var dl=t.closest('[data-del-t]');
