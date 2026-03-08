@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Any, Optional
 
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from sqlalchemy import select
@@ -507,3 +507,253 @@ def _template_out(
         except:
             out['sections'] = []
     return out
+
+def _build_report_html(r, findings):
+    t = r.title or 'Report'
+    esc = lambda s: (
+        str(s)
+        .replace('&','&amp;')
+        .replace('<','&lt;')
+        .replace('>','&gt;')
+    )
+    parts = [
+        '<!DOCTYPE html>',
+        '<html><head>',
+        '<meta charset="UTF-8">',
+        '<title>' + esc(t) + '</title>',
+        '<style>',
+        'body{font-family:Arial,sans-serif;',
+        'margin:40px;color:#1a1d27}',
+        'h1{font-size:24px;margin-bottom:8px}',
+        'h2{font-size:18px;margin-top:32px;',
+        'border-bottom:2px solid #4f6ef7;',
+        'padding-bottom:4px}',
+        '.meta{color:#555;margin-bottom:24px}',
+        '.finding{border:1px solid #ccc;',
+        'border-radius:6px;padding:16px;',
+        'margin-bottom:16px}',
+        '.sev{display:inline-block;',
+        'padding:2px 8px;border-radius:4px;',
+        'font-size:11px;font-weight:700;',
+        'margin-left:8px}',
+        '.critical{background:#d32f2f;color:#fff}',
+        '.high{background:#f57c00;color:#fff}',
+        '.medium{background:#f9a825;color:#000}',
+        '.low{background:#388e3c;color:#fff}',
+        '.info{background:#0288d1;color:#fff}',
+        '</style></head><body>',
+    ]
+    parts.append(
+        '<h1>' + esc(t) + '</h1>')
+    meta = []
+    d = json.loads(r.data_json or '{}')
+    if r.org:
+        meta.append('Client: ' + esc(r.org))
+    if r.assessment_date:
+        meta.append(
+            'Date: ' + esc(r.assessment_date))
+    if r.authors:
+        meta.append(
+            'Authors: ' + esc(r.authors))
+    if meta:
+        parts.append(
+            '<p class="meta">' +
+            ' | '.join(meta) + '</p>')
+    secs = d.get('sections', [])
+    for sec in secs:
+        parts.append(
+            '<h2>' + esc(sec.get(
+            'title','')) + '</h2>')
+        for fld in sec.get('fields',[]):
+            lbl = esc(fld.get('label',''))
+            val = esc(fld.get('value',''))
+            parts.append(
+                '<p><b>' + lbl +
+                ':</b> ' + val + '</p>')
+    if findings:
+        parts.append(
+            '<h2>Findings (' +
+            str(len(findings)) + ')</h2>')
+        for f in findings:
+            sev = (f.get('severity')
+                   or 'info').lower()
+            parts.append(
+                '<div class="finding">')
+            parts.append(
+                '<b>' + esc(f.get(
+                'title','')) + '</b>'
+                + '<span class="sev '
+                + sev + '">' + sev
+                + '</span>')
+            for lbl, key in [
+                ('Observation','description'),
+                ('Discussion','discussion'),
+                ('Recommendations',
+                 'recommendation'),
+                ('References','refs'),
+            ]:
+                val = f.get(key,'')
+                if val:
+                    parts.append(
+                        '<p><b>' + lbl
+                        + ':</b></p>'
+                        + '<div>' + val
+                        + '</div>')
+            parts.append('</div>')
+    parts.append('</body></html>')
+    return '\n'.join(parts)
+
+def _get_report_for_export(rid):
+    with SessionLocal() as db:
+        r = db.get(Report, rid)
+        if not r:
+            raise HTTPException(
+                404, 'Report not found')
+        d = json.loads(
+            r.data_json or '{}')
+        findings = d.get('findings', [])
+        return r, findings
+
+@app.get('/api/reports/{rid}/export/html')
+def export_html(rid: str):
+    r, findings = _get_report_for_export(
+        rid)
+    html = _build_report_html(r, findings)
+    fname = (r.title or 'report')
+    fname = fname.replace(' ', '_')
+    fname = fname + '.html'
+    return Response(
+        content=html,
+        media_type='text/html',
+        headers={
+            'Content-Disposition':
+            'attachment; filename="' +
+            fname + '"'
+        }
+    )
+
+@app.get('/api/reports/{rid}/export/pdf')
+def export_pdf(rid: str):
+    r, findings = _get_report_for_export(
+        rid)
+    html = _build_report_html(r, findings)
+    try:
+        from weasyprint import HTML
+        pdf = HTML(
+            string=html
+        ).write_pdf()
+    except Exception as e:
+        raise HTTPException(
+            500,
+            'PDF generation failed: '
+            + str(e))
+    fname = (r.title or 'report')
+    fname = fname.replace(' ', '_')
+    fname = fname + '.pdf'
+    return Response(
+        content=pdf,
+        media_type='application/pdf',
+        headers={
+            'Content-Disposition':
+            'attachment; filename="' +
+            fname + '"'
+        }
+    )
+
+@app.get('/api/reports/{rid}/export/docx')
+def export_docx(rid: str):
+    r, findings = _get_report_for_export(
+        rid)
+    try:
+        from docx import Document
+        from docx.shared import Pt, RGBColor
+        from bs4 import BeautifulSoup
+        doc = Document()
+        doc.add_heading(
+            r.title or 'Report', 0)
+        d = json.loads(
+            r.data_json or '{}')
+        meta_lines = []
+        if r.org:
+            meta_lines.append(
+                'Client: ' + r.org)
+        if r.assessment_date:
+            meta_lines.append(
+                'Date: ' + r.assessment_date)
+        if r.authors:
+            meta_lines.append(
+                'Authors: ' + r.authors)
+        for ml in meta_lines:
+            doc.add_paragraph(ml)
+        secs = d.get('sections', [])
+        for sec in secs:
+            doc.add_heading(
+                sec.get('title',''), 1)
+            for fld in sec.get(
+                'fields',[]):
+                p = doc.add_paragraph()
+                p.add_run(
+                    fld.get(
+                    'label','')+': '
+                ).bold = True
+                p.add_run(
+                    fld.get('value',''))
+        if findings:
+            doc.add_heading(
+                'Findings', 1)
+            for f in findings:
+                title = f.get('title','')
+                sev = f.get(
+                    'severity','')
+                doc.add_heading(
+                    title + ' [' +
+                    sev + ']', 2)
+                for lbl, key in [
+                  ('Observation',
+                   'description'),
+                  ('Discussion',
+                   'discussion'),
+                  ('Recommendations',
+                   'recommendation'),
+                  ('References',
+                   'refs'),
+                ]:
+                    html = f.get(key,'')
+                    if not html:
+                        continue
+                    p2 = doc.add_paragraph()
+                    p2.add_run(
+                        lbl + ':'
+                    ).bold = True
+                    soup = BeautifulSoup(
+                        html, 'html.parser')
+                    txt = soup.get_text(
+                        separator='\n')
+                    doc.add_paragraph(txt)
+        import io
+        buf = io.BytesIO()
+        doc.save(buf)
+        buf.seek(0)
+        data = buf.read()
+    except Exception as e:
+        raise HTTPException(
+            500,
+            'DOCX generation failed: '
+            + str(e))
+    fname = (r.title or 'report')
+    fname = fname.replace(' ', '_')
+    fname = fname + '.docx'
+    ct = (
+        'application/vnd.openxmlformats'
+        '-officedocument'
+        '.wordprocessingml.document'
+    )
+    return Response(
+        content=data,
+        media_type=ct,
+        headers={
+            'Content-Disposition':
+            'attachment; filename="' +
+            fname + '"'
+        }
+    )
