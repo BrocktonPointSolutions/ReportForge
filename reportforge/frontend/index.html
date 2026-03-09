@@ -141,7 +141,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
           <div class="editor-tabs">
             <button class="editor-tab active" data-tab="info">Info</button>
             <button class="editor-tab" data-tab="sections">Sections</button>
-            <button class="editor-tab" data-tab="findings">Findings</button>
+            <button class="editor-tab" id="findings-tab-btn" data-tab="findings">Findings</button>
             <button class="editor-tab" data-tab="preview">Preview</button>
           </div>
           <div class="editor-panel active" id="ed-info">
@@ -646,6 +646,7 @@ async function openEditor(id){
     sv('ed-summary',m.summary||'');
     renderEdSections();
     renderEdFindings();
+    syncFindingsTab();
     switchTab('info');
     showView('editor');
   }catch(e){
@@ -827,6 +828,18 @@ function renderPreview(){
   $('preview-content').innerHTML=h;
 }
 
+function syncFindingsTab(){
+  var hasFindings=S.currentReport&&
+    (S.currentReport.findings||[]).length>0;
+  var btn=$('findings-tab-btn');
+  var panel=$('ed-findings');
+  if(btn){
+    btn.style.display=hasFindings?'':' none';
+  }
+  if(panel&&!hasFindings){
+    panel.classList.remove('active');
+  }
+}
 function renderEdFindings(){
   var el=$('ed-findings-list');
   if(!el||!S.currentReport)return;
@@ -1032,6 +1045,7 @@ function addFindingToReport(tplId){
   S.currentReport.findings.push(copy);
   closeM('modal-add-finding');
   renderEdFindings();
+  syncFindingsTab();
   markDirty();
   toast('Finding added');
 }
@@ -1368,6 +1382,7 @@ document.addEventListener('click',function(e){
       S.currentReport.findings
         .splice(rfi,1);
       renderEdFindings();
+      syncFindingsTab();
       markDirty();
     }
     return;
