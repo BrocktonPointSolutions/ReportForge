@@ -103,8 +103,8 @@ tr:hover td{background:rgba(255,255,255,.02)}
         <div class="stat-card"><div class="stat-num" id="stat-final">0</div><div class="stat-label">Final</div></div>
       </div>
       <div class="card">
-        <div style="font-weight:600;margin-bottom:12px">Recent Reports</div>
-        <div id="dash-recent"></div>
+        <div style="font-weight:600;margin-bottom:12px">In-Progress Reports</div>
+        <div id="dash-inprogress"></div>
       </div>
     </div>
 
@@ -511,29 +511,31 @@ function renderDash(){
     r.filter(function(x){
       return x.status==='final';
     }).length;
-  var recent=r.slice().sort(function(a,b){
+  var inprogress=r.filter(function(x){
+    return x.status==='draft'||x.status==='review';
+  }).sort(function(a,b){
     return (b.updated_at||'')
       .localeCompare(a.updated_at||'');
-  }).slice(0,5);
-  var el=$('dash-recent');
-  if(!recent.length){
+  });
+  var el=$('dash-inprogress');
+  if(!inprogress.length){
     el.innerHTML=
-      '<div class="empty"><p>No reports.</p></div>';
+      '<div class="empty-state"><p>No in-progress reports.</p></div>';
     return;
   }
-  var rows=recent.map(function(r){
-    return '<tr data-open-rpt="'+r.id+'"'
-      +' style="cursor:pointer"><td>'
-      +esc(r.title)+'</td><td>'
-      +bdg(r.status)+'</td><td>'
-      +fmtDate(r.updated_at)+'</td></tr>';
-  }).join('');
   el.innerHTML='<table><thead><tr>'
     +'<th>Title</th><th>Status</th>'
-    +'<th>Updated</th></tr></thead><tbody>'
-    +rows+'</tbody></table>';
+    +'<th>Updated</th><th></th></tr></thead><tbody>'
+    +inprogress.map(function(rep){
+      return '<tr>'
+        +'<td style="font-weight:500">'+esc(rep.title)+'</td>'
+        +'<td>'+bdg(rep.status)+'</td>'
+        +'<td>'+fmtDate(rep.updated_at)+'</td>'
+        +'<td><button class="btn btn-primary btn-sm" data-open-rpt="'+rep.id+'">Open</button></td>'
+        +'</tr>';
+    }).join('')
+    +'</tbody></table>';
 }
-
 function renderReports(){
   var q=gv('rpt-search').toLowerCase();
   var list=S.reports.filter(function(r){
