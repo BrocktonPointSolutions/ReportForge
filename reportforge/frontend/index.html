@@ -163,7 +163,7 @@ tr:hover td{background:rgba(255,255,255,.015)}
     </div>
     <div class="nav-item" data-nav="templates">
       <svg class="ni" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="2" width="14" height="2" rx="1"/><rect x="1" y="6" width="14" height="2" rx="1"/><rect x="1" y="10" width="9" height="2" rx="1"/></svg>
-      Template Builder
+      Report Templates
     </div>
     <div class="nav-section-label" style="margin-top:6px">Output</div>
     <div class="nav-item" id="nav-preview-btn">
@@ -176,7 +176,7 @@ tr:hover td{background:rgba(255,255,255,.015)}
       <div class="cr-label">Current Report</div>
       <div class="cr-title" id="cr-title">No report open</div>
       <div class="cr-bar-wrap"><div class="cr-bar" id="cr-bar" style="width:0%"></div></div>
-      <div class="cr-pct" id="cr-pct">ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ</div>
+      <div class="cr-pct" id="cr-pct">ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ</div>
     </div>
   </div>
 </div>
@@ -327,7 +327,7 @@ tr:hover td{background:rgba(255,255,255,.015)}
     <!-- TEMPLATES -->
     <div class="view" id="view-templates">
       <div class="page-hdr">
-        <span class="page-title">Template Builder</span>
+        <span class="page-title">Report Templates</span>
         <button class="btn btn-primary" id="btn-new-template">+ New Template</button>
       </div>
       <div id="templates-list"></div>
@@ -532,7 +532,7 @@ function bdg(st){
 function updateCrCard(){
   var r=S.currentReport;
   var ttl=$('cr-title');var bar=$('cr-bar');var pct=$('cr-pct');
-  if(!r){if(ttl)ttl.textContent='No report open';if(bar)bar.style.width='0%';if(pct)pct.textContent='ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ';return;}
+  if(!r){if(ttl)ttl.textContent='No report open';if(bar)bar.style.width='0%';if(pct)pct.textContent='ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ';return;}
   if(ttl)ttl.textContent=r.title||'Untitled';
   var d=r.data||{};var m=d.report||{};
   var filled=0,total=5;
@@ -543,7 +543,7 @@ function updateCrCard(){
   if(pct)pct.textContent=p+'% complete';
 }
 function updateTopbar(name){
-  var titles={dash:'Dashboard',reports:'Reports',editor:'Report Editor',findings:'Finding Templates',templates:'Template Builder','template-editor':'Template Editor',preview:'Report Preview'};
+  var titles={dash:'Dashboard',reports:'Reports',editor:'Report Editor',findings:'Finding Templates',templates:'Report Templates','template-editor':'Template Editor',preview:'Report Preview'};
   var el=$('topbar-title');if(el)el.textContent=titles[name]||name;
   var prevBtn=$('btn-preview-report');
   if(prevBtn)prevBtn.style.display=(name==='editor')?'':'none';
