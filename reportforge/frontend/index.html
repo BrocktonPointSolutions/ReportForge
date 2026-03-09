@@ -136,6 +136,38 @@ tr:hover td{background:rgba(255,255,255,.015)}
 .ql-wrap .ql-picker{color:var(--text2)!important}.ql-wrap .ql-picker-options{background:var(--surface2)!important;border-color:var(--border)!important}
 .ql-wrap.ql-snow{border-radius:6px}
 ::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+
+/* ── Frameworks Page ─────────────────────────────── */
+.fw-page-hdr{margin-bottom:24px}
+.fw-page-hdr h2{font-size:20px;font-weight:700;color:var(--text);margin:0 0 4px}
+.fw-page-hdr h2 span{font-size:13px;font-weight:400;color:var(--text3);margin-left:10px;letter-spacing:.04em}
+.fw-page-hdr p{font-size:13px;color:var(--text2);margin:0}
+.fw-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.fw-card{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:20px;cursor:pointer;transition:.15s;position:relative}
+.fw-card:hover{border-color:var(--accent);background:var(--surface3)}
+.fw-card.selected{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-glow)}
+.fw-card-check{position:absolute;top:14px;right:14px;width:20px;height:20px;border-radius:50%;border:2px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:11px;color:transparent;transition:.15s}
+.fw-card.selected .fw-card-check{background:var(--accent);border-color:var(--accent);color:#000}
+.fw-badge{display:inline-block;padding:3px 8px;border-radius:5px;font-size:10px;font-weight:700;letter-spacing:.05em;margin-bottom:10px}
+.fw-badge.cis{background:#1a4a3a;color:#2dd4aa}
+.fw-badge.soc2{background:#1a2d4a;color:#60a5fa}
+.fw-badge.pci{background:#3a2000;color:#fb923c}
+.fw-badge.nist{background:#2a1a4a;color:#a78bfa}
+.fw-badge.iso{background:#1a3a2a;color:#34d399}
+.fw-badge.hipaa{background:#3a1a2a;color:#f472b6}
+.fw-card h3{font-size:15px;font-weight:700;color:var(--text);margin:0 0 6px}
+.fw-card p{font-size:12px;color:var(--text2);line-height:1.5;margin:0 0 12px}
+.fw-meta{display:flex;gap:12px;flex-wrap:wrap}
+.fw-stat{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text3)}
+.fw-stat svg{width:12px;height:12px;opacity:.6}
+.fw-custom{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px}
+.fw-custom-icon{width:40px;height:40px;border-radius:10px;background:var(--surface3);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.fw-custom-text h4{font-size:14px;font-weight:600;color:var(--text);margin:0 0 3px}
+.fw-custom-text p{font-size:12px;color:var(--text2);margin:0}
+.fw-import-bar{margin-top:20px;display:flex;align-items:center;gap:12px}
+.fw-selected-count{font-size:13px;color:var(--text2);flex:1}
+.fw-selected-count strong{color:var(--accent)}
+
 </style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@2/dist/quill.snow.css">
 <script src="https://cdn.jsdelivr.net/npm/quill@2/dist/quill.js"></script>
@@ -161,6 +193,10 @@ tr:hover td{background:rgba(255,255,255,.015)}
       Findings
       <span class="nav-badge" id="sb-findings-count">0</span>
     </div>
+    <div class="nav-item" data-nav="frameworks">
+      <svg class="ni" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1L1 4v4c0 4 3.1 6.8 7 7.9 3.9-1.1 7-3.9 7-7.9V4L8 1z" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+      Frameworks
+    </div>
     <div class="nav-item" data-nav="templates">
       <svg class="ni" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="2" width="14" height="2" rx="1"/><rect x="1" y="6" width="14" height="2" rx="1"/><rect x="1" y="10" width="9" height="2" rx="1"/></svg>
       Report Templates
@@ -176,7 +212,7 @@ tr:hover td{background:rgba(255,255,255,.015)}
       <div class="cr-label">Current Report</div>
       <div class="cr-title" id="cr-title">No report open</div>
       <div class="cr-bar-wrap"><div class="cr-bar" id="cr-bar" style="width:0%"></div></div>
-      <div class="cr-pct" id="cr-pct">ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ</div>
+      <div class="cr-pct" id="cr-pct">ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ</div>
     </div>
   </div>
 </div>
@@ -192,7 +228,28 @@ tr:hover td{background:rgba(255,255,255,.015)}
   </div>
   <div class="main-scroll">
 
-    <!-- DASHBOARD -->
+    <!-- FRAMEWORKS -->
+<div class="view" id="view-frameworks">
+  <div class="fw-page-hdr">
+    <h2>Security Frameworks <span>Select one or more to import into your report</span></h2>
+    <p>Each framework loads a pre-structured template with the appropriate controls, categories, and compliance mapping.</p>
+  </div>
+  <div class="fw-grid" id="fw-grid"></div>
+  <div class="fw-custom">
+    <div class="fw-custom-icon">&#10011;</div>
+    <div class="fw-custom-text">
+      <h4>Custom Framework</h4>
+      <p>Upload your own framework as CSV/JSON or build it from scratch in the Template Builder.</p>
+    </div>
+    <button class="btn btn-secondary" style="margin-left:auto" data-nav="templates">Open Builder &rarr;</button>
+  </div>
+  <div class="fw-import-bar">
+    <div class="fw-selected-count" id="fw-count">Select frameworks above to import</div>
+    <button class="btn btn-primary" id="fw-import-btn" onclick="importSelectedFrameworks()" style="display:none">Import Selected &rarr;</button>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
     <div class="view active" id="view-dash">
       <div class="dash-hero">
         <div class="hero-eyebrow">Report Writing Tool</div>
@@ -200,7 +257,7 @@ tr:hover td{background:rgba(255,255,255,.015)}
         <div class="hero-sub">Create professional security assessment reports with industry-standard frameworks. Build custom templates or start from scratch.</div>
         <div class="hero-actions">
           <button class="btn btn-primary" id="btn-hero-new">+ New Report</button>
-          <button class="btn btn-ghost" data-nav="templates">Import Framework</button>
+          <button class="btn btn-ghost" data-nav="frameworks">Import Framework</button>
         </div>
       </div>
       <div class="stats-row">
@@ -532,7 +589,7 @@ function bdg(st){
 function updateCrCard(){
   var r=S.currentReport;
   var ttl=$('cr-title');var bar=$('cr-bar');var pct=$('cr-pct');
-  if(!r){if(ttl)ttl.textContent='No report open';if(bar)bar.style.width='0%';if(pct)pct.textContent='ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ';return;}
+  if(!r){if(ttl)ttl.textContent='No report open';if(bar)bar.style.width='0%';if(pct)pct.textContent='ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ';return;}
   if(ttl)ttl.textContent=r.title||'Untitled';
   var d=r.data||{};var m=d.report||{};
   var filled=0,total=5;
@@ -543,7 +600,7 @@ function updateCrCard(){
   if(pct)pct.textContent=p+'% complete';
 }
 function updateTopbar(name){
-  var titles={dash:'Dashboard',reports:'Reports',editor:'Report Editor',findings:'Finding Templates',templates:'Report Templates','template-editor':'Template Editor',preview:'Report Preview'};
+  var titles={dash:'Dashboard',reports:'Reports',editor:'Report Editor',findings:'Finding Templates',templates:'Report Templates',frameworks:'Security Frameworks','template-editor':'Template Editor',preview:'Report Preview'};
   var el=$('topbar-title');if(el)el.textContent=titles[name]||name;
   var prevBtn=$('btn-preview-report');
   if(prevBtn)prevBtn.style.display=(name==='editor')?'':'none';
@@ -623,6 +680,75 @@ function alertMsg(msg,title){
   openM('modal-alert');
 }
 
+var FRAMEWORKS=[
+  {id:'cis',name:'CIS Controls v8',badge:'CIS',badgeClass:'cis',
+   desc:'Center for Internet Security Controls — 18 control groups covering essential cyber hygiene from asset management to incident response.',
+   stats:[{label:'18 Controls'},{label:'153 Safeguards'},{label:'2021'}]},
+  {id:'soc2',name:'SOC 2 Type II',badge:'SOC2',badgeClass:'soc2',
+   desc:'AICPA Trust Services Criteria — evaluating controls for Security, Availability, Confidentiality, Processing Integrity, and Privacy.',
+   stats:[{label:'5 Categories'},{label:'64 Criteria'},{label:'2017'}]},
+  {id:'pci',name:'PCI DSS v4.0',badge:'PCI-DSS',badgeClass:'pci',
+   desc:'Payment Card Industry Data Security Standard — protecting cardholder data through network security, access control, and monitoring requirements.',
+   stats:[{label:'12 Requirements'},{label:'281 Controls'},{label:'2022'}]},
+  {id:'nist',name:'NIST CSF 2.0',badge:'NIST',badgeClass:'nist',
+   desc:'NIST Cybersecurity Framework — Govern, Identify, Protect, Detect, Respond, Recover. Risk-based approach to managing cybersecurity risk.',
+   stats:[{label:'6 Functions'},{label:'106 Outcomes'},{label:'2024'}]},
+  {id:'iso27001',name:'ISO/IEC 27001:2022',badge:'ISO',badgeClass:'iso',
+   desc:'International standard for information security management systems — organizational security controls and risk treatment methodology.',
+   stats:[{label:'4 Clauses'},{label:'93 Controls'},{label:'2022'}]},
+  {id:'hipaa',name:'HIPAA Security Rule',badge:'HIPAA',badgeClass:'hipaa',
+   desc:'Health Insurance Portability Act — safeguarding electronic protected health information through administrative, physical, and technical controls.',
+   stats:[{label:'3 Safeguards'},{label:'45 Standards'},{label:'2013'}]}
+];
+var _fwSelected=new Set();
+function renderFrameworks(){
+  var grid=$('fw-grid');
+  if(!grid)return;
+  grid.innerHTML=FRAMEWORKS.map(function(fw){
+    var sel=_fwSelected.has(fw.id);
+    var imported=S.templates.some(function(t){return t.framework_id===fw.id;});
+    var statsHtml=fw.stats.map(function(st){
+      return '<div class="fw-stat"><svg viewBox="0 0 12 12" fill="currentColor"><circle cx="6" cy="6" r="3"/></svg>'+esc(st.label)+'</div>';
+    }).join('');
+    return '<div class="fw-card'+(sel?' selected':'')+(imported?' imported':'')+'" onclick="toggleFw(''+fw.id+'')">'+
+      '<div class="fw-card-check">✓</div>'+
+      '<span class="fw-badge '+fw.badgeClass+'">'+esc(fw.badge)+'</span>'+
+      '<h3>'+esc(fw.name)+'</h3>'+
+      '<p>'+esc(fw.desc)+'</p>'+
+      '<div class="fw-meta">'+statsHtml+'</div>'+
+      (imported?'<div style="margin-top:8px;font-size:11px;color:var(--accent)">✓ Already imported</div>':'')+
+      '</div>';
+  }).join('');
+  updateFwBar();
+}
+function toggleFw(id){
+  if(_fwSelected.has(id))_fwSelected.delete(id);
+  else _fwSelected.add(id);
+  renderFrameworks();
+}
+function updateFwBar(){
+  var cnt=$('fw-count');var btn=$('fw-import-btn');var n=_fwSelected.size;
+  if(cnt)cnt.innerHTML=n===0?'Select frameworks above to import':'<strong>'+n+'</strong> framework'+(n>1?'s':'')+' selected';
+  if(btn)btn.style.display=n>0?'':'none';
+}
+async function importSelectedFrameworks(){
+  var ids=Array.from(_fwSelected);if(!ids.length)return;
+  var btn=$('fw-import-btn');
+  if(btn){btn.textContent='Importing…';btn.disabled=true;}
+  var errors=[];
+  for(var i=0;i<ids.length;i++){
+    var fw=FRAMEWORKS.find(function(f){return f.id===ids[i];});
+    if(!fw||S.templates.some(function(t){return t.framework_id===fw.id;}))continue;
+    try{
+      var r=await api('/api/templates',{method:'POST',body:JSON.stringify({name:fw.name,framework_id:fw.id,sections:[],description:fw.desc})});
+      S.templates.push(r);
+    }catch(e){errors.push(fw.name);}
+  }
+  _fwSelected.clear();renderFrameworks();
+  if(btn){btn.textContent='Import Selected →';btn.disabled=false;}
+  if(errors.length)toast('Failed: '+errors.join(', '),'err');
+  else toast('Framework'+(ids.length>1?'s':'')+' imported successfully');
+}
 function showView(name){
   var vs=document.querySelectorAll('.view');
   var ns=document.querySelectorAll('.nav-item');
@@ -637,6 +763,7 @@ function showView(name){
   if(name==='templates')renderTemplates();
   if(name==='dash')renderDash();
   if(name==='preview')renderFullPreview();
+  if(name==='frameworks')renderFrameworks();
 }
 async function loadAll(){
   try{
