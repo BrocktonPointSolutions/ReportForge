@@ -123,28 +123,6 @@ tr:hover td{background:rgba(255,255,255,.015)}
 .nr-footer{padding:16px 24px}
 .nr-footer .btn-primary{padding:9px 20px;font-size:13px;font-weight:700}
 .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.fw-intro{color:var(--text2);font-size:13px;margin-bottom:24px;max-width:680px;line-height:1.6}
-.fw-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
-.fw-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 22px;cursor:pointer;transition:.15s;position:relative;overflow:hidden}
-.fw-card:hover{border-color:var(--accent);box-shadow:0 4px 20px var(--accent-glow);transform:translateY(-1px)}
-.fw-card.imported{border-color:var(--accent);background:var(--surface2)}
-.fw-card-badge{position:absolute;top:14px;right:14px;font-size:9px;font-weight:700;letter-spacing:.08em;padding:2px 8px;border-radius:20px;text-transform:uppercase}
-.fw-card-badge.badge-cis{background:rgba(0,184,158,.15);color:var(--accent)}
-.fw-card-badge.badge-soc2{background:rgba(99,102,241,.15);color:#818cf8}
-.fw-card-badge.badge-pci{background:rgba(245,158,11,.15);color:#f59e0b}
-.fw-card-badge.badge-nist{background:rgba(59,130,246,.15);color:#60a5fa}
-.fw-card-badge.badge-iso{background:rgba(16,185,129,.15);color:#34d399}
-.fw-card-badge.badge-hipaa{background:rgba(239,68,68,.15);color:#f87171}
-.fw-logo{font-size:28px;margin-bottom:12px}
-.fw-name{font-size:15px;font-weight:700;color:var(--text);margin-bottom:4px}
-.fw-full{font-size:11px;color:var(--text2);margin-bottom:10px;letter-spacing:.01em}
-.fw-desc{font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:16px}
-.fw-meta{display:flex;gap:12px;margin-bottom:16px}
-.fw-stat{font-size:10px;color:var(--text3);display:flex;flex-direction:column;gap:2px}
-.fw-stat strong{font-size:12px;color:var(--text);font-weight:600}
-.fw-import-btn{width:100%;padding:8px;font-size:12px;font-weight:600;border-radius:6px;border:none;cursor:pointer;transition:.12s;background:var(--accent);color:#0a0c10}
-.fw-import-btn:hover{filter:brightness(1.1)}
-.fw-import-btn.imported-btn{background:var(--surface3);color:var(--text2);cursor:default}
 .toast-root{position:fixed;bottom:20px;right:20px;display:flex;flex-direction:column;gap:8px;z-index:999}
 .toast{padding:10px 16px;border-radius:8px;font-size:12px;font-weight:600;animation:slideIn .2s ease;min-width:200px}
 .t-ok{background:rgba(0,229,195,.1);color:var(--accent);border:1px solid rgba(0,229,195,.2)}
@@ -182,10 +160,6 @@ tr:hover td{background:rgba(255,255,255,.015)}
       <svg class="ni" viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 5v4M8 10.5v1"/></svg>
       Findings
       <span class="nav-badge" id="sb-findings-count">0</span>
-    </div>
-    <div class="nav-item" data-nav="frameworks">
-      <svg class="ni" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1l6 3v4c0 3.5-2.5 5.8-6 7-3.5-1.2-6-3.5-6-7V4l6-3z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M5 8l2 2 4-4"/></svg>
-      Frameworks
     </div>
     <div class="nav-item" data-nav="templates">
       <svg class="ni" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="2" width="14" height="2" rx="1"/><rect x="1" y="6" width="14" height="2" rx="1"/><rect x="1" y="10" width="9" height="2" rx="1"/></svg>
@@ -226,7 +200,7 @@ tr:hover td{background:rgba(255,255,255,.015)}
         <div class="hero-sub">Create professional security assessment reports with industry-standard frameworks. Build custom templates or start from scratch.</div>
         <div class="hero-actions">
           <button class="btn btn-primary" id="btn-hero-new">+ New Report</button>
-          <button class="btn btn-ghost" data-nav="frameworks">Import Framework</button>
+          <button class="btn btn-ghost" data-nav="templates">Import Framework</button>
         </div>
       </div>
       <div class="stats-row">
@@ -253,11 +227,6 @@ tr:hover td{background:rgba(255,255,255,.015)}
       <div id="dash-inprogress" style="margin-bottom:20px"></div>
       <div class="section-title">Quick Start</div>
       <div class="qs-grid">
-        <div class="qs-card" data-nav="frameworks">
-          <div class="qs-icon">&#128737;</div>
-          <div class="qs-title">Import a Framework</div>
-          <div class="qs-desc">Load pre-built structures for CIS, SOC2, PCI-DSS, NIST CSF, ISO 27001, HIPAA and more.</div>
-        </div>
         <div class="qs-card" data-nav="templates">
           <div class="qs-icon">&#128203;</div>
           <div class="qs-title">Build Custom Template</div>
@@ -268,19 +237,6 @@ tr:hover td{background:rgba(255,255,255,.015)}
           <div class="qs-title">Start New Report</div>
           <div class="qs-desc">Begin a new security assessment report with a blank or templated structure.</div>
         </div>
-      </div>
-    </div>
-
-    <!-- FRAMEWORKS -->
-    <div class="view" id="view-frameworks">
-      <div class="page-hdr">
-        <span class="page-title">Import Framework</span>
-      </div>
-      <div class="fw-intro">
-        <p>Select a security framework to import as a report template. Each framework includes pre-defined sections, control categories, and findings structure aligned to the standard.</p>
-      </div>
-      <div class="fw-grid" id="fw-grid">
-        <!-- rendered by renderFrameworks() -->
       </div>
     </div>
 
@@ -587,7 +543,7 @@ function updateCrCard(){
   if(pct)pct.textContent=p+'% complete';
 }
 function updateTopbar(name){
-  var titles={dash:'Dashboard',reports:'Reports',editor:'Report Editor',findings:'Finding Templates',templates:'Template Builder','template-editor':'Template Editor',preview:'Report Preview',frameworks:'Import Framework'};
+  var titles={dash:'Dashboard',reports:'Reports',editor:'Report Editor',findings:'Finding Templates',templates:'Template Builder','template-editor':'Template Editor',preview:'Report Preview'};
   var el=$('topbar-title');if(el)el.textContent=titles[name]||name;
   var prevBtn=$('btn-preview-report');
   if(prevBtn)prevBtn.style.display=(name==='editor')?'':'none';
@@ -681,7 +637,6 @@ function showView(name){
   if(name==='templates')renderTemplates();
   if(name==='dash')renderDash();
   if(name==='preview')renderFullPreview();
-  if(name==='frameworks')renderFrameworks();
 }
 async function loadAll(){
   try{
@@ -735,46 +690,6 @@ function renderDash(){
       +bdg(rep.status)
       +'</div>';
   }).join('');
-}
-var FRAMEWORKS=[
-  {id:'cis',name:'CIS Controls',full:'Center for Internet Security Controls v8',logo:'&#128737;',badge:'badge-cis',sections:18,controls:153,desc:'Prioritized set of actions to protect organizations and data from known cyber attack vectors. Covers basic, foundational, and organizational security controls.',category:'Cybersecurity'},
-  {id:'soc2',name:'SOC 2',full:'Service Organization Control 2',logo:'&#128274;',badge:'badge-soc2',sections:5,controls:64,desc:'Trust Services Criteria covering Security, Availability, Processing Integrity, Confidentiality, and Privacy for cloud-based service providers.',category:'Compliance'},
-  {id:'pci',name:'PCI DSS',full:'Payment Card Industry Data Security Standard',logo:'&#128179;',badge:'badge-pci',sections:12,controls:78,desc:'Security standard for organizations that handle branded credit cards. Covers network security, cardholder data protection, access control, and monitoring.',category:'Payment Security'},
-  {id:'nist',name:'NIST CSF',full:'NIST Cybersecurity Framework 2.0',logo:'&#127963;',badge:'badge-nist',sections:6,controls:106,desc:'Voluntary framework of standards, guidelines, and practices to manage cybersecurity-related risk. Functions: Govern, Identify, Protect, Detect, Respond, Recover.',category:'Risk Management'},
-  {id:'iso27001',name:'ISO 27001',full:'ISO/IEC 27001:2022',logo:'&#127760;',badge:'badge-iso',sections:14,controls:114,desc:'International standard for information security management systems (ISMS). Provides requirements for establishing, implementing, maintaining, and improving an ISMS.',category:'Information Security'},
-  {id:'hipaa',name:'HIPAA',full:'Health Insurance Portability and Accountability Act',logo:'&#127973;',badge:'badge-hipaa',sections:4,controls:54,desc:'US federal law protecting sensitive patient health information. Covers Administrative, Physical, and Technical Safeguards for healthcare organizations.',category:'Healthcare'}
-];
-function renderFrameworks(){
-  var grid=$('fw-grid');
-  if(!grid)return;
-  var imported=S.templates.map(function(t){return t.framework_id||'';});
-  grid.innerHTML=FRAMEWORKS.map(function(fw){
-    var isImported=imported.indexOf(fw.id)>-1;
-    return '<div class="fw-card'+(isImported?' imported':'')+'" data-fw="'+fw.id+'">'+'<span class="fw-card-badge '+fw.badge+'">'+fw.category+'</span>'+'<div class="fw-logo">'+fw.logo+'</div>'+'<div class="fw-name">'+fw.name+'</div>'+'<div class="fw-full">'+fw.full+'</div>'+'<div class="fw-desc">'+fw.desc+'</div>'+'<div class="fw-meta">'+'<div class="fw-stat"><strong>'+fw.sections+'</strong>Sections</div>'+'<div class="fw-stat"><strong>'+fw.controls+'</strong>Controls</div>'+'</div>'+(isImported?'<button class=\"fw-import-btn imported-btn\">&#10003; Already Imported</button>':'<button class=\"fw-import-btn\" onclick=\"importFramework(\\''+fw.id+'\\')\">Import Framework &rarr;</button>')+'</div>';
-  }).join('');
-}
-async function importFramework(fwId){
-  var fw=FRAMEWORKS.find(function(f){return f.id===fwId;});
-  if(!fw)return;
-  try{
-    var sections=[];
-    for(var i=0;i<fw.sections;i++){
-      sections.push({id:'s'+Date.now()+i,title:'Section '+(i+1),content:'',fields:[]});
-    }
-    var t=await api('/api/templates',{
-      method:'POST',
-      body:JSON.stringify({
-        name:fw.name+' Assessment Template',
-        framework_id:fw.id,
-        sections:sections
-      })
-    });
-    S.templates.push(t);
-    toast(fw.name+' template imported');
-    renderFrameworks();
-  }catch(e){
-    toast('Import failed: '+e.message,'err');
-  }
 }
 function renderReports(){
   var q=gv('rpt-search').toLowerCase();
