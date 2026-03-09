@@ -115,10 +115,14 @@ tr:hover td{background:rgba(255,255,255,.015)}
 .empty-state p{font-size:13px}
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;align-items:center;justify-content:center}
 .modal-overlay.open{display:flex}
-.modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;width:520px;max-width:95vw;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 24px 60px rgba(0,0,0,.5)}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;width:560px;max-width:95vw;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 24px 60px rgba(0,0,0,.5)}
 .modal-hdr{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-weight:700;font-size:14px;flex-shrink:0}
 .modal-body{padding:20px;overflow-y:auto;flex:1}
 .modal-footer{padding:12px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;flex-shrink:0}
+.modal-new-report-dlg{width:560px}
+.nr-footer{padding:16px 24px}
+.nr-footer .btn-primary{padding:9px 20px;font-size:13px;font-weight:700}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .toast-root{position:fixed;bottom:20px;right:20px;display:flex;flex-direction:column;gap:8px;z-index:999}
 .toast{padding:10px 16px;border-radius:8px;font-size:12px;font-weight:600;animation:slideIn .2s ease;min-width:200px}
 .t-ok{background:rgba(0,229,195,.1);color:var(--accent);border:1px solid rgba(0,229,195,.2)}
@@ -172,7 +176,7 @@ tr:hover td{background:rgba(255,255,255,.015)}
       <div class="cr-label">Current Report</div>
       <div class="cr-title" id="cr-title">No report open</div>
       <div class="cr-bar-wrap"><div class="cr-bar" id="cr-bar" style="width:0%"></div></div>
-      <div class="cr-pct" id="cr-pct">Ã¢ÂÂ</div>
+      <div class="cr-pct" id="cr-pct">ÃÂ¢ÃÂÃÂ</div>
     </div>
   </div>
 </div>
@@ -379,13 +383,57 @@ tr:hover td{background:rgba(255,255,255,.015)}
 
 <!-- NEW REPORT MODAL -->
 <div class="modal-overlay" id="modal-new-report">
-  <div class="modal">
+  <div class="modal modal-new-report-dlg">
     <div class="modal-hdr"><span>New Report</span><button class="btn btn-ghost btn-sm" data-close-modal="modal-new-report">&#10005;</button></div>
     <div class="modal-body">
-      <div class="field-group"><label class="field-label">Title</label><input class="field-input" id="nr-title" placeholder="Report title"></div>
-      <div class="field-group"><label class="field-label">Template</label><select class="field-select" id="nr-template"><option value="">None (blank)</option></select></div>
+      <div class="field-group">
+        <label class="field-label">Report Title</label>
+        <input class="field-input" id="nr-title" placeholder="e.g. Q4 2024 Security Assessment">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Organization / Client Name</label>
+        <input class="field-input" id="nr-client" placeholder="e.g. Acme Corporation">
+      </div>
+      <div class="field-row">
+        <div class="field-group">
+          <label class="field-label">Report Type</label>
+          <select class="field-select" id="nr-type">
+            <option value="Security Assessment">Security Assessment</option>
+            <option value="Penetration Test">Penetration Test</option>
+            <option value="Vulnerability Assessment">Vulnerability Assessment</option>
+            <option value="Risk Assessment">Risk Assessment</option>
+            <option value="Compliance Audit">Compliance Audit</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Classification</label>
+          <select class="field-select" id="nr-classification">
+            <option value="Confidential">Confidential</option>
+            <option value="Restricted">Restricted</option>
+            <option value="Internal">Internal</option>
+            <option value="Public">Public</option>
+            <option value="Top Secret">Top Secret</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Assessment Date</label>
+        <input class="field-input" type="date" id="nr-date">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Assessors / Authors</label>
+        <input class="field-input" id="nr-authors" placeholder="e.g. Jane Doe, John Smith">
+      </div>
+      <div class="field-group" style="display:none" id="nr-template-group">
+        <label class="field-label">Template</label>
+        <select class="field-select" id="nr-template"><option value="">None (blank)</option></select>
+      </div>
     </div>
-    <div class="modal-footer"><button class="btn btn-ghost" data-close-modal="modal-new-report">Cancel</button><button class="btn btn-primary" id="btn-create-report">Create</button></div>
+    <div class="modal-footer nr-footer">
+      <button class="btn btn-ghost" data-close-modal="modal-new-report">Cancel</button>
+      <button class="btn btn-primary" id="btn-create-report">Create Report &#8594;</button>
+    </div>
   </div>
 </div>
 <!-- NEW TEMPLATE MODAL -->
@@ -484,7 +532,7 @@ function bdg(st){
 function updateCrCard(){
   var r=S.currentReport;
   var ttl=$('cr-title');var bar=$('cr-bar');var pct=$('cr-pct');
-  if(!r){if(ttl)ttl.textContent='No report open';if(bar)bar.style.width='0%';if(pct)pct.textContent='Ã¢ÂÂ';return;}
+  if(!r){if(ttl)ttl.textContent='No report open';if(bar)bar.style.width='0%';if(pct)pct.textContent='ÃÂ¢ÃÂÃÂ';return;}
   if(ttl)ttl.textContent=r.title||'Untitled';
   var d=r.data||{};var m=d.report||{};
   var filled=0,total=5;
@@ -667,6 +715,12 @@ function renderReports(){
 function openNewReport(){
   popNRTemplates();
   sv('nr-title','');
+  sv('nr-client','');
+  sv('nr-type','Security Assessment');
+  sv('nr-classification','Confidential');
+  sv('nr-authors','');
+  var today=new Date().toISOString().split('T')[0];
+  sv('nr-date',today);
   openM('modal-new-report');
 }
 function popNRTemplates(){
@@ -695,13 +749,20 @@ async function createReport(){
     return;
   }
   var tid=gv('nr-template');
+  var meta={
+    client:gv('nr-client').trim(),
+    type:gv('nr-type'),
+    classification:gv('nr-classification'),
+    date:gv('nr-date'),
+    authors:gv('nr-authors').trim()
+  };
   try{
     var r=await api('/api/reports',{
       method:'POST',
       body:JSON.stringify({
         title:title,
         template_id:tid||null,
-        status:'draft',sections:[],meta:{}
+        status:'draft',sections:[],meta:meta
       })
     });
     S.reports.unshift(r);
