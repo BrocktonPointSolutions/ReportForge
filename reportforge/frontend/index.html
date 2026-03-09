@@ -6,9 +6,9 @@
 <title>ReportForge</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#f0f2f5;--sidebar:#0a0c10;--surface:#ffffff;--surface2:#f4f6f9;--surface3:#eaedf2;--border:#dde1eb;--accent:#00b89e;--accent2:#009e87;--accent-glow:rgba(0,184,158,.12);--orange:#e07832;--text:#1a1d2e;--text2:#5a6275;--text3:#9aa0b0;--danger:#e03d3d;--radius:8px;--sidebar-w:192px}
-body.dark{--bg:#0d0f14;--surface:#13161e;--surface2:#1a1e28;--surface3:#1f2433;--border:#252a38;--accent:#00e5c3;--accent2:#00b89e;--accent-glow:rgba(0,229,195,.15);--orange:#ff8c42;--text:#e8eaf0;--text2:#7a8099;--text3:#4a5068;--danger:#ff4d4d}
-.sidebar .nav-item{color:#7a8099!important}.sidebar .nav-item.active{color:var(--accent)!important}.sidebar .nav-item:hover{color:#bcc2d0!important}.sidebar .sidebar-label{color:#4a5068!important}.sidebar .cr-label{color:#4a5068!important}.sidebar .cr-title{color:#bcc2d0!important}.sidebar .cr-pct{color:var(--orange)!important}.sidebar .logo-text{color:#e8eaf0!important}.sidebar .logo-dot{color:var(--accent)!important}
+:root{--bg:#f0f2f5;--sidebar:#f8f9fb;--surface:#ffffff;--surface2:#f4f6f9;--surface3:#eaedf2;--border:#dde1eb;--accent:#00b89e;--accent2:#009e87;--accent-glow:rgba(0,184,158,.12);--orange:#e07832;--text:#1a1d2e;--text2:#5a6275;--text3:#9aa0b0;--danger:#e03d3d;--radius:8px;--sidebar-w:192px}
+body.dark{--bg:#0d0f14;--sidebar:#0a0c10;--surface:#13161e;--surface2:#1a1e28;--surface3:#1f2433;--border:#252a38;--accent:#00e5c3;--accent2:#00b89e;--accent-glow:rgba(0,229,195,.15);--orange:#ff8c42;--text:#e8eaf0;--text2:#7a8099;--text3:#4a5068;--danger:#ff4d4d}
+
 body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;overflow:hidden}
 .sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);height:100vh;background:var(--sidebar);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
 .sidebar-logo{padding:20px 16px 14px;border-bottom:1px solid var(--border)}
@@ -172,7 +172,7 @@ tr:hover td{background:rgba(255,255,255,.015)}
       <div class="cr-label">Current Report</div>
       <div class="cr-title" id="cr-title">No report open</div>
       <div class="cr-bar-wrap"><div class="cr-bar" id="cr-bar" style="width:0%"></div></div>
-      <div class="cr-pct" id="cr-pct">â</div>
+      <div class="cr-pct" id="cr-pct">Ã¢ÂÂ</div>
     </div>
   </div>
 </div>
@@ -484,7 +484,7 @@ function bdg(st){
 function updateCrCard(){
   var r=S.currentReport;
   var ttl=$('cr-title');var bar=$('cr-bar');var pct=$('cr-pct');
-  if(!r){if(ttl)ttl.textContent='No report open';if(bar)bar.style.width='0%';if(pct)pct.textContent='â';return;}
+  if(!r){if(ttl)ttl.textContent='No report open';if(bar)bar.style.width='0%';if(pct)pct.textContent='Ã¢ÂÂ';return;}
   if(ttl)ttl.textContent=r.title||'Untitled';
   var d=r.data||{};var m=d.report||{};
   var filled=0,total=5;
