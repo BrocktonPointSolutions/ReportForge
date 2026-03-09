@@ -75,7 +75,8 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .toast-error{background:#3a1010;color:#ff6b6b;border:1px solid #5a2020}
 .toast-info{background:#1a1a3a;color:#9b9bd4;border:1px solid #2a2a5a}
 @keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:none;opacity:1}}
-.ql-wrap{background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;min-height:80px}.ql-wrap .ql-editor{min-height:80px;color:var(--text);font-size:13px;padding:8px 12px}.ql-wrap .ql-toolbar{border:none;border-bottom:1px solid var(--border);background:var(--surface2);padding:4px 8px}.ql-wrap .ql-stroke{stroke:var(--text)!important}.ql-wrap .ql-fill{fill:var(--text)!important}.ql-wrap .ql-picker{color:var(--text)!important}.ql-wrap .ql-picker-options{background:var(--surface2)!important;border-color:var(--border)!important}.ql-wrap.ql-snow{border-radius:6px}</style>
+.ql-wrap{background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;min-height:80px}.ql-wrap .ql-editor{min-height:80px;color:var(--text);font-size:13px;padding:8px 12px}.ql-wrap .ql-toolbar{border:none;border-bottom:1px solid var(--border);background:var(--surface2);padding:4px 8px}.ql-wrap .ql-stroke{stroke:var(--text)!important}.ql-wrap .ql-fill{fill:var(--text)!important}.ql-wrap .ql-picker{color:var(--text)!important}.ql-wrap .ql-picker-options{background:var(--surface2)!important;border-color:var(--border)!important}.ql-wrap.ql-snow{border-radius:6px}
+.sec-editor .ql-wrap{min-height:200px}.sec-editor .ql-editor{min-height:200px}</style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@2/dist/quill.snow.css">
 <script src="https://cdn.jsdelivr.net/npm/quill@2/dist/quill.js"></script>
 </head>
@@ -393,6 +394,7 @@ function gv(id){return $(id)?$(id).value:'';}
 function sv(id,v){if($(id))$(id).value=(v==null?'':v);}
 
 var _Q={};
+var _TQ={};
 function _qv(k){
   var q=_Q[k];
   if(!q)return '';
@@ -753,24 +755,12 @@ function renderEdSections(){
     return;
   }
   el.innerHTML=secs.map(function(sec,i){
-    var flds=(sec.fields||[]).map(function(f){
-      var inp=f.type==='textarea'
-        ?'<textarea class="field-textarea">'
-          +esc(f.value||'')+'</textarea>'
-        :'<input class="field-input" type="'
-          +esc(f.type||'text')+'" value="'
-          +esc(f.value||'')+'">';
-      return '<div class="field-group">'
-        +'<label class="field-label">'
-        +esc(f.label)+'</label>'
-        +inp+'</div>';
-    }).join('');
-    return '<div class="sec-hdr"'
+    return '<div class="section-hdr"'
       +' data-tog-sec="'+i+'">'
       +esc(sec.title||'Section '+(i+1))
       +'</div>'
-      +'<div class="sec-body" id="rsec-'+i+'">'
-      +(flds||'<p>No fields.</p>')
+      +'<div class="section-body" id="rsec-'+i+'">'
+      +(sec.content||'<p style="color:var(--text2);font-size:13px">No content.</p>')
       +'</div>';
   }).join('');
 }
@@ -1193,11 +1183,13 @@ function addSection(){
   S.currentTemplate.sections=
     S.currentTemplate.sections||[];
   S.currentTemplate.sections.push(
-    {title:'New section',type:tp,fields:[]});
+    {title:'New section',type:tp,content:''});
   markTDirty();renderTSections();
 }
 function renderTSections(){
   var el=$('ted-sections');if(!el)return;
+  // Flush old Quill instances to avoid leaks
+  _TQ={};
   var secs=(S.currentTemplate&&
     S.currentTemplate.sections)||[];
   if(!secs.length){
@@ -1206,33 +1198,6 @@ function renderTSections(){
     return;
   }
   el.innerHTML=secs.map(function(sec,si){
-    var flds=(sec.fields||[]).map(function(f,fi){
-      var opts=
-        ['text','textarea','date','number','select']
-        .map(function(o){
-          return '<option value="'+o+'"'
-            +(f.type===o?' selected':'')+'>'
-            +o+'</option>';
-        }).join('');
-      return '<div class="form-row"'
-        +' style="margin-bottom:8px;'
-        +'align-items:end">'
-        +'<div class="field-group" style="margin:0">'
-        +'<label class="field-label">Label</label>'
-        +'<input class="field-input"'
-        +' data-si="'+si+'" data-fi="'+fi+'"'
-        +' data-prop="label"'
-        +' value="'+esc(f.label||'')+'"></div>'
-        +'<div class="field-group" style="margin:0">'
-        +'<label class="field-label">Type</label>'
-        +'<select class="field-select"'
-        +' data-si="'+si+'" data-fi="'+fi+'"'
-        +' data-prop="type">'+opts+'</select></div>'
-        +'<button class="btn btn-danger btn-sm'
-        +' btn-icon"'
-        +' data-rm-fi="'+fi+'" data-si="'+si+'">'
-        +'&#10005;</button></div>';
-    }).join('');
     return '<div class="card"'
       +' style="margin-bottom:12px">'
       +'<div style="display:flex;'
@@ -1247,31 +1212,36 @@ function renderTSections(){
       +'<button class="btn btn-danger btn-sm btn-icon"'
       +' data-rm-sec="'+si+'">'
       +'&#10005;</button></div>'
-      +(flds||'<p style="color:var(--text2);'
-        +'font-size:12px">No fields.</p>')
-      +'<button class="btn btn-secondary btn-sm"'
-      +' style="margin-top:8px"'
-      +' data-add-fi="'+si+'">'
-      +'+ Add Field</button></div>';
+      +'<div class="sec-editor">'
+      +'<div class="ql-wrap" id="tq-'+si+'"></div>'
+      +'</div></div>';
   }).join('');
+  // Initialize a Quill editor for each section
+  secs.forEach(function(sec,si){
+    var tb=[
+      [{header:[1,2,3,false]}],
+      ['bold','italic','underline'],
+      [{list:'ordered'},{list:'bullet'}],
+      ['link','clean']
+    ];
+    var q=new Quill('#tq-'+si,{
+      theme:'snow',
+      placeholder:'Section content...',
+      modules:{toolbar:tb}
+    });
+    q.clipboard.dangerouslyPasteHTML(sec.content||'');
+    q.on('text-change',function(){
+      S.currentTemplate.sections[si].content=
+        q.root.innerHTML===
+        '<p><br></p>'?'':q.root.innerHTML;
+      markTDirty();
+    });
+    _TQ[si]=q;
+  });
 }
 function rmSection(si){
   if(!S.currentTemplate)return;
   S.currentTemplate.sections.splice(si,1);
-  markTDirty();renderTSections();
-}
-function addField(si){
-  if(!S.currentTemplate)return;
-  S.currentTemplate.sections[si].fields=
-    S.currentTemplate.sections[si].fields||[];
-  S.currentTemplate.sections[si].fields.push(
-    {label:'New Field',type:'text',value:''});
-  markTDirty();renderTSections();
-}
-function rmField(si,fi){
-  if(!S.currentTemplate)return;
-  S.currentTemplate.sections[si].fields
-    .splice(fi,1);
   markTDirty();renderTSections();
 }
 async function saveTemplate(){
@@ -1426,18 +1396,7 @@ document.addEventListener('click',function(e){
       parseInt(rs.getAttribute('data-rm-sec')));
     return;
   }
-  var af=t.closest('[data-add-fi]');
-  if(af){
-    addField(parseInt(af.getAttribute('data-add-fi')));
-    return;
-  }
-  var rf=t.closest('[data-rm-fi]');
-  if(rf){
-    rmField(
-      parseInt(rf.getAttribute('data-si')),
-      parseInt(rf.getAttribute('data-rm-fi')));
-    return;
-  }
+  // add-fi / rm-fi handlers removed (sections now use WYSIWYG)
   var b=t.closest('button');
   var bid=b?b.id:'';
   if(bid==='theme-toggle'){
@@ -1485,15 +1444,7 @@ document.addEventListener('change',function(e){
     ||t.id==='findings-sev-sel'){
     renderFindings();return;
   }
-  var si=t.getAttribute('data-si');
-  var fi=t.getAttribute('data-fi');
-  var prop=t.getAttribute('data-prop');
-  if(si!==null&&fi!==null&&prop){
-    S.currentTemplate
-      .sections[parseInt(si)]
-      .fields[parseInt(fi)][prop]=t.value;
-    markTDirty();renderTSections();
-  }
+  // field-prop handler removed (sections now use WYSIWYG)
 });
 
 document.addEventListener('input',function(e){
@@ -1508,15 +1459,7 @@ document.addEventListener('input',function(e){
       .sections[parseInt(st)].title=t.value;
     markTDirty();return;
   }
-  var si=t.getAttribute('data-si');
-  var fi=t.getAttribute('data-fi');
-  var prop=t.getAttribute('data-prop');
-  if(si!==null&&fi!==null&&prop){
-    S.currentTemplate
-      .sections[parseInt(si)]
-      .fields[parseInt(fi)][prop]=t.value;
-    markTDirty();
-  }
+  // field-prop handler removed (sections now use WYSIWYG)
 });
 
 function _applyTheme(dark){
