@@ -1170,27 +1170,12 @@ function rfCard(f,idx){
 }
 function fCard(f){
   var sev=(f.severity||'info').toLowerCase();
-  return '<div class="fcard">'
-    +'<div style="display:flex;'
-    +'align-items:center;'
-    +'margin-bottom:6px">'
-    +'<span class="fsev sev-'
-    +esc(sev)+'">'
-    +esc(f.severity)+'</span>'
-    +'<strong>'+esc(f.title)+'</strong>'
-    +'</div>'
-    +'<div style="color:var(--text2);'
-    +'font-size:12px;margin-bottom:8px">'
-    +(f.description||'')+'</div>'
+  return '<div class="fcard fcard-row">'
+    +'<span class="fsev sev-'+esc(sev)+'">'+esc(f.severity)+'</span>'
+    +'<span class="fcard-name">'+esc(f.title)+'</span>'
     +'<div class="item-actions">'
-    +'<button class="btn btn-ghost btn-sm"'
-    +' data-edit-f="'+f.id+'">'
-    +'Edit</button>'
-    +'<button class="btn btn-danger btn-sm"'
-    +' data-del-t="finding"'
-    +' data-del-id="'+f.id+'"'
-    +' data-del-n="'+esc(f.title)+'">'
-    +'Delete</button>'
+    +'<button class="btn btn-ghost btn-sm" data-edit-f="'+f.id+'">Edit</button>'
+    +'<button class="btn btn-danger btn-sm" data-del-t="finding" data-del-id="'+f.id+'" data-del-n="'+esc(f.title)+'">Delete</button>'
     +'</div></div>';
 }
 function openFinding(){
