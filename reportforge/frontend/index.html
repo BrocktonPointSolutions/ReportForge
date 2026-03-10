@@ -137,7 +137,7 @@ tr:hover td{background:rgba(255,255,255,.015)}
 .ql-wrap.ql-snow{border-radius:6px}
 ::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
 
-/* ── Frameworks Page ─────────────────────────────── */
+/* ââ Frameworks Page âââââââââââââââââââââââââââââââ */
 .fw-page-hdr{margin-bottom:24px}
 .fw-page-hdr h2{font-size:20px;font-weight:700;color:var(--text);margin:0 0 4px}
 .fw-page-hdr h2 span{font-size:13px;font-weight:400;color:var(--text3);margin-left:10px;letter-spacing:.04em}
@@ -212,7 +212,7 @@ tr:hover td{background:rgba(255,255,255,.015)}
       <div class="cr-label">Current Report</div>
       <div class="cr-title" id="cr-title">No report open</div>
       <div class="cr-bar-wrap"><div class="cr-bar" id="cr-bar" style="width:0%"></div></div>
-      <div class="cr-pct" id="cr-pct">ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ</div>
+      <div class="cr-pct" id="cr-pct">ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ</div>
     </div>
   </div>
 </div>
@@ -589,7 +589,7 @@ function bdg(st){
 function updateCrCard(){
   var r=S.currentReport;
   var ttl=$('cr-title');var bar=$('cr-bar');var pct=$('cr-pct');
-  if(!r){if(ttl)ttl.textContent='No report open';if(bar)bar.style.width='0%';if(pct)pct.textContent='ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ';return;}
+  if(!r){if(ttl)ttl.textContent='No report open';if(bar)bar.style.width='0%';if(pct)pct.textContent='ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ';return;}
   if(ttl)ttl.textContent=r.title||'Untitled';
   var d=r.data||{};var m=d.report||{};
   var filled=0,total=5;
@@ -682,22 +682,22 @@ function alertMsg(msg,title){
 
 var FRAMEWORKS=[
   {id:'cis',name:'CIS Controls v8',badge:'CIS',badgeClass:'cis',
-   desc:'Center for Internet Security Controls — 18 control groups covering essential cyber hygiene from asset management to incident response.',
+   desc:'Center for Internet Security Controls  &mdash;  18 control groups covering essential cyber hygiene from asset management to incident response.',
    stats:[{label:'18 Controls'},{label:'153 Safeguards'},{label:'2021'}]},
   {id:'soc2',name:'SOC 2 Type II',badge:'SOC2',badgeClass:'soc2',
-   desc:'AICPA Trust Services Criteria — evaluating controls for Security, Availability, Confidentiality, Processing Integrity, and Privacy.',
+   desc:'AICPA Trust Services Criteria  &mdash;  evaluating controls for Security, Availability, Confidentiality, Processing Integrity, and Privacy.',
    stats:[{label:'5 Categories'},{label:'64 Criteria'},{label:'2017'}]},
   {id:'pci',name:'PCI DSS v4.0',badge:'PCI-DSS',badgeClass:'pci',
-   desc:'Payment Card Industry Data Security Standard — protecting cardholder data through network security, access control, and monitoring requirements.',
+   desc:'Payment Card Industry Data Security Standard  &mdash;  protecting cardholder data through network security, access control, and monitoring requirements.',
    stats:[{label:'12 Requirements'},{label:'281 Controls'},{label:'2022'}]},
   {id:'nist',name:'NIST CSF 2.0',badge:'NIST',badgeClass:'nist',
-   desc:'NIST Cybersecurity Framework — Govern, Identify, Protect, Detect, Respond, Recover. Risk-based approach to managing cybersecurity risk.',
+   desc:'NIST Cybersecurity Framework  &mdash;  Govern, Identify, Protect, Detect, Respond, Recover. Risk-based approach to managing cybersecurity risk.',
    stats:[{label:'6 Functions'},{label:'106 Outcomes'},{label:'2024'}]},
   {id:'iso27001',name:'ISO/IEC 27001:2022',badge:'ISO',badgeClass:'iso',
-   desc:'International standard for information security management systems — organizational security controls and risk treatment methodology.',
+   desc:'International standard for information security management systems  &mdash;  organizational security controls and risk treatment methodology.',
    stats:[{label:'4 Clauses'},{label:'93 Controls'},{label:'2022'}]},
   {id:'hipaa',name:'HIPAA Security Rule',badge:'HIPAA',badgeClass:'hipaa',
-   desc:'Health Insurance Portability Act — safeguarding electronic protected health information through administrative, physical, and technical controls.',
+   desc:'Health Insurance Portability Act  &mdash;  safeguarding electronic protected health information through administrative, physical, and technical controls.',
    stats:[{label:'3 Safeguards'},{label:'45 Standards'},{label:'2013'}]}
 ];
 var _fwSelected=new Set();
@@ -711,12 +711,12 @@ function renderFrameworks(){
       return '<div class="fw-stat"><svg viewBox="0 0 12 12" fill="currentColor"><circle cx="6" cy="6" r="3"/></svg>'+esc(st.label)+'</div>';
     }).join('');
     return '<div class="fw-card'+(sel?' selected':'')+(imported?' imported':'')+'" onclick="toggleFw(''+fw.id+'')">'+
-      '<div class="fw-card-check">✓</div>'+
+      '<div class="fw-card-check">&#10003;</div>'+
       '<span class="fw-badge '+fw.badgeClass+'">'+esc(fw.badge)+'</span>'+
       '<h3>'+esc(fw.name)+'</h3>'+
       '<p>'+esc(fw.desc)+'</p>'+
       '<div class="fw-meta">'+statsHtml+'</div>'+
-      (imported?'<div style="margin-top:8px;font-size:11px;color:var(--accent)">✓ Already imported</div>':'')+
+      (imported?'<div style="margin-top:8px;font-size:11px;color:var(--accent)">&#10003; Already imported</div>':'')+
       '</div>';
   }).join('');
   updateFwBar();
@@ -734,7 +734,7 @@ function updateFwBar(){
 async function importSelectedFrameworks(){
   var ids=Array.from(_fwSelected);if(!ids.length)return;
   var btn=$('fw-import-btn');
-  if(btn){btn.textContent='Importing…';btn.disabled=true;}
+  if(btn){btn.textContent='Importing...';btn.disabled=true;}
   var errors=[];
   for(var i=0;i<ids.length;i++){
     var fw=FRAMEWORKS.find(function(f){return f.id===ids[i];});
@@ -745,7 +745,7 @@ async function importSelectedFrameworks(){
     }catch(e){errors.push(fw.name);}
   }
   _fwSelected.clear();renderFrameworks();
-  if(btn){btn.textContent='Import Selected →';btn.disabled=false;}
+  if(btn){btn.textContent='Import Selected ->';btn.disabled=false;}
   if(errors.length)toast('Failed: '+errors.join(', '),'err');
   else toast('Framework'+(ids.length>1?'s':'')+' imported successfully');
 }
