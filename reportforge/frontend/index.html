@@ -995,8 +995,8 @@ async function openEditor(id){
   }
 }
 function switchTab(name){
-  var tabs=document.querySelectorAll('.ed-tab');
-  var panels=document.querySelectorAll('.ed-panel');
+  var tabs=document.querySelectorAll('.editor-tab');
+  var panels=document.querySelectorAll('.editor-panel');
   for(var i=0;i<tabs.length;i++){
     tabs[i].classList.remove('active');
   }
@@ -1006,11 +1006,12 @@ function switchTab(name){
   var p=$('ed-'+name);
   if(p)p.classList.add('active');
   var et=document.querySelectorAll(
-    '.ed-tab[data-tab="'+name+'"]');
+    '.editor-tab[data-tab="'+name+'"]');
   for(var i=0;i<et.length;i++){
     et[i].classList.add('active');
   }
   if(name==='preview')renderPreview();
+  if(name==='sections')renderEdSections();
 }
 function markDirty(){
   S.edDirty=true;
