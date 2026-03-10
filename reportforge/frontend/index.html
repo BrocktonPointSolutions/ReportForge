@@ -357,6 +357,14 @@ tr:hover td{background:rgba(255,255,255,.015)}
               <div class="field-group"><label class="field-label">End Date</label><input class="field-input" type="date" id="ed-end"></div>
             </div>
             <div class="field-group"><label class="field-label">Executive Summary</label><textarea class="field-textarea" id="ed-summary" rows="5"></textarea></div>
+            <div class="field-group">
+              <label class="field-label">Report Template</label>
+              <div style="display:flex;gap:8px;align-items:center">
+                <select class="field-select" id="ed-template" style="flex:1"><option value="">None</option></select>
+                <button class="btn btn-secondary btn-sm" id="btn-apply-template">Apply</button>
+              </div>
+              <div style="font-size:11px;color:var(--text3);margin-top:4px">Applying loads the template's sections into this report. Existing sections will be replaced.</div>
+            </div>
           </div>
           <div class="editor-panel" id="ed-sections"><div id="ed-sections-body"></div></div>
           <div class="editor-panel" id="ed-findings">
@@ -853,6 +861,34 @@ function renderReports(){
       +'</div></div>';
   }).join('');
 }
+function popEdTemplates(){
+  var sel=$('ed-template');
+  if(!sel)return;
+  var cur=sel.value;
+  sel.innerHTML='<option value="">None</option>'
+    +S.templates.map(function(t){
+      return '<option value="'+t.id+'">'+esc(t.name)+'</option>';
+    }).join('');
+  if(cur) sel.value=cur;
+}
+function applyTemplate(){
+  if(!S.currentReport)return;
+  var tid=gv('ed-template');
+  if(!tid){toast('Select a template first','err');return;}
+  var tpl=S.templates.find(function(t){return t.id===tid;});
+  if(!tpl){toast('Template not found','err');return;}
+  var hasSecs=(S.currentReport.sections||[]).length>0;
+  if(hasSecs&&!confirm('This will replace existing sections. Continue?'))return;
+  var rawSecs=tpl.sections||tpl.data&&tpl.data.sections||[];
+  S.currentReport.sections=rawSecs.map(function(s){
+    return {title:s.title,type:s.type||'text',content:s.content||'',finding_ids:s.finding_ids||[]};
+  });
+  markDirty();
+  renderEdSections();
+  switchTab('sections');
+  toast('Template applied - '+S.currentReport.sections.length+' sections loaded');
+}
+
 function openNewReport(){
   popNRTemplates();
   sv('nr-title','');
@@ -938,6 +974,8 @@ async function openEditor(id){
     sv('ed-start',m.start_date||'');
     sv('ed-end',m.end_date||'');
     sv('ed-summary',m.summary||'');
+    popEdTemplates();
+    sv('ed-template',r.template_id||'');
     renderEdSections();
     renderEdFindings();
     syncFindingsTab();
@@ -993,6 +1031,7 @@ async function saveEditor(){
         title:title,
         org:gv('ed-org'),
         status:S.currentReport.status,
+        template_id:gv('ed-template')||null,
         data:{
           report:{
             title:title,
@@ -1788,6 +1827,7 @@ document.addEventListener('click',function(e){
   if(bid==='btn-create-report'){
     createReport();return;
   }
+  if(bid==='btn-apply-template'){applyTemplate();return;}
   if(bid==='btn-save-editor'){saveEditor();return;}
   if(bid==='btn-add-finding-ed'){
     openAddFindingToReport();
