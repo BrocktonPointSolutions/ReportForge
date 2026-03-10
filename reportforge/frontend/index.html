@@ -127,6 +127,14 @@ tr:hover td{background:rgba(255,255,255,.015)}
 .section-hdr{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;cursor:pointer;margin-bottom:4px;font-size:13px}
 .section-body{padding:12px 14px;border:1px solid var(--border);border-top:none;border-radius:0 0 6px 6px;margin-bottom:8px}
 .sec-editor .ql-wrap{min-height:180px}.sec-editor .ql-editor{min-height:180px}
+.rsec-type{font-size:10px;font-weight:700;padding:2px 6px;border-radius:3px;background:var(--surface3);color:var(--text2);margin-left:8px;text-transform:uppercase}
+.rsec-body{padding:14px;border:1px solid var(--border);border-top:none;border-radius:0 0 6px 6px;margin-bottom:10px}
+.rsec-body .ql-wrap{min-height:120px}
+.rsec-body .ql-editor{min-height:120px}
+.rsec-findings-list{list-style:none;padding:0;margin:0}
+.rsec-finding-item{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px}
+.rsec-finding-item:last-child{border-bottom:none}
+.rsec-empty-note{color:var(--text3);font-size:12px;padding:8px 0}
 .empty-state{text-align:center;padding:40px 20px;color:var(--text3)}
 .empty-state p{font-size:13px}
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;align-items:center;justify-content:center}
@@ -641,6 +649,7 @@ function sv(id,v){if($(id))$(id).value=(v==null?'':v);}
 
 var _Q={};
 var _TQ={};
+var _EQ={};
 function _qv(k){
   var q=_Q[k];
   if(!q)return '';
@@ -1081,23 +1090,68 @@ async function updateStatus(){
 function renderEdSections(){
   var el=$('ed-sections-body');
   if(!el)return;
+  _EQ={};
   var secs=
     (S.currentReport&&S.currentReport.sections)||[];
   if(!secs.length){
     el.innerHTML=
-      '<div class="empty"><p>No sections.</p></div>';
+      '<div class="empty"><p>No sections. Apply a template from the Info tab.</p></div>';
     return;
   }
   el.innerHTML=secs.map(function(sec,i){
-    return '<div class="section-hdr"'
-      +' data-tog-sec="'+i+'">'
+    var typeLabel=esc(sec.type||'text');
+    var hdr='<div class="section-hdr" data-tog-sec="'+i+'">'
       +esc(sec.title||'Section '+(i+1))
-      +'</div>'
-      +'<div class="section-body" id="rsec-'+i+'">'
-      +(sec.content||'<p style="color:var(--text2);font-size:13px">No content.</p>')
+      +'<span class="rsec-type">'+typeLabel+'</span>'
       +'</div>';
+    var body;
+    if(sec.type==='findings'){
+      var ids=sec.finding_ids||[];
+      var items=ids.length
+        ? ids.map(function(fid){
+            var f=S.findings.find(function(x){return x.id===fid;});
+            if(!f)return '';
+            var sev=(f.severity||'info').toLowerCase();
+            return '<li class="rsec-finding-item">'
+              +'<span class="fsev sev-'+esc(sev)+'">'+esc(f.severity)+'</span>'
+              +'<span>'+esc(f.title)+'</span>'
+              +'</li>';
+          }).join('')
+        : '<li class="rsec-empty-note">No findings assigned to this section.</li>';
+      body='<div class="rsec-body">'
+        +'<ul class="rsec-findings-list">'+items+'</ul>'
+        +'</div>';
+    } else {
+      body='<div class="rsec-body">'
+        +'<div class="ql-wrap" id="esec-'+i+'"></div>'
+        +'</div>';
+    }
+    return hdr+body;
   }).join('');
+  secs.forEach(function(sec,i){
+    if(sec.type==='findings') return;
+    var tb=[
+      [{header:[1,2,3,false]}],
+      ['bold','italic','underline'],
+      [{list:'ordered'},{list:'bullet'}],
+      ['link','clean']
+    ];
+    var q=new Quill('#esec-'+i,{
+      theme:'snow',
+      placeholder:'Enter content for this section...',
+      modules:{toolbar:tb}
+    });
+    q.clipboard.dangerouslyPasteHTML(sec.content||'');
+    q.on('text-change',function(){
+      S.currentReport.sections[i].content=
+        q.root.innerHTML==='<p><br></p>'?'':
+        q.root.innerHTML;
+      markDirty();
+    });
+    _EQ[i]=q;
+  });
 }
+
 function exportReport(fmt){
   if(!S.currentReport)return;
   var rid=S.currentReport.id;
