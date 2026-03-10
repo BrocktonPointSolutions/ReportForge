@@ -106,6 +106,16 @@ tr:hover td{background:rgba(255,255,255,.015)}
 .drag-handle:active{cursor:grabbing}
 .sec-card-drag{border:2px dashed var(--accent)!important;opacity:.5}
 .sec-card-drag-over{border:2px solid var(--accent)!important}
+.fsec-picker{border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.fsec-picker-hdr{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--surface3);border-bottom:1px solid var(--border)}
+.fsec-picker-hdr span{font-size:11px;color:var(--text2)}
+.fsec-item{display:flex;align-items:center;gap:10px;padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border);transition:.12s}
+.fsec-item:last-child{border-bottom:none}
+.fsec-item:hover{background:var(--surface2)}
+.fsec-item.sel{background:rgba(0,184,158,.07)}
+.fsec-cb{width:15px;height:15px;border:2px solid var(--border);border-radius:3px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--accent)}
+.fsec-item.sel .fsec-cb{background:var(--accent);border-color:var(--accent);color:#000}
+.fsec-empty{padding:16px;text-align:center;color:var(--text3);font-size:12px}
 .fcard-title{flex:1;font-size:13px;font-weight:600;color:var(--text)}
 .fsev{font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;margin-right:7px}
 .sev-critical{background:rgba(255,77,77,.15);color:#ff4d4d}
@@ -1475,6 +1485,37 @@ function renderTSections(){
     return;
   }
   el.innerHTML=secs.map(function(sec,si){
+    var bodyHtml;
+    if(sec.type==='findings'){
+      var ids=sec.finding_ids||[];
+      var ord={Critical:0,High:1,Medium:2,Low:3,Info:4};
+      var list=S.findings.slice().sort(function(a,b){
+        return (ord[a.severity]||5)-(ord[b.severity]||5);
+      });
+      var count=ids.length;
+      var rows=list.length
+        ? list.map(function(f){
+            var sel=ids.indexOf(f.id)!==-1;
+            var sev=(f.severity||'info').toLowerCase();
+            return '<div class="fsec-item'+(sel?' sel':'')+'"'
+              +' data-pick-f="'+f.id+'"'
+              +' data-pick-si="'+si+'">'
+              +'<div class="fsec-cb">'+(sel?'&#10003;':'')+'</div>'
+              +'<span class="fsev sev-'+esc(sev)+'">'+esc(f.severity)+'</span>'
+              +'<span style="flex:1;font-size:13px">'+esc(f.title)+'</span>'
+              +'</div>';
+          }).join('')
+        : '<div class="fsec-empty">No findings in database yet.</div>';
+      bodyHtml='<div class="fsec-picker">'
+        +'<div class="fsec-picker-hdr">'
+        +'<span>Select findings to include in this section</span>'
+        +'<span id="fsec-count-'+si+'">'+count+' selected</span>'
+        +'</div>'
+        +rows
+        +'</div>';
+    } else {
+      bodyHtml='<div class="ql-wrap" id="tq-'+si+'"></div>';
+    }
     return '<div class="card sec-drag-card"'
       +' draggable="true"'
       +' data-si="'+si+'"'
@@ -1493,10 +1534,11 @@ function renderTSections(){
       +' data-rm-sec="'+si+'">'
       +'&#10005;</button></div>'
       +'<div class="sec-editor">'
-      +'<div class="ql-wrap" id="tq-'+si+'"></div>'
+      +bodyHtml
       +'</div></div>';
   }).join('');
   secs.forEach(function(sec,si){
+    if(sec.type==='findings') return;
     var tb=[
       [{header:[1,2,3,false]}],
       ['bold','italic','underline'],
@@ -1704,6 +1746,28 @@ document.addEventListener('click',function(e){
     var sb=$('rsec-'+idx);
     if(sb)sb.style.display=
       sb.style.display==='none'?'':'none';
+    return;
+  }
+  var pf=t.closest('[data-pick-f]');
+  if(pf){
+    var fid=pf.getAttribute('data-pick-f');
+    var psi=parseInt(pf.getAttribute('data-pick-si'),10);
+    var sec=S.currentTemplate.sections[psi];
+    if(!sec||sec.type!=='findings')return;
+    sec.finding_ids=sec.finding_ids||[];
+    var fidx=sec.finding_ids.indexOf(fid);
+    if(fidx===-1){
+      sec.finding_ids.push(fid);
+      pf.classList.add('sel');
+      pf.querySelector('.fsec-cb').innerHTML='&#10003;';
+    } else {
+      sec.finding_ids.splice(fidx,1);
+      pf.classList.remove('sel');
+      pf.querySelector('.fsec-cb').innerHTML='';
+    }
+    var cEl=$('fsec-count-'+psi);
+    if(cEl)cEl.textContent=sec.finding_ids.length+' selected';
+    markTDirty();
     return;
   }
   var rs=t.closest('[data-rm-sec]');
