@@ -137,7 +137,7 @@ tr:hover td{background:rgba(255,255,255,.015)}
 .ql-wrap.ql-snow{border-radius:6px}
 ::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
 
-/* ââ Frameworks Page âââââââââââââââââââââââââââââââ */
+/* Frameworks Page */
 .fw-page-hdr{margin-bottom:24px}
 .fw-page-hdr h2{font-size:20px;font-weight:700;color:var(--text);margin:0 0 4px}
 .fw-page-hdr h2 span{font-size:13px;font-weight:400;color:var(--text3);margin-left:10px;letter-spacing:.04em}
@@ -159,7 +159,6 @@ tr:hover td{background:rgba(255,255,255,.015)}
 .fw-card p{font-size:12px;color:var(--text2);line-height:1.5;margin:0 0 12px}
 .fw-meta{display:flex;gap:12px;flex-wrap:wrap}
 .fw-stat{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text3)}
-.fw-stat svg{width:12px;height:12px;opacity:.6}
 .fw-custom{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:16px}
 .fw-custom-icon{width:40px;height:40px;border-radius:10px;background:var(--surface3);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
 .fw-custom-text h4{font-size:14px;font-weight:600;color:var(--text);margin:0 0 3px}
@@ -167,7 +166,6 @@ tr:hover td{background:rgba(255,255,255,.015)}
 .fw-import-bar{margin-top:20px;display:flex;align-items:center;gap:12px}
 .fw-selected-count{font-size:13px;color:var(--text2);flex:1}
 .fw-selected-count strong{color:var(--accent)}
-
 </style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@2/dist/quill.snow.css">
 <script src="https://cdn.jsdelivr.net/npm/quill@2/dist/quill.js"></script>
@@ -212,7 +210,7 @@ tr:hover td{background:rgba(255,255,255,.015)}
       <div class="cr-label">Current Report</div>
       <div class="cr-title" id="cr-title">No report open</div>
       <div class="cr-bar-wrap"><div class="cr-bar" id="cr-bar" style="width:0%"></div></div>
-      <div class="cr-pct" id="cr-pct">ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ</div>
+      <div class="cr-pct" id="cr-pct">ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ</div>
     </div>
   </div>
 </div>
@@ -236,16 +234,16 @@ tr:hover td{background:rgba(255,255,255,.015)}
   </div>
   <div class="fw-grid" id="fw-grid"></div>
   <div class="fw-custom">
-    <div class="fw-custom-icon">&#10011;</div>
+    <div class="fw-custom-icon">+</div>
     <div class="fw-custom-text">
       <h4>Custom Framework</h4>
       <p>Upload your own framework as CSV/JSON or build it from scratch in the Template Builder.</p>
     </div>
-    <button class="btn btn-secondary" style="margin-left:auto" data-nav="templates">Open Builder &rarr;</button>
+    <button class="btn btn-secondary" style="margin-left:auto" data-nav="templates">Open Builder</button>
   </div>
   <div class="fw-import-bar">
     <div class="fw-selected-count" id="fw-count">Select frameworks above to import</div>
-    <button class="btn btn-primary" id="fw-import-btn" onclick="importSelectedFrameworks()" style="display:none">Import Selected &rarr;</button>
+    <button class="btn btn-primary" id="fw-import-btn" onclick="importSelectedFrameworks()" style="display:none">Import Selected</button>
   </div>
 </div>
 
@@ -589,7 +587,7 @@ function bdg(st){
 function updateCrCard(){
   var r=S.currentReport;
   var ttl=$('cr-title');var bar=$('cr-bar');var pct=$('cr-pct');
-  if(!r){if(ttl)ttl.textContent='No report open';if(bar)bar.style.width='0%';if(pct)pct.textContent='ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ';return;}
+  if(!r){if(ttl)ttl.textContent='No report open';if(bar)bar.style.width='0%';if(pct)pct.textContent='ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ';return;}
   if(ttl)ttl.textContent=r.title||'Untitled';
   var d=r.data||{};var m=d.report||{};
   var filled=0,total=5;
@@ -682,23 +680,23 @@ function alertMsg(msg,title){
 
 var FRAMEWORKS=[
   {id:'cis',name:'CIS Controls v8',badge:'CIS',badgeClass:'cis',
-   desc:'Center for Internet Security Controls  &mdash;  18 control groups covering essential cyber hygiene from asset management to incident response.',
-   stats:[{label:'18 Controls'},{label:'153 Safeguards'},{label:'2021'}]},
+   desc:'Center for Internet Security Controls. 18 control groups covering essential cyber hygiene from asset management to incident response.',
+   stats:['18 Controls','153 Safeguards','2021']},
   {id:'soc2',name:'SOC 2 Type II',badge:'SOC2',badgeClass:'soc2',
-   desc:'AICPA Trust Services Criteria  &mdash;  evaluating controls for Security, Availability, Confidentiality, Processing Integrity, and Privacy.',
-   stats:[{label:'5 Categories'},{label:'64 Criteria'},{label:'2017'}]},
+   desc:'AICPA Trust Services Criteria. Evaluating controls for Security, Availability, Confidentiality, Processing Integrity, and Privacy.',
+   stats:['5 Categories','64 Criteria','2017']},
   {id:'pci',name:'PCI DSS v4.0',badge:'PCI-DSS',badgeClass:'pci',
-   desc:'Payment Card Industry Data Security Standard  &mdash;  protecting cardholder data through network security, access control, and monitoring requirements.',
-   stats:[{label:'12 Requirements'},{label:'281 Controls'},{label:'2022'}]},
+   desc:'Payment Card Industry Data Security Standard. Protecting cardholder data through network security, access control, and monitoring.',
+   stats:['12 Requirements','281 Controls','2022']},
   {id:'nist',name:'NIST CSF 2.0',badge:'NIST',badgeClass:'nist',
-   desc:'NIST Cybersecurity Framework  &mdash;  Govern, Identify, Protect, Detect, Respond, Recover. Risk-based approach to managing cybersecurity risk.',
-   stats:[{label:'6 Functions'},{label:'106 Outcomes'},{label:'2024'}]},
+   desc:'NIST Cybersecurity Framework. Govern, Identify, Protect, Detect, Respond, Recover. Risk-based approach to managing cybersecurity risk.',
+   stats:['6 Functions','106 Outcomes','2024']},
   {id:'iso27001',name:'ISO/IEC 27001:2022',badge:'ISO',badgeClass:'iso',
-   desc:'International standard for information security management systems  &mdash;  organizational security controls and risk treatment methodology.',
-   stats:[{label:'4 Clauses'},{label:'93 Controls'},{label:'2022'}]},
+   desc:'International standard for information security management systems and risk treatment methodology.',
+   stats:['4 Clauses','93 Controls','2022']},
   {id:'hipaa',name:'HIPAA Security Rule',badge:'HIPAA',badgeClass:'hipaa',
-   desc:'Health Insurance Portability Act  &mdash;  safeguarding electronic protected health information through administrative, physical, and technical controls.',
-   stats:[{label:'3 Safeguards'},{label:'45 Standards'},{label:'2013'}]}
+   desc:'Health Insurance Portability Act. Safeguarding electronic protected health information through administrative, physical, and technical controls.',
+   stats:['3 Safeguards','45 Standards','2013']}
 ];
 var _fwSelected=new Set();
 function renderFrameworks(){
@@ -708,15 +706,15 @@ function renderFrameworks(){
     var sel=_fwSelected.has(fw.id);
     var imported=S.templates.some(function(t){return t.framework_id===fw.id;});
     var statsHtml=fw.stats.map(function(st){
-      return '<div class="fw-stat"><svg viewBox="0 0 12 12" fill="currentColor"><circle cx="6" cy="6" r="3"/></svg>'+esc(st.label)+'</div>';
+      return '<div class="fw-stat"><svg viewBox="0 0 12 12" fill="currentColor"><circle cx="6" cy="6" r="3"/></svg>'+esc(st)+'</div>';
     }).join('');
-    return '<div class="fw-card'+(sel?' selected':'')+(imported?' imported':'')+'" onclick="toggleFw(''+fw.id+'')">'+
+    return '<div class="fw-card'+(sel?' selected':'')+(imported?' imported':'')+'" onclick="toggleFw(\''+(fw.id)+'\')">'+
       '<div class="fw-card-check">&#10003;</div>'+
       '<span class="fw-badge '+fw.badgeClass+'">'+esc(fw.badge)+'</span>'+
       '<h3>'+esc(fw.name)+'</h3>'+
       '<p>'+esc(fw.desc)+'</p>'+
       '<div class="fw-meta">'+statsHtml+'</div>'+
-      (imported?'<div style="margin-top:8px;font-size:11px;color:var(--accent)">&#10003; Already imported</div>':'')+
+      (imported?'<div style="margin-top:8px;font-size:11px;color:var(--accent)">&#10003; Imported</div>':'')+
       '</div>';
   }).join('');
   updateFwBar();
@@ -745,9 +743,9 @@ async function importSelectedFrameworks(){
     }catch(e){errors.push(fw.name);}
   }
   _fwSelected.clear();renderFrameworks();
-  if(btn){btn.textContent='Import Selected ->';btn.disabled=false;}
+  if(btn){btn.textContent='Import Selected';btn.disabled=false;}
   if(errors.length)toast('Failed: '+errors.join(', '),'err');
-  else toast('Framework'+(ids.length>1?'s':'')+' imported successfully');
+  else toast('Frameworks imported successfully');
 }
 function showView(name){
   var vs=document.querySelectorAll('.view');
