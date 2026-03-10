@@ -100,7 +100,9 @@ table{width:100%;border-collapse:collapse;font-size:12px}
 th{text-align:left;padding:8px 11px;background:var(--surface2);color:var(--text3);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;border-bottom:1px solid var(--border)}
 td{padding:9px 11px;border-bottom:1px solid var(--border);vertical-align:middle;color:var(--text)}
 tr:hover td{background:rgba(255,255,255,.015)}
-.fcard{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:12px 14px;margin-bottom:8px}
+.fcard{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px 14px;margin-bottom:6px}
+.fcard-row{display:flex;align-items:center;gap:10px}
+.fcard-title{flex:1;font-size:13px;font-weight:600;color:var(--text)}
 .fsev{font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;margin-right:7px}
 .sev-critical{background:rgba(255,77,77,.15);color:#ff4d4d}
 .sev-high{background:rgba(255,140,66,.15);color:var(--orange)}
@@ -366,8 +368,8 @@ tr:hover td{background:rgba(255,255,255,.015)}
     <!-- FINDINGS -->
     <div class="view" id="view-findings">
       <div class="page-hdr">
-        <span class="page-title">Finding Templates</span>
-        <button class="btn btn-primary" id="btn-new-finding-tpl">+ New Template</button>
+        <span class="page-title">Findings</span>
+        <button class="btn btn-primary" id="btn-new-finding-tpl">+ New Finding</button>
       </div>
       <div style="display:flex;gap:10px;margin-bottom:14px">
         <select class="field-select" id="findings-rpt-sel" style="flex:1"><option value="">All Reports</option></select>
@@ -598,7 +600,7 @@ function updateCrCard(){
   if(pct)pct.textContent=p+'% complete';
 }
 function updateTopbar(name){
-  var titles={dash:'Dashboard',reports:'Reports',editor:'Report Editor',findings:'Finding Templates',templates:'Report Templates',frameworks:'Security Frameworks','template-editor':'Template Editor',preview:'Report Preview'};
+  var titles={dash:'Dashboard',reports:'Reports',editor:'Report Editor',findings:'Findings',templates:'Report Templates',frameworks:'Security Frameworks','template-editor':'Template Editor',preview:'Report Preview'};
   var el=$('topbar-title');if(el)el.textContent=titles[name]||name;
   var prevBtn=$('btn-preview-report');
   if(prevBtn)prevBtn.style.display=(name==='editor')?'':'none';
