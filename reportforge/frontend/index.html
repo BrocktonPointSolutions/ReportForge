@@ -102,6 +102,10 @@ td{padding:9px 11px;border-bottom:1px solid var(--border);vertical-align:middle;
 tr:hover td{background:rgba(255,255,255,.015)}
 .fcard{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:10px 14px;margin-bottom:6px}
 .fcard-row{display:flex;align-items:center;gap:10px}
+.drag-handle{cursor:grab;color:var(--text3);font-size:18px;line-height:1;padding:0 4px;user-select:none;flex-shrink:0}
+.drag-handle:active{cursor:grabbing}
+.sec-card-drag{border:2px dashed var(--accent)!important;opacity:.5}
+.sec-card-drag-over{border:2px solid var(--accent)!important}
 .fcard-title{flex:1;font-size:13px;font-weight:600;color:var(--text)}
 .fsev{font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;margin-right:7px}
 .sev-critical{background:rgba(255,77,77,.15);color:#ff4d4d}
@@ -1462,7 +1466,6 @@ function addSection(){
 }
 function renderTSections(){
   var el=$('ted-sections');if(!el)return;
-  // Flush old Quill instances to avoid leaks
   _TQ={};
   var secs=(S.currentTemplate&&
     S.currentTemplate.sections)||[];
@@ -1472,11 +1475,14 @@ function renderTSections(){
     return;
   }
   el.innerHTML=secs.map(function(sec,si){
-    return '<div class="card"'
-      +' style="margin-bottom:12px">'
+    return '<div class="card sec-drag-card"'
+      +' draggable="true"'
+      +' data-si="'+si+'"'
+      +' style="margin-bottom:12px;cursor:default">'
       +'<div style="display:flex;'
       +'align-items:center;'
       +'margin-bottom:10px;gap:8px">'
+      +'<span class="drag-handle" title="Drag to reorder">&#9776;</span>'
       +'<input class="field-input" style="flex:1"'
       +' data-sec-title="'+si+'"'
       +' value="'+esc(sec.title)+'">'
@@ -1490,7 +1496,6 @@ function renderTSections(){
       +'<div class="ql-wrap" id="tq-'+si+'"></div>'
       +'</div></div>';
   }).join('');
-  // Initialize a Quill editor for each section
   secs.forEach(function(sec,si){
     var tb=[
       [{header:[1,2,3,false]}],
@@ -1507,10 +1512,45 @@ function renderTSections(){
     q.on('text-change',function(){
       S.currentTemplate.sections[si].content=
         q.root.innerHTML===
-        '<p><br></p>'?'':q.root.innerHTML;
+        '<p><br></p>'?'':
+        q.root.innerHTML;
       markTDirty();
     });
     _TQ[si]=q;
+  });
+  var cards=el.querySelectorAll('.sec-drag-card');
+  var dragSrc=null;
+  cards.forEach(function(card){
+    card.addEventListener('dragstart',function(e){
+      dragSrc=card;
+      e.dataTransfer.effectAllowed='move';
+      e.dataTransfer.setData('text/plain',card.dataset.si);
+      setTimeout(function(){card.classList.add('sec-card-drag');},0);
+    });
+    card.addEventListener('dragend',function(){
+      card.classList.remove('sec-card-drag');
+      cards.forEach(function(c){c.classList.remove('sec-card-drag-over');});
+    });
+    card.addEventListener('dragover',function(e){
+      e.preventDefault();
+      e.dataTransfer.dropEffect='move';
+      cards.forEach(function(c){c.classList.remove('sec-card-drag-over');});
+      if(card!==dragSrc) card.classList.add('sec-card-drag-over');
+    });
+    card.addEventListener('dragleave',function(){
+      card.classList.remove('sec-card-drag-over');
+    });
+    card.addEventListener('drop',function(e){
+      e.preventDefault();
+      card.classList.remove('sec-card-drag-over');
+      if(!dragSrc||dragSrc===card)return;
+      var fromIdx=parseInt(dragSrc.dataset.si,10);
+      var toIdx=parseInt(card.dataset.si,10);
+      var moved=S.currentTemplate.sections.splice(fromIdx,1)[0];
+      S.currentTemplate.sections.splice(toIdx,0,moved);
+      markTDirty();
+      renderTSections();
+    });
   });
 }
 function rmSection(si){
