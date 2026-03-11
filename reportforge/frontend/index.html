@@ -1143,17 +1143,31 @@ function renderEdSections(){
   });
 }
 
-function exportReport(fmt){
+async function exportReport(fmt){
   if(!S.currentReport)return;
   var rid=S.currentReport.id;
-  var url='/api/reports/'+rid
-    +'/export/'+fmt;
-  var a=document.createElement('a');
-  a.href=url;
-  a.download='';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+  var url='/api/reports/'+rid+'/export/'+fmt;
+  try{
+    toast('Preparing '+fmt.toUpperCase()+'...');
+    var res=await fetch(url);
+    if(!res.ok){
+      var t=await res.text();
+      toast('Export failed: '+(t||res.statusText),'err');
+      return;
+    }
+    var blob=await res.blob();
+    var cd=res.headers.get('Content-Disposition')||'';
+    var m=cd.match(/filename="([^"]+)"/);
+    var name=m?m[1]:(S.currentReport.title||'report')+'.'+fmt;
+    var a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download=name;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function(){URL.revokeObjectURL(a.href);document.body.removeChild(a);},1000);
+  }catch(e){
+    toast('Export failed: '+e.message,'err');
+  }
 }
 function renderPreview(){
   var r=S.currentReport;if(!r)return;
