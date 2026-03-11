@@ -880,22 +880,24 @@ function popEdTemplates(){
     }).join('');
   if(cur) sel.value=cur;
 }
-function applyTemplate(){
+async function applyTemplate(){
   if(!S.currentReport)return;
   var tid=gv('ed-template');
   if(!tid){toast('Select a template first','err');return;}
-  var tpl=S.templates.find(function(t){return t.id===tid;});
-  if(!tpl){toast('Template not found','err');return;}
   var hasSecs=(S.currentReport.sections||[]).length>0;
   if(hasSecs&&!confirm('This will replace existing sections. Continue?'))return;
-  var rawSecs=tpl.sections||tpl.data&&tpl.data.sections||[];
-  S.currentReport.sections=rawSecs.map(function(s){
-    return {title:s.title,type:s.type||'text',content:s.content||'',finding_ids:s.finding_ids||[]};
-  });
-  markDirty();
-  renderEdSections();
-  switchTab('sections');
-  toast('Template applied - '+S.currentReport.sections.length+' sections loaded');
+  try{
+    var tpl=await api('/api/templates/'+tid);
+    var rawSecs=tpl.sections||[];
+    S.currentReport.sections=rawSecs.map(function(s){
+      return {title:s.title,type:s.type||'text',content:s.content||'',finding_ids:s.finding_ids||[]};
+    });
+    markDirty();
+    switchTab('sections');
+    toast('Template applied - '+S.currentReport.sections.length+' sections loaded');
+  }catch(e){
+    toast('Failed to load template: '+e.message,'err');
+  }
 }
 
 function openNewReport(){
