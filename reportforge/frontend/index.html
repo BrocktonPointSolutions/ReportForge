@@ -762,7 +762,7 @@ async function importSelectedFrameworks(){
     if(!fw||S.templates.some(function(t){return t.framework_id===fw.id;}))continue;
     try{
       var r=await api('/api/templates',{method:'POST',body:JSON.stringify({name:fw.name,framework_id:fw.id,sections:[],description:fw.desc})});
-      S.templates.push(r);
+      S.templates.push({id:r.id,name:fw.name,description:fw.desc,sections:[]});
     }catch(e){errors.push(fw.name);}
   }
   _fwSelected.clear();renderFrameworks();
@@ -1521,7 +1521,7 @@ async function createTemplate(){
         sections:[]
       })
     });
-    S.templates.push(t);
+    S.templates.push({id:t.id,name:name,description:gv('nt-desc'),sections:[]});
     closeM('modal-new-template');
     toast('Template created');
     openTplEditor(t.id);
