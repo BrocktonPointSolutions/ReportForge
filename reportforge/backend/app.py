@@ -541,6 +541,8 @@ def _build_report_html(r, findings):
         '.medium{background:#f9a825;color:#000}',
         '.low{background:#388e3c;color:#fff}',
         '.info{background:#0288d1;color:#fff}',
+        '.sec-content{margin:8px 0 16px 0;',
+        'line-height:1.6}',
         '</style></head><body>',
     ]
     parts.append(
@@ -564,12 +566,11 @@ def _build_report_html(r, findings):
         parts.append(
             '<h2>' + esc(sec.get(
             'title','')) + '</h2>')
-        for fld in sec.get('fields',[]):
-            lbl = esc(fld.get('label',''))
-            val = esc(fld.get('value',''))
+        content = sec.get('content','')
+        if content:
             parts.append(
-                '<p><b>' + lbl +
-                ':</b> ' + val + '</p>')
+                '<div class="sec-content">'
+                + content + '</div>')
     if findings:
         parts.append(
             '<h2>Findings (' +
@@ -689,15 +690,14 @@ def export_docx(rid: str):
         for sec in secs:
             doc.add_heading(
                 sec.get('title',''), 1)
-            for fld in sec.get(
-                'fields',[]):
-                p = doc.add_paragraph()
-                p.add_run(
-                    fld.get(
-                    'label','')+': '
-                ).bold = True
-                p.add_run(
-                    fld.get('value',''))
+            content = sec.get('content','')
+            if content:
+                soup2 = BeautifulSoup(
+                    content, 'html.parser')
+                txt2 = soup2.get_text(
+                    separator='\n').strip()
+                if txt2:
+                    doc.add_paragraph(txt2)
         if findings:
             doc.add_heading(
                 'Findings', 1)
