@@ -661,13 +661,129 @@ def export_pdf(rid: str):
         }
     )
 
+def _add_html_to_docx(doc, html, base_heading=2):
+    import re, base64, io as _io
+    from bs4 import BeautifulSoup, NavigableString, Tag
+    from docx.shared import Pt, RGBColor
+    from docx.oxml.ns import qn
+    from docx.oxml import OxmlElement
+    BLOCK_TAGS = {'p','div','h1','h2','h3','h4',
+                  'h5','h6','ul','ol','li','br',
+                  'blockquote','pre'}
+    H_MAP = {'h1': base_heading,
+             'h2': base_heading+1,
+             'h3': base_heading+2,
+             'h4': base_heading+3,
+             'h5': base_heading+3,
+             'h6': base_heading+3}
+    def parse_color(style_str):
+        m = re.search(r'colors*:s*#([0-9a-fA-F]{6})', style_str or '')
+        if m:
+            h = m.group(1)
+            return RGBColor(int(h[0:2],16),int(h[2:4],16),int(h[4:6],16))
+        m2 = re.search(r'colors*:s*rgb((d+),s*(d+),s*(d+))', style_str or '')
+        if m2:
+            return RGBColor(int(m2.group(1)),int(m2.group(2)),int(m2.group(3)))
+        return None
+    def add_run_from_node(para, node, bold=False, italic=False, color=None):
+        if isinstance(node, NavigableString):
+            txt = str(node)
+            if not txt:
+                return
+            run = para.add_run(txt)
+            run.bold = bold
+            run.italic = italic
+            if color:
+                run.font.color.rgb = color
+            return
+        if not isinstance(node, Tag):
+            return
+        tag = node.name.lower() if node.name else ''
+        new_bold = bold or tag in ('b','strong')
+        new_italic = italic or tag in ('i','em')
+        new_color = color
+        style_str = node.get('style','')
+        c = parse_color(style_str)
+        if c:
+            new_color = c
+        if tag == 'img':
+            src = node.get('src','')
+            if src.startswith('data:image'):
+                try:
+                    header, b64data = src.split(',',1)
+                    img_bytes = base64.b64decode(b64data)
+                    img_stream = _io.BytesIO(img_bytes)
+                    from docx.shared import Inches
+                    run = para.add_run()
+                    run.add_picture(img_stream, width=Inches(4))
+                except Exception:
+                    pass
+            return
+        for child in node.children:
+            add_run_from_node(para, child, new_bold, new_italic, new_color)
+    def process_block(node):
+        if isinstance(node, NavigableString):
+            txt = str(node).strip()
+            if txt:
+                doc.add_paragraph(txt)
+            return
+        if not isinstance(node, Tag):
+            return
+        tag = node.name.lower() if node.name else ''
+        if tag in H_MAP:
+            doc.add_heading(node.get_text(), H_MAP[tag])
+            return
+        if tag == 'img':
+            src = node.get('src','')
+            if src.startswith('data:image'):
+                try:
+                    header, b64data = src.split(',',1)
+                    img_bytes = base64.b64decode(b64data)
+                    img_stream = _io.BytesIO(img_bytes)
+                    from docx.shared import Inches
+                    p = doc.add_paragraph()
+                    run = p.add_run()
+                    run.add_picture(img_stream, width=Inches(4))
+                except Exception:
+                    pass
+            return
+        if tag in ('ul','ol'):
+            list_style = 'List Bullet' if tag=='ul' else 'List Number'
+            for li in node.find_all('li', recursive=False):
+                p = doc.add_paragraph(style=list_style)
+                for child in li.children:
+                    add_run_from_node(p, child)
+            return
+        if tag in ('p','div','blockquote','pre'):
+            has_block = any(
+                isinstance(c, Tag) and c.name and
+                c.name.lower() in BLOCK_TAGS
+                for c in node.children)
+            if has_block:
+                for child in node.children:
+                    process_block(child)
+            else:
+                p = doc.add_paragraph()
+                for child in node.children:
+                    add_run_from_node(p, child)
+            return
+        if tag == 'br':
+            doc.add_paragraph()
+            return
+        for child in node.children:
+            process_block(child)
+    soup = BeautifulSoup(html, 'html.parser')
+    for child in soup.children:
+        process_block(child)
+
+
 @app.get('/api/reports/{rid}/export/docx')
 def export_docx(rid: str):
     r, findings = _get_report_for_export(
         rid)
     try:
+        import io
         from docx import Document
-        from docx.shared import Pt, RGBColor
         from bs4 import BeautifulSoup
         doc = Document()
         doc.add_heading(
@@ -692,45 +808,34 @@ def export_docx(rid: str):
                 sec.get('title',''), 1)
             content = sec.get('content','')
             if content:
-                soup2 = BeautifulSoup(
-                    content, 'html.parser')
-                txt2 = soup2.get_text(
-                    separator='\n').strip()
-                if txt2:
-                    doc.add_paragraph(txt2)
+                _add_html_to_docx(
+                    doc, content,
+                    base_heading=2)
         if findings:
             doc.add_heading(
                 'Findings', 1)
             for f in findings:
                 title = f.get('title','')
-                sev = f.get(
-                    'severity','')
+                sev = f.get('severity','')
                 doc.add_heading(
-                    title + ' [' +
-                    sev + ']', 2)
+                    title + ' [' + sev + ']', 2)
                 for lbl, key in [
-                  ('Observation',
-                   'description'),
-                  ('Discussion',
-                   'discussion'),
+                  ('Observation','description'),
+                  ('Discussion','discussion'),
                   ('Recommendations',
                    'recommendation'),
-                  ('References',
-                   'refs'),
+                  ('References','refs'),
                 ]:
-                    html = f.get(key,'')
-                    if not html:
+                    html_val = f.get(key,'')
+                    if not html_val:
                         continue
                     p2 = doc.add_paragraph()
                     p2.add_run(
                         lbl + ':'
                     ).bold = True
-                    soup = BeautifulSoup(
-                        html, 'html.parser')
-                    txt = soup.get_text(
-                        separator='\n')
-                    doc.add_paragraph(txt)
-        import io
+                    _add_html_to_docx(
+                        doc, html_val,
+                        base_heading=3)
         buf = io.BytesIO()
         doc.save(buf)
         buf.seek(0)
