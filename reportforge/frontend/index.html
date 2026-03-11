@@ -10,7 +10,7 @@
 body.dark{--bg:#0d0f14;--sidebar:#0a0c10;--surface:#13161e;--surface2:#1a1e28;--surface3:#1f2433;--border:#252a38;--accent:#00e5c3;--accent2:#00b89e;--accent-glow:rgba(0,229,195,.15);--orange:#ff8c42;--text:#e8eaf0;--text2:#7a8099;--text3:#4a5068;--danger:#ff4d4d}
 
 body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;overflow:hidden}
-.sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);height:100vh;background:var(--sidebar);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
+.sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);height:100vh;bachkground:var(--sidebar);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
 .sidebar-logo{padding:20px 16px 14px;border-bottom:1px solid var(--border)}
 .logo-mark{font-size:18px;font-weight:800;letter-spacing:-.5px}
 .logo-mark .r{color:var(--text)}.logo-mark .f{color:var(--accent)}
@@ -568,6 +568,20 @@ tr:hover td{background:rgba(255,255,255,.015)}
     <div class="modal-footer"><button class="btn btn-primary" data-close-modal="modal-alert">OK</button></div>
   </div>
 </div>
+<!-- CHANGE REPORT TYPE WARNING MODAL -->
+<div class="modal-overlay" id="modal-change-type-warn">
+  <div class="modal" style="width:440px">
+    <div class="modal-hdr"><span>⚠ Change Report Type?</span></div>
+    <div class="modal-body">
+      <p style="color:var(--text2);font-size:13px;line-height:1.6">Changing the report type will replace the current report structure when you apply the new template. <strong style="color:var(--danger)">You may lose all existing sections and data.</strong></p>
+      <p style="color:var(--text2);font-size:13px;margin-top:10px">Are you sure you want to change the report type?</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" id="btn-cancel-type-change">Cancel</button>
+      <button class="btn btn-danger" id="btn-confirm-type-change">Change Type</button>
+    </div>
+  </div>
+</div>
 <div class="toast-root" id="toast-root"></div>
 <script>
 
@@ -975,7 +989,8 @@ async function openEditor(id){
     sv('ed-end',m.end_date||'');
     sv('ed-summary',m.summary||'');
     popEdTemplates();
-    sv('ed-template',r.template_id||'');
+    sv('ed-template',r.template_id!=null?String(r.template_id):'');
+    S.currentReport.template_id=r.template_id||null;
     renderEdSections();
     renderEdFindings();
     syncFindingsTab();
@@ -1933,6 +1948,27 @@ document.addEventListener('click',function(e){
 document.addEventListener('change',function(e){
   var t=e.target;
   if(t.id==='editor-status'){updateStatus();return;}
+  if(t.id==='ed-template'){
+    var _prevTpl=S.currentReport&&S.currentReport.template_id;
+    if(_prevTpl&&t.value!==String(_prevTpl)){
+      var _newVal=t.value;
+      t.value=String(_prevTpl);
+      openM('modal-change-type-warn');
+      $('btn-confirm-type-change').onclick=function(){
+        closeM('modal-change-type-warn');
+        sv('ed-template',_newVal);
+        S.currentReport.template_id=_newVal||null;
+        markDirty();
+      };
+      $('btn-cancel-type-change').onclick=function(){
+        closeM('modal-change-type-warn');
+      };
+    }else{
+      S.currentReport.template_id=t.value||null;
+      markDirty();
+    }
+    return;
+  }
   if(t.id==='findings-rpt-sel'
     ||t.id==='findings-sev-sel'){
     renderFindings();return;
