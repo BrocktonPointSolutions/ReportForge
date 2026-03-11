@@ -804,13 +804,14 @@ def export_docx(rid: str):
             doc.add_paragraph(ml)
         secs = d.get('sections', [])
         for sec in secs:
+            sec_lvl = sec.get('level', 2)
             doc.add_heading(
-                sec.get('title',''), 2)
+                sec.get('title',''), sec_lvl)
             content = sec.get('content','')
             if content:
                 _add_html_to_docx(
                     doc, content,
-                    base_heading=3)
+                    base_heading=sec_lvl+1)
         if findings:
             doc.add_heading(
                 'Findings', 2)
