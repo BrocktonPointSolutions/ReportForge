@@ -295,6 +295,7 @@ def _report_out(
         'date': r.assessment_date,
         'authors': r.authors,
         'status': r.status,
+        'template_id': r.template_id,
         'created_at': _ts(r.created_at),
         'updated_at': _ts(r.updated_at),
     }
