@@ -787,7 +787,7 @@ def export_docx(rid: str):
         from bs4 import BeautifulSoup
         doc = Document()
         doc.add_heading(
-            r.title or 'Report', 0)
+            r.title or 'Report', 1)
         d = json.loads(
             r.data_json or '{}')
         meta_lines = []
@@ -805,20 +805,20 @@ def export_docx(rid: str):
         secs = d.get('sections', [])
         for sec in secs:
             doc.add_heading(
-                sec.get('title',''), 1)
+                sec.get('title',''), 2)
             content = sec.get('content','')
             if content:
                 _add_html_to_docx(
                     doc, content,
-                    base_heading=2)
+                    base_heading=3)
         if findings:
             doc.add_heading(
-                'Findings', 1)
+                'Findings', 2)
             for f in findings:
                 title = f.get('title','')
                 sev = f.get('severity','')
                 doc.add_heading(
-                    title + ' [' + sev + ']', 2)
+                    title + ' [' + sev + ']', 3)
                 for lbl, key in [
                   ('Observation','description'),
                   ('Discussion','discussion'),
@@ -835,7 +835,7 @@ def export_docx(rid: str):
                     ).bold = True
                     _add_html_to_docx(
                         doc, html_val,
-                        base_heading=3)
+                        base_heading=4)
         buf = io.BytesIO()
         doc.save(buf)
         buf.seek(0)
