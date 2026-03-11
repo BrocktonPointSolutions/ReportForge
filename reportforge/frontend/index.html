@@ -484,14 +484,7 @@ tr:hover td{background:rgba(255,255,255,.015)}
       <div class="field-row">
         <div class="field-group">
           <label class="field-label">Report Type</label>
-          <select class="field-select" id="nr-type">
-            <option value="Security Assessment">Security Assessment</option>
-            <option value="Penetration Test">Penetration Test</option>
-            <option value="Vulnerability Assessment">Vulnerability Assessment</option>
-            <option value="Risk Assessment">Risk Assessment</option>
-            <option value="Compliance Audit">Compliance Audit</option>
-            <option value="Other">Other</option>
-          </select>
+          <select class="field-select" id="nr-type"><option value="">Select a template...</option></select>
         </div>
         <div class="field-group">
           <label class="field-label">Classification</label>
@@ -512,10 +505,7 @@ tr:hover td{background:rgba(255,255,255,.015)}
         <label class="field-label">Assessors / Authors</label>
         <input class="field-input" id="nr-authors" placeholder="e.g. Jane Doe, John Smith">
       </div>
-      <div class="field-group" style="display:none" id="nr-template-group">
-        <label class="field-label">Template</label>
-        <select class="field-select" id="nr-template"><option value="">None (blank)</option></select>
-      </div>
+
     </div>
     <div class="modal-footer nr-footer">
       <button class="btn btn-ghost" data-close-modal="modal-new-report">Cancel</button>
@@ -904,7 +894,6 @@ function openNewReport(){
   popNRTemplates();
   sv('nr-title','');
   sv('nr-client','');
-  sv('nr-type','Security Assessment');
   sv('nr-classification','Confidential');
   sv('nr-authors','');
   var today=new Date().toISOString().split('T')[0];
@@ -912,13 +901,11 @@ function openNewReport(){
   openM('modal-new-report');
 }
 function popNRTemplates(){
-  var sel=$('nr-template');
+  var sel=$('nr-type');
   if(!sel)return;
-  sel.innerHTML=
-    '<option value="">None (blank)</option>'
+  sel.innerHTML='<option value="">Select a template...</option>'
     +S.templates.map(function(t){
-      return '<option value="'+t.id+'">'
-        +esc(t.name)+'</option>';
+      return '<option value="'+t.id+'">'+esc(t.name)+'</option>';
     }).join('');
 }
 async function createReport(){
@@ -936,10 +923,11 @@ async function createReport(){
     alertMsg('Duplicate report name');
     return;
   }
-  var tid=gv('nr-template');
+  var tid=gv('nr-type');
+  var tplName=tid?(S.templates.find(function(t){return t.id===tid;})||{}).name||'':'Custom';
   var meta={
     client:gv('nr-client').trim(),
-    type:gv('nr-type'),
+    type:tplName,
     classification:gv('nr-classification'),
     date:gv('nr-date'),
     authors:gv('nr-authors').trim()
