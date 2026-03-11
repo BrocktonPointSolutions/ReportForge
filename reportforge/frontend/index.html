@@ -1949,7 +1949,8 @@ document.addEventListener('change',function(e){
   var t=e.target;
   if(t.id==='editor-status'){updateStatus();return;}
   if(t.id==='ed-template'){
-    var _prevTpl=S.currentReport&&S.currentReport.template_id;
+    if(!S.currentReport)return;
+    var _prevTpl=S.currentReport.template_id;
     if(_prevTpl&&t.value!==String(_prevTpl)){
       var _newVal=t.value;
       t.value=String(_prevTpl);
@@ -1965,7 +1966,6 @@ document.addEventListener('change',function(e){
       };
     }else{
       S.currentReport.template_id=t.value||null;
-      markDirty();
     }
     return;
   }
