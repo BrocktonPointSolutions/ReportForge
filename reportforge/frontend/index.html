@@ -144,7 +144,13 @@ tr:hover td{background:rgba(255,255,255,.015)}
 .modal-hdr{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-weight:700;font-size:14px;flex-shrink:0}
 .modal-body{padding:20px;overflow-y:auto;flex:1}
 .modal-footer{padding:12px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;flex-shrink:0}
-.modal-new-report-dlg{width:560px}
+.modal-new-report-dlg{width:600px}
+.poc-section-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);padding:12px 0 6px;border-top:1px solid var(--border);margin-top:8px}
+.logo-upload-area{border:2px dashed var(--border);border-radius:8px;padding:12px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:.15s}
+.logo-upload-area:hover{border-color:var(--accent);background:var(--surface2)}
+.logo-upload-area img{height:40px;max-width:120px;object-fit:contain;border-radius:4px;display:none}
+.logo-upload-area .logo-placeholder{font-size:12px;color:var(--text3)}
+.logo-upload-area .logo-fname{font-size:11px;color:var(--text2);margin-left:auto}
 .nr-footer{padding:16px 24px}
 .nr-footer .btn-primary{padding:9px 20px;font-size:13px;font-weight:700}
 .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -236,7 +242,7 @@ tr:hover td{background:rgba(255,255,255,.015)}
       <div class="cr-label">Current Report</div>
       <div class="cr-title" id="cr-title">No report open</div>
       <div class="cr-bar-wrap"><div class="cr-bar" id="cr-bar" style="width:0%"></div></div>
-      <div class="cr-pct" id="cr-pct">ÃÂ¢ÃÂÃÂ</div>
+      <div class="cr-pct" id="cr-pct">ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ</div>
     </div>
   </div>
 </div>
@@ -365,6 +371,24 @@ tr:hover td{background:rgba(255,255,255,.015)}
               <label class="field-label">Report Template</label>
               <input type="hidden" id="ed-template">
               <input class="field-input" id="ed-template-name" readonly style="background:var(--bg2,#f5f5f5);cursor:default">
+            </div>
+            <div class="poc-section-label" style="margin-top:4px">Client Point of Contact</div>
+            <div class="form-row">
+              <div class="field-group"><label class="field-label">First Name</label><input class="field-input" id="ed-poc-first"></div>
+              <div class="field-group"><label class="field-label">Last Name</label><input class="field-input" id="ed-poc-last"></div>
+            </div>
+            <div class="form-row">
+              <div class="field-group"><label class="field-label">Email</label><input class="field-input" type="email" id="ed-poc-email"></div>
+              <div class="field-group"><label class="field-label">Phone</label><input class="field-input" type="tel" id="ed-poc-phone"></div>
+            </div>
+            <div class="field-group">
+              <label class="field-label">Company Logo</label>
+              <div class="logo-upload-area" id="ed-logo-area" onclick="document.getElementById('ed-logo-input').click()">
+                <img id="ed-logo-preview" alt="logo">
+                <span class="logo-placeholder" id="ed-logo-placeholder">Click to upload logo (PNG, JPG, SVG)</span>
+                <span class="logo-fname" id="ed-logo-fname"></span>
+              </div>
+              <input type="file" id="ed-logo-input" accept="image/*" style="display:none">
             </div>
           </div>
           <div class="editor-panel" id="ed-sections"><div id="ed-sections-body"></div></div>
@@ -499,6 +523,24 @@ tr:hover td{background:rgba(255,255,255,.015)}
         <input class="field-input" id="nr-authors" placeholder="e.g. Jane Doe, John Smith">
       </div>
 
+      <div class="poc-section-label">Client Point of Contact</div>
+      <div class="field-row">
+        <div class="field-group"><label class="field-label">First Name</label><input class="field-input" id="nr-poc-first" placeholder="Jane"></div>
+        <div class="field-group"><label class="field-label">Last Name</label><input class="field-input" id="nr-poc-last" placeholder="Smith"></div>
+      </div>
+      <div class="field-row">
+        <div class="field-group"><label class="field-label">Email Address</label><input class="field-input" type="email" id="nr-poc-email" placeholder="jane@company.com"></div>
+        <div class="field-group"><label class="field-label">Phone Number</label><input class="field-input" type="tel" id="nr-poc-phone" placeholder="+1 (555) 000-0000"></div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Company Logo</label>
+        <div class="logo-upload-area" id="nr-logo-area" onclick="document.getElementById('nr-logo-input').click()">
+          <img id="nr-logo-preview" alt="logo">
+          <span class="logo-placeholder" id="nr-logo-placeholder">Click to upload logo (PNG, JPG, SVG)</span>
+          <span class="logo-fname" id="nr-logo-fname"></span>
+        </div>
+        <input type="file" id="nr-logo-input" accept="image/*" style="display:none">
+      </div>
     </div>
     <div class="modal-footer nr-footer">
       <button class="btn btn-ghost" data-close-modal="modal-new-report">Cancel</button>
@@ -602,7 +644,7 @@ function bdg(st){
 function updateCrCard(){
   var r=S.currentReport;
   var ttl=$('cr-title');var bar=$('cr-bar');var pct=$('cr-pct');
-  if(!r){if(ttl)ttl.textContent='No report open';if(bar)bar.style.width='0%';if(pct)pct.textContent='ÃÂ¢ÃÂÃÂ';return;}
+  if(!r){if(ttl)ttl.textContent='No report open';if(bar)bar.style.width='0%';if(pct)pct.textContent='ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ';return;}
   if(ttl)ttl.textContent=r.title||'Untitled';
   var d=r.data||{};var m=d.report||{};
   var filled=0,total=5;
@@ -718,12 +760,12 @@ var FW_SECTIONS={
   cis:[
     {title:'Executive Summary',type:'text',content:''},
     {title:'Scope and Methodology',type:'text',content:''},
-    {title:'CIS IG1 Ã¢ÂÂ Basic Cyber Hygiene',type:'checklist',content:''},
-    {title:'CIS IG2 Ã¢ÂÂ Foundational Controls',type:'checklist',content:''},
-    {title:'CIS IG3 Ã¢ÂÂ Organizational Controls',type:'checklist',content:''},
-    {title:'Asset Management (Controls 1Ã¢ÂÂ2)',type:'text',content:''},
+    {title:'CIS IG1 ÃÂ¢ÃÂÃÂ Basic Cyber Hygiene',type:'checklist',content:''},
+    {title:'CIS IG2 ÃÂ¢ÃÂÃÂ Foundational Controls',type:'checklist',content:''},
+    {title:'CIS IG3 ÃÂ¢ÃÂÃÂ Organizational Controls',type:'checklist',content:''},
+    {title:'Asset Management (Controls 1ÃÂ¢ÃÂÃÂ2)',type:'text',content:''},
     {title:'Data Protection (Control 3)',type:'text',content:''},
-    {title:'Secure Configuration (Controls 4Ã¢ÂÂ5)',type:'text',content:''},
+    {title:'Secure Configuration (Controls 4ÃÂ¢ÃÂÃÂ5)',type:'text',content:''},
     {title:'Account & Access Management (Control 6)',type:'text',content:''},
     {title:'Vulnerability Management (Control 7)',type:'text',content:''},
     {title:'Audit Log Management (Control 8)',type:'text',content:''},
@@ -734,11 +776,11 @@ var FW_SECTIONS={
   soc2:[
     {title:'Executive Summary',type:'text',content:''},
     {title:'Scope and Boundaries',type:'text',content:''},
-    {title:'Security Ã¢ÂÂ Logical & Physical Access (CC6)',type:'checklist',content:''},
+    {title:'Security ÃÂ¢ÃÂÃÂ Logical & Physical Access (CC6)',type:'checklist',content:''},
     {title:'Availability (A1)',type:'checklist',content:''},
     {title:'Confidentiality (C1)',type:'checklist',content:''},
     {title:'Processing Integrity (PI1)',type:'checklist',content:''},
-    {title:'Privacy (P1Ã¢ÂÂP8)',type:'checklist',content:''},
+    {title:'Privacy (P1ÃÂ¢ÃÂÃÂP8)',type:'checklist',content:''},
     {title:'Control Environment Assessment',type:'table',content:''},
     {title:'Exceptions and Deviations',type:'findings',content:''},
     {title:'Management Response',type:'text',content:''},
@@ -747,12 +789,12 @@ var FW_SECTIONS={
   pci:[
     {title:'Executive Summary',type:'text',content:''},
     {title:'Scope and Cardholder Data Environment',type:'text',content:''},
-    {title:'Req 1Ã¢ÂÂ2: Network Security Controls',type:'checklist',content:''},
-    {title:'Req 3Ã¢ÂÂ4: Protect Account Data',type:'checklist',content:''},
-    {title:'Req 5Ã¢ÂÂ6: Secure Systems and Software',type:'checklist',content:''},
-    {title:'Req 7Ã¢ÂÂ8: Restrict Access',type:'checklist',content:''},
+    {title:'Req 1ÃÂ¢ÃÂÃÂ2: Network Security Controls',type:'checklist',content:''},
+    {title:'Req 3ÃÂ¢ÃÂÃÂ4: Protect Account Data',type:'checklist',content:''},
+    {title:'Req 5ÃÂ¢ÃÂÃÂ6: Secure Systems and Software',type:'checklist',content:''},
+    {title:'Req 7ÃÂ¢ÃÂÃÂ8: Restrict Access',type:'checklist',content:''},
     {title:'Req 9: Restrict Physical Access',type:'checklist',content:''},
-    {title:'Req 10Ã¢ÂÂ11: Log and Monitor',type:'checklist',content:''},
+    {title:'Req 10ÃÂ¢ÃÂÃÂ11: Log and Monitor',type:'checklist',content:''},
     {title:'Req 12: Organizational Policies',type:'checklist',content:''},
     {title:'Findings and Non-Conformities',type:'findings',content:''},
     {title:'Compensating Controls',type:'table',content:''},
@@ -762,12 +804,12 @@ var FW_SECTIONS={
   nist:[
     {title:'Executive Summary',type:'text',content:''},
     {title:'Scope and Methodology',type:'text',content:''},
-    {title:'GV Ã¢ÂÂ Govern',type:'checklist',content:''},
-    {title:'ID Ã¢ÂÂ Identify',type:'checklist',content:''},
-    {title:'PR Ã¢ÂÂ Protect',type:'checklist',content:''},
-    {title:'DE Ã¢ÂÂ Detect',type:'checklist',content:''},
-    {title:'RS Ã¢ÂÂ Respond',type:'checklist',content:''},
-    {title:'RC Ã¢ÂÂ Recover',type:'checklist',content:''},
+    {title:'GV ÃÂ¢ÃÂÃÂ Govern',type:'checklist',content:''},
+    {title:'ID ÃÂ¢ÃÂÃÂ Identify',type:'checklist',content:''},
+    {title:'PR ÃÂ¢ÃÂÃÂ Protect',type:'checklist',content:''},
+    {title:'DE ÃÂ¢ÃÂÃÂ Detect',type:'checklist',content:''},
+    {title:'RS ÃÂ¢ÃÂÃÂ Respond',type:'checklist',content:''},
+    {title:'RC ÃÂ¢ÃÂÃÂ Recover',type:'checklist',content:''},
     {title:'Risk Register',type:'table',content:''},
     {title:'Findings',type:'findings',content:''},
     {title:'Improvement Priorities',type:'text',content:''},
@@ -776,8 +818,8 @@ var FW_SECTIONS={
   iso27001:[
     {title:'Executive Summary',type:'text',content:''},
     {title:'ISMS Scope and Context',type:'text',content:''},
-    {title:'Clause 4Ã¢ÂÂ6: Context, Leadership, Planning',type:'checklist',content:''},
-    {title:'Clause 7Ã¢ÂÂ8: Support and Operations',type:'checklist',content:''},
+    {title:'Clause 4ÃÂ¢ÃÂÃÂ6: Context, Leadership, Planning',type:'checklist',content:''},
+    {title:'Clause 7ÃÂ¢ÃÂÃÂ8: Support and Operations',type:'checklist',content:''},
     {title:'Clause 9: Performance Evaluation',type:'checklist',content:''},
     {title:'Clause 10: Improvement',type:'checklist',content:''},
     {title:'Annex A Controls Assessment',type:'table',content:''},
@@ -789,10 +831,10 @@ var FW_SECTIONS={
   hipaa:[
     {title:'Executive Summary',type:'text',content:''},
     {title:'Covered Entity / Business Associate Scope',type:'text',content:''},
-    {title:'Administrative Safeguards (ÃÂ§164.308)',type:'checklist',content:''},
-    {title:'Physical Safeguards (ÃÂ§164.310)',type:'checklist',content:''},
-    {title:'Technical Safeguards (ÃÂ§164.312)',type:'checklist',content:''},
-    {title:'Organizational Requirements (ÃÂ§164.314)',type:'checklist',content:''},
+    {title:'Administrative Safeguards (ÃÂÃÂ§164.308)',type:'checklist',content:''},
+    {title:'Physical Safeguards (ÃÂÃÂ§164.310)',type:'checklist',content:''},
+    {title:'Technical Safeguards (ÃÂÃÂ§164.312)',type:'checklist',content:''},
+    {title:'Organizational Requirements (ÃÂÃÂ§164.314)',type:'checklist',content:''},
     {title:'ePHI Risk Analysis',type:'table',content:''},
     {title:'Findings and Gaps',type:'findings',content:''},
     {title:'Corrective Action Plan',type:'text',content:''},
@@ -1019,7 +1061,12 @@ async function createReport(){
     type:tplName,
     classification:gv('nr-classification'),
     date:gv('nr-date'),
-    authors:gv('nr-authors').trim()
+    authors:gv('nr-authors').trim(),
+    poc_first:gv('nr-poc-first').trim(),
+    poc_last:gv('nr-poc-last').trim(),
+    poc_email:gv('nr-poc-email').trim(),
+    poc_phone:gv('nr-poc-phone').trim(),
+    logo:window._nrLogoB64||''
   };
   try{
     var r=await api('/api/reports',{
@@ -1064,6 +1111,15 @@ async function openEditor(id){
     sv('ed-end',m.end_date||'');
     sv('ed-template',d.template_id||'');
     sv('ed-template-name',d.template_name||'None');
+    sv('ed-poc-first',m.poc_first||'');
+    sv('ed-poc-last',m.poc_last||'');
+    sv('ed-poc-email',m.poc_email||'');
+    sv('ed-poc-phone',m.poc_phone||'');
+    var logoVal=m.logo||'';
+    window._edLogoB64=logoVal;
+    var edPrev=$('ed-logo-preview'),edPh=$('ed-logo-placeholder'),edFn=$('ed-logo-fname');
+    if(logoVal&&edPrev){edPrev.src=logoVal;edPrev.style.display='block';if(edPh)edPh.style.display='none';}
+    else{if(edPrev)edPrev.style.display='none';if(edPh)edPh.style.display='';}
     renderEdSections();
     renderEdFindings();
     syncFindingsTab();
@@ -1131,7 +1187,12 @@ async function saveEditor(){
             assessor:gv('ed-assessor'),
             start_date:gv('ed-start'),
             end_date:gv('ed-end'),
-            scope:''
+            scope:'',
+            poc_first:gv('ed-poc-first'),
+            poc_last:gv('ed-poc-last'),
+            poc_email:gv('ed-poc-email'),
+            poc_phone:gv('ed-poc-phone'),
+            logo:window._edLogoB64||''
           },
           sections:
             S.currentReport.sections||[],
@@ -2019,7 +2080,7 @@ document.addEventListener('change',function(e){
 document.addEventListener('input',function(e){
   var t=e.target;
   var edF=['ed-title','ed-org','ed-assessor',
-    'ed-start','ed-end'];
+    'ed-start','ed-end','ed-poc-first','ed-poc-last','ed-poc-email','ed-poc-phone'];
   if(edF.indexOf(t.id)>=0){markDirty();return;}
   if(t.id==='rpt-search'){renderReports();return;}
   var st=t.getAttribute('data-sec-title');
@@ -2059,6 +2120,43 @@ loadAll();
 initQuills();
 window.toggleFw=toggleFw;
 window.importSelectedFrameworks=importSelectedFrameworks;
+// Logo upload handlers
+function _initLogoUpload(inputId,previewId,placeholderId,fnameId,storeKey){
+  var inp=document.getElementById(inputId);
+  if(!inp)return;
+  inp.addEventListener('change',function(){
+    var f=inp.files&&inp.files[0];
+    if(!f)return;
+    var reader=new FileReader();
+    reader.onload=function(e){
+      window[storeKey]=e.target.result;
+      var prev=document.getElementById(previewId);
+      var ph=document.getElementById(placeholderId);
+      var fn=document.getElementById(fnameId);
+      if(prev){prev.src=e.target.result;prev.style.display='block';}
+      if(ph)ph.style.display='none';
+      if(fn)fn.textContent=f.name;
+      if(storeKey==='_edLogoB64')markDirty();
+    };
+    reader.readAsDataURL(f);
+  });
+}
+document.addEventListener('DOMContentLoaded',function(){
+  _initLogoUpload('nr-logo-input','nr-logo-preview','nr-logo-placeholder','nr-logo-fname','_nrLogoB64');
+  _initLogoUpload('ed-logo-input','ed-logo-preview','ed-logo-placeholder','ed-logo-fname','_edLogoB64');
+});
+// Reset NR logo when modal opens
+document.addEventListener('click',function(e){
+  if(e.target&&e.target.id==='btn-new-report'){
+    window._nrLogoB64='';
+    var prev=document.getElementById('nr-logo-preview');
+    var ph=document.getElementById('nr-logo-placeholder');
+    var fn=document.getElementById('nr-logo-fname');
+    if(prev){prev.src='';prev.style.display='none';}
+    if(ph)ph.style.display='';
+    if(fn)fn.textContent='';
+  }
+});
 })();
 
 </script>
