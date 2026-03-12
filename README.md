@@ -1,5 +1,7 @@
 # ReportForge
 
+**Version: 1.2.2**
+
 A web-based security report writing tool with a fully custom template builder.
 
 ## Features
