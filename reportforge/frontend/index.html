@@ -242,7 +242,7 @@ tr:hover td{background:rgba(255,255,255,.015)}
       <div class="cr-label">Current Report</div>
       <div class="cr-title" id="cr-title">No report open</div>
       <div class="cr-bar-wrap"><div class="cr-bar" id="cr-bar" style="width:0%"></div></div>
-      <div class="cr-pct" id="cr-pct">ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ</div>
+      <div class="cr-pct" id="cr-pct">ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ</div>
     </div>
   </div>
 </div>
@@ -644,7 +644,7 @@ function bdg(st){
 function updateCrCard(){
   var r=S.currentReport;
   var ttl=$('cr-title');var bar=$('cr-bar');var pct=$('cr-pct');
-  if(!r){if(ttl)ttl.textContent='No report open';if(bar)bar.style.width='0%';if(pct)pct.textContent='ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ';return;}
+  if(!r){if(ttl)ttl.textContent='No report open';if(bar)bar.style.width='0%';if(pct)pct.textContent='ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ';return;}
   if(ttl)ttl.textContent=r.title||'Untitled';
   var d=r.data||{};var m=d.report||{};
   var filled=0,total=5;
@@ -760,12 +760,12 @@ var FW_SECTIONS={
   cis:[
     {title:'Executive Summary',type:'text',content:''},
     {title:'Scope and Methodology',type:'text',content:''},
-    {title:'CIS IG1 ÃÂ¢ÃÂÃÂ Basic Cyber Hygiene',type:'checklist',content:''},
-    {title:'CIS IG2 ÃÂ¢ÃÂÃÂ Foundational Controls',type:'checklist',content:''},
-    {title:'CIS IG3 ÃÂ¢ÃÂÃÂ Organizational Controls',type:'checklist',content:''},
-    {title:'Asset Management (Controls 1ÃÂ¢ÃÂÃÂ2)',type:'text',content:''},
+    {title:'CIS IG1 ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ Basic Cyber Hygiene',type:'checklist',content:''},
+    {title:'CIS IG2 ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ Foundational Controls',type:'checklist',content:''},
+    {title:'CIS IG3 ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ Organizational Controls',type:'checklist',content:''},
+    {title:'Asset Management (Controls 1ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ2)',type:'text',content:''},
     {title:'Data Protection (Control 3)',type:'text',content:''},
-    {title:'Secure Configuration (Controls 4ÃÂ¢ÃÂÃÂ5)',type:'text',content:''},
+    {title:'Secure Configuration (Controls 4ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ5)',type:'text',content:''},
     {title:'Account & Access Management (Control 6)',type:'text',content:''},
     {title:'Vulnerability Management (Control 7)',type:'text',content:''},
     {title:'Audit Log Management (Control 8)',type:'text',content:''},
@@ -776,11 +776,11 @@ var FW_SECTIONS={
   soc2:[
     {title:'Executive Summary',type:'text',content:''},
     {title:'Scope and Boundaries',type:'text',content:''},
-    {title:'Security ÃÂ¢ÃÂÃÂ Logical & Physical Access (CC6)',type:'checklist',content:''},
+    {title:'Security ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ Logical & Physical Access (CC6)',type:'checklist',content:''},
     {title:'Availability (A1)',type:'checklist',content:''},
     {title:'Confidentiality (C1)',type:'checklist',content:''},
     {title:'Processing Integrity (PI1)',type:'checklist',content:''},
-    {title:'Privacy (P1ÃÂ¢ÃÂÃÂP8)',type:'checklist',content:''},
+    {title:'Privacy (P1ÃÂÃÂ¢ÃÂÃÂÃÂÃÂP8)',type:'checklist',content:''},
     {title:'Control Environment Assessment',type:'table',content:''},
     {title:'Exceptions and Deviations',type:'findings',content:''},
     {title:'Management Response',type:'text',content:''},
@@ -789,12 +789,12 @@ var FW_SECTIONS={
   pci:[
     {title:'Executive Summary',type:'text',content:''},
     {title:'Scope and Cardholder Data Environment',type:'text',content:''},
-    {title:'Req 1ÃÂ¢ÃÂÃÂ2: Network Security Controls',type:'checklist',content:''},
-    {title:'Req 3ÃÂ¢ÃÂÃÂ4: Protect Account Data',type:'checklist',content:''},
-    {title:'Req 5ÃÂ¢ÃÂÃÂ6: Secure Systems and Software',type:'checklist',content:''},
-    {title:'Req 7ÃÂ¢ÃÂÃÂ8: Restrict Access',type:'checklist',content:''},
+    {title:'Req 1ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ2: Network Security Controls',type:'checklist',content:''},
+    {title:'Req 3ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ4: Protect Account Data',type:'checklist',content:''},
+    {title:'Req 5ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ6: Secure Systems and Software',type:'checklist',content:''},
+    {title:'Req 7ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ8: Restrict Access',type:'checklist',content:''},
     {title:'Req 9: Restrict Physical Access',type:'checklist',content:''},
-    {title:'Req 10ÃÂ¢ÃÂÃÂ11: Log and Monitor',type:'checklist',content:''},
+    {title:'Req 10ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ11: Log and Monitor',type:'checklist',content:''},
     {title:'Req 12: Organizational Policies',type:'checklist',content:''},
     {title:'Findings and Non-Conformities',type:'findings',content:''},
     {title:'Compensating Controls',type:'table',content:''},
@@ -804,12 +804,12 @@ var FW_SECTIONS={
   nist:[
     {title:'Executive Summary',type:'text',content:''},
     {title:'Scope and Methodology',type:'text',content:''},
-    {title:'GV ÃÂ¢ÃÂÃÂ Govern',type:'checklist',content:''},
-    {title:'ID ÃÂ¢ÃÂÃÂ Identify',type:'checklist',content:''},
-    {title:'PR ÃÂ¢ÃÂÃÂ Protect',type:'checklist',content:''},
-    {title:'DE ÃÂ¢ÃÂÃÂ Detect',type:'checklist',content:''},
-    {title:'RS ÃÂ¢ÃÂÃÂ Respond',type:'checklist',content:''},
-    {title:'RC ÃÂ¢ÃÂÃÂ Recover',type:'checklist',content:''},
+    {title:'GV ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ Govern',type:'checklist',content:''},
+    {title:'ID ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ Identify',type:'checklist',content:''},
+    {title:'PR ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ Protect',type:'checklist',content:''},
+    {title:'DE ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ Detect',type:'checklist',content:''},
+    {title:'RS ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ Respond',type:'checklist',content:''},
+    {title:'RC ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ Recover',type:'checklist',content:''},
     {title:'Risk Register',type:'table',content:''},
     {title:'Findings',type:'findings',content:''},
     {title:'Improvement Priorities',type:'text',content:''},
@@ -818,8 +818,8 @@ var FW_SECTIONS={
   iso27001:[
     {title:'Executive Summary',type:'text',content:''},
     {title:'ISMS Scope and Context',type:'text',content:''},
-    {title:'Clause 4ÃÂ¢ÃÂÃÂ6: Context, Leadership, Planning',type:'checklist',content:''},
-    {title:'Clause 7ÃÂ¢ÃÂÃÂ8: Support and Operations',type:'checklist',content:''},
+    {title:'Clause 4ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ6: Context, Leadership, Planning',type:'checklist',content:''},
+    {title:'Clause 7ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ8: Support and Operations',type:'checklist',content:''},
     {title:'Clause 9: Performance Evaluation',type:'checklist',content:''},
     {title:'Clause 10: Improvement',type:'checklist',content:''},
     {title:'Annex A Controls Assessment',type:'table',content:''},
@@ -831,10 +831,10 @@ var FW_SECTIONS={
   hipaa:[
     {title:'Executive Summary',type:'text',content:''},
     {title:'Covered Entity / Business Associate Scope',type:'text',content:''},
-    {title:'Administrative Safeguards (ÃÂÃÂ§164.308)',type:'checklist',content:''},
-    {title:'Physical Safeguards (ÃÂÃÂ§164.310)',type:'checklist',content:''},
-    {title:'Technical Safeguards (ÃÂÃÂ§164.312)',type:'checklist',content:''},
-    {title:'Organizational Requirements (ÃÂÃÂ§164.314)',type:'checklist',content:''},
+    {title:'Administrative Safeguards (ÃÂÃÂÃÂÃÂ§164.308)',type:'checklist',content:''},
+    {title:'Physical Safeguards (ÃÂÃÂÃÂÃÂ§164.310)',type:'checklist',content:''},
+    {title:'Technical Safeguards (ÃÂÃÂÃÂÃÂ§164.312)',type:'checklist',content:''},
+    {title:'Organizational Requirements (ÃÂÃÂÃÂÃÂ§164.314)',type:'checklist',content:''},
     {title:'ePHI Risk Analysis',type:'table',content:''},
     {title:'Findings and Gaps',type:'findings',content:''},
     {title:'Corrective Action Plan',type:'text',content:''},
@@ -1720,7 +1720,7 @@ function addSection(){
   S.currentTemplate.sections=
     S.currentTemplate.sections||[];
   S.currentTemplate.sections.push(
-    {title:'New section',type:tp,content:''});
+    {title:'New section',type:tp,content:'',heading_level:1});
   markTDirty();renderTSections();
 }
 function renderTSections(){
@@ -1776,6 +1776,15 @@ function renderTSections(){
       +'<input class="field-input" style="flex:1"'
       +' data-sec-title="'+si+'"'
       +' value="'+esc(sec.title)+'">'
+      +'<select class="field-input" style="width:130px;flex-shrink:0"'
+      +' data-sec-heading="'+si+'">'
+      +'<option value="1"'+(sec.heading_level===1||!sec.heading_level?' selected':'')+'>Heading 1</option>'
+      +'<option value="2"'+(sec.heading_level===2?' selected':'')+'>Heading 2</option>'
+      +'<option value="3"'+(sec.heading_level===3?' selected':'')+'>Heading 3</option>'
+      +'<option value="4"'+(sec.heading_level===4?' selected':'')+'>Heading 4</option>'
+      +'<option value="5"'+(sec.heading_level===5?' selected':'')+'>Heading 5</option>'
+      +'<option value="6"'+(sec.heading_level===6?' selected':'')+'>Heading 6</option>'
+      +'</select>'
       +'<span style="font-size:12px;'
       +'color:var(--text2)">'
       +esc(sec.type)+'</span>'
@@ -2075,6 +2084,12 @@ document.addEventListener('change',function(e){
     renderFindings();return;
   }
   // field-prop handler removed (sections now use WYSIWYG)
+  var sh=t.getAttribute('data-sec-heading');
+  if(sh!==null){
+    S.currentTemplate
+      .sections[parseInt(sh)].heading_level=parseInt(t.value);
+    markTDirty();return;
+  }
 });
 
 document.addEventListener('input',function(e){
@@ -2090,6 +2105,12 @@ document.addEventListener('input',function(e){
     markTDirty();return;
   }
   // field-prop handler removed (sections now use WYSIWYG)
+  var sh=t.getAttribute('data-sec-heading');
+  if(sh!==null){
+    S.currentTemplate
+      .sections[parseInt(sh)].heading_level=parseInt(t.value);
+    markTDirty();return;
+  }
 });
 
 function _applyTheme(dark){
