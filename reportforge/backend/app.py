@@ -142,6 +142,7 @@ class TemplateCreate(BaseModel):
     name: str
     description: str = ''
     sections: list[dict[str, Any]] = []
+    framework_id: Optional[str] = None
 
 class TemplateUpdate(BaseModel):
     name: Optional[str] = None
@@ -433,7 +434,8 @@ def create_template(payload: TemplateCreate):
                 or 'Untitled Template'),
             description=payload.description,
             template_json=json.dumps(
-                {'sections': payload.sections}),
+                {'sections': payload.sections,
+                 'framework_id': payload.framework_id}),
         )
         db.add(t)
         db.commit()
@@ -491,10 +493,15 @@ def delete_template(tid: str):
 def _template_out(
     t: Template,
     include_data: bool = False) -> dict:
+    try:
+        _tj=json.loads(t.template_json or '{}')
+    except:
+        _tj={}
     out = {
         'id': t.id,
         'name': t.name,
         'description': t.description,
+        'framework_id': _tj.get('framework_id'),
         'created_at': _ts(t.created_at),
         'updated_at': _ts(t.updated_at),
     }
