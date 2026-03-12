@@ -1,5 +1,5 @@
 FROM python:3.12-slim
-LABEL version="1.2.2"
+LABEL version="1.2.3"
 WORKDIR /app
 COPY . .
 RUN pip install --no-cache-dir -e .
