@@ -234,7 +234,7 @@ tr:hover td{background:rgba(255,255,255,.015)}
       <div class="cr-label">Current Report</div>
       <div class="cr-title" id="cr-title">No report open</div>
       <div class="cr-bar-wrap"><div class="cr-bar" id="cr-bar" style="width:0%"></div></div>
-      <div class="cr-pct" id="cr-pct">ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ</div>
+      <div class="cr-pct" id="cr-pct">ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ</div>
     </div>
   </div>
 </div>
@@ -365,14 +365,10 @@ tr:hover td{background:rgba(255,255,255,.015)}
               <div class="field-group"><label class="field-label">Start Date</label><input class="field-input" type="date" id="ed-start"></div>
               <div class="field-group"><label class="field-label">End Date</label><input class="field-input" type="date" id="ed-end"></div>
             </div>
-            <div class="field-group"><label class="field-label">Executive Summary</label><textarea class="field-textarea" id="ed-summary" rows="5"></textarea></div>
             <div class="field-group">
               <label class="field-label">Report Template</label>
-              <div style="display:flex;gap:8px;align-items:center">
-                <select class="field-select" id="ed-template" style="flex:1"><option value="">None</option></select>
-                <button class="btn btn-secondary btn-sm" id="btn-apply-template">Apply</button>
-              </div>
-              <div style="font-size:11px;color:var(--text3);margin-top:4px">Applying loads the template's sections into this report. Existing sections will be replaced.</div>
+              <input type="hidden" id="ed-template">
+              <input class="field-input" id="ed-template-name" readonly style="background:var(--bg2,#f5f5f5);cursor:default">
             </div>
           </div>
           <div class="editor-panel" id="ed-sections"><div id="ed-sections-body"></div></div>
@@ -610,7 +606,7 @@ function bdg(st){
 function updateCrCard(){
   var r=S.currentReport;
   var ttl=$('cr-title');var bar=$('cr-bar');var pct=$('cr-pct');
-  if(!r){if(ttl)ttl.textContent='No report open';if(bar)bar.style.width='0%';if(pct)pct.textContent='ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ';return;}
+  if(!r){if(ttl)ttl.textContent='No report open';if(bar)bar.style.width='0%';if(pct)pct.textContent='ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ';return;}
   if(ttl)ttl.textContent=r.title||'Untitled';
   var d=r.data||{};var m=d.report||{};
   var filled=0,total=5;
@@ -974,9 +970,9 @@ async function openEditor(id){
     sv('ed-assessor',m.assessor||'');
     sv('ed-start',m.start_date||'');
     sv('ed-end',m.end_date||'');
-    sv('ed-summary',m.summary||'');
-    popEdTemplates();
     sv('ed-template',r.template_id||'');
+    var _tmpl=S.templates&&S.templates.find(function(t){return t.id===r.template_id;});
+    sv('ed-template-name',_tmpl?_tmpl.name:'None');
     renderEdSections();
     renderEdFindings();
     syncFindingsTab();
@@ -1041,8 +1037,6 @@ async function saveEditor(){
             assessor:gv('ed-assessor'),
             start_date:gv('ed-start'),
             end_date:gv('ed-end'),
-            summary:
-              gv('ed-summary'),
             scope:''
           },
           sections:
@@ -1888,7 +1882,6 @@ document.addEventListener('click',function(e){
   if(bid==='btn-create-report'){
     createReport();return;
   }
-  if(bid==='btn-apply-template'){applyTemplate();return;}
   if(bid==='btn-save-editor'){saveEditor();return;}
   if(bid==='btn-add-finding-ed'){
     openAddFindingToReport();
@@ -1932,7 +1925,7 @@ document.addEventListener('change',function(e){
 document.addEventListener('input',function(e){
   var t=e.target;
   var edF=['ed-title','ed-org','ed-assessor',
-    'ed-start','ed-end','ed-summary'];
+    'ed-start','ed-end'];
   if(edF.indexOf(t.id)>=0){markDirty();return;}
   if(t.id==='rpt-search'){renderReports();return;}
   var st=t.getAttribute('data-sec-title');
