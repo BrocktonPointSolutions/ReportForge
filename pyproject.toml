@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "reportforge"
-version = "1.2.1"
+version = "1.2.2"
 description = "Web-based security report writing tool with custom template builder"
 requires-python = ">=3.11"
 dependencies = [
