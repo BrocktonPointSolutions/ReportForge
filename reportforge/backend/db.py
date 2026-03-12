@@ -1,4 +1,5 @@
 from __future__ import annotations
+__version__ = "1.2.3"
 from sqlalchemy import create_engine, event, text
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
 from sqlalchemy.pool import NullPool
