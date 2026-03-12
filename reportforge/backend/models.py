@@ -1,4 +1,5 @@
 from __future__ import annotations
+__version__ = "1.2.3"
 import datetime as dt
 from typing import Optional
 from sqlalchemy import String, Text, DateTime, Float
