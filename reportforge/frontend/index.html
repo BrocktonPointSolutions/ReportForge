@@ -234,7 +234,7 @@ tr:hover td{background:rgba(255,255,255,.015)}
       <div class="cr-label">Current Report</div>
       <div class="cr-title" id="cr-title">No report open</div>
       <div class="cr-bar-wrap"><div class="cr-bar" id="cr-bar" style="width:0%"></div></div>
-      <div class="cr-pct" id="cr-pct">—</div>
+      <div class="cr-pct" id="cr-pct">â</div>
     </div>
   </div>
 </div>
@@ -600,7 +600,7 @@ function bdg(st){
 function updateCrCard(){
   var r=S.currentReport;
   var ttl=$('cr-title');var bar=$('cr-bar');var pct=$('cr-pct');
-  if(!r){if(ttl)ttl.textContent='No report open';if(bar)bar.style.width='0%';if(pct)pct.textContent='—';return;}
+  if(!r){if(ttl)ttl.textContent='No report open';if(bar)bar.style.width='0%';if(pct)pct.textContent='â';return;}
   if(ttl)ttl.textContent=r.title||'Untitled';
   var d=r.data||{};var m=d.report||{};
   var filled=0,total=5;
@@ -712,6 +712,91 @@ var FRAMEWORKS=[
    desc:'Health Insurance Portability Act. Safeguarding electronic protected health information through administrative, physical, and technical controls.',
    stats:['3 Safeguards','45 Standards','2013']}
 ];
+var FW_SECTIONS={
+  cis:[
+    {title:'Executive Summary',type:'text',content:''},
+    {title:'Scope and Methodology',type:'text',content:''},
+    {title:'CIS IG1 – Basic Cyber Hygiene',type:'checklist',content:''},
+    {title:'CIS IG2 – Foundational Controls',type:'checklist',content:''},
+    {title:'CIS IG3 – Organizational Controls',type:'checklist',content:''},
+    {title:'Asset Management (Controls 1–2)',type:'text',content:''},
+    {title:'Data Protection (Control 3)',type:'text',content:''},
+    {title:'Secure Configuration (Controls 4–5)',type:'text',content:''},
+    {title:'Account & Access Management (Control 6)',type:'text',content:''},
+    {title:'Vulnerability Management (Control 7)',type:'text',content:''},
+    {title:'Audit Log Management (Control 8)',type:'text',content:''},
+    {title:'Findings',type:'findings',content:''},
+    {title:'Recommendations',type:'text',content:''},
+    {title:'Conclusion',type:'text',content:''}
+  ],
+  soc2:[
+    {title:'Executive Summary',type:'text',content:''},
+    {title:'Scope and Boundaries',type:'text',content:''},
+    {title:'Security – Logical & Physical Access (CC6)',type:'checklist',content:''},
+    {title:'Availability (A1)',type:'checklist',content:''},
+    {title:'Confidentiality (C1)',type:'checklist',content:''},
+    {title:'Processing Integrity (PI1)',type:'checklist',content:''},
+    {title:'Privacy (P1–P8)',type:'checklist',content:''},
+    {title:'Control Environment Assessment',type:'table',content:''},
+    {title:'Exceptions and Deviations',type:'findings',content:''},
+    {title:'Management Response',type:'text',content:''},
+    {title:'Conclusion',type:'text',content:''}
+  ],
+  pci:[
+    {title:'Executive Summary',type:'text',content:''},
+    {title:'Scope and Cardholder Data Environment',type:'text',content:''},
+    {title:'Req 1–2: Network Security Controls',type:'checklist',content:''},
+    {title:'Req 3–4: Protect Account Data',type:'checklist',content:''},
+    {title:'Req 5–6: Secure Systems and Software',type:'checklist',content:''},
+    {title:'Req 7–8: Restrict Access',type:'checklist',content:''},
+    {title:'Req 9: Restrict Physical Access',type:'checklist',content:''},
+    {title:'Req 10–11: Log and Monitor',type:'checklist',content:''},
+    {title:'Req 12: Organizational Policies',type:'checklist',content:''},
+    {title:'Findings and Non-Conformities',type:'findings',content:''},
+    {title:'Compensating Controls',type:'table',content:''},
+    {title:'Remediation Roadmap',type:'text',content:''},
+    {title:'Conclusion',type:'text',content:''}
+  ],
+  nist:[
+    {title:'Executive Summary',type:'text',content:''},
+    {title:'Scope and Methodology',type:'text',content:''},
+    {title:'GV – Govern',type:'checklist',content:''},
+    {title:'ID – Identify',type:'checklist',content:''},
+    {title:'PR – Protect',type:'checklist',content:''},
+    {title:'DE – Detect',type:'checklist',content:''},
+    {title:'RS – Respond',type:'checklist',content:''},
+    {title:'RC – Recover',type:'checklist',content:''},
+    {title:'Risk Register',type:'table',content:''},
+    {title:'Findings',type:'findings',content:''},
+    {title:'Improvement Priorities',type:'text',content:''},
+    {title:'Conclusion',type:'text',content:''}
+  ],
+  iso27001:[
+    {title:'Executive Summary',type:'text',content:''},
+    {title:'ISMS Scope and Context',type:'text',content:''},
+    {title:'Clause 4–6: Context, Leadership, Planning',type:'checklist',content:''},
+    {title:'Clause 7–8: Support and Operations',type:'checklist',content:''},
+    {title:'Clause 9: Performance Evaluation',type:'checklist',content:''},
+    {title:'Clause 10: Improvement',type:'checklist',content:''},
+    {title:'Annex A Controls Assessment',type:'table',content:''},
+    {title:'Risk Assessment and Treatment',type:'text',content:''},
+    {title:'Non-Conformities',type:'findings',content:''},
+    {title:'Statement of Applicability Summary',type:'text',content:''},
+    {title:'Conclusion',type:'text',content:''}
+  ],
+  hipaa:[
+    {title:'Executive Summary',type:'text',content:''},
+    {title:'Covered Entity / Business Associate Scope',type:'text',content:''},
+    {title:'Administrative Safeguards (§164.308)',type:'checklist',content:''},
+    {title:'Physical Safeguards (§164.310)',type:'checklist',content:''},
+    {title:'Technical Safeguards (§164.312)',type:'checklist',content:''},
+    {title:'Organizational Requirements (§164.314)',type:'checklist',content:''},
+    {title:'ePHI Risk Analysis',type:'table',content:''},
+    {title:'Findings and Gaps',type:'findings',content:''},
+    {title:'Corrective Action Plan',type:'text',content:''},
+    {title:'Conclusion',type:'text',content:''}
+  ]
+};
 var _fwSelected=new Set();
 function renderFrameworks(){
   var grid=$('fw-grid');
@@ -752,7 +837,7 @@ async function importSelectedFrameworks(){
     var fw=FRAMEWORKS.find(function(f){return f.id===ids[i];});
     if(!fw||S.templates.some(function(t){return t.framework_id===fw.id;}))continue;
     try{
-      var r=await api('/api/templates',{method:'POST',body:JSON.stringify({name:fw.name,framework_id:fw.id,sections:[],description:fw.desc})});
+      var r=await api('/api/templates',{method:'POST',body:JSON.stringify({name:fw.name,framework_id:fw.id,sections:(FW_SECTIONS[fw.id]||[]),description:fw.desc})});
       S.templates.push({id:r.id,name:fw.name,description:fw.desc,sections:[]});
     }catch(e){errors.push(fw.name);}
   }
