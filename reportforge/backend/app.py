@@ -531,10 +531,14 @@ def _build_report_html(r, findings):
         '<style>',
         'body{font-family:Arial,sans-serif;',
         'margin:40px;color:#1a1d27}',
-        'h1{font-size:24px;margin-bottom:8px}',
-        'h2{font-size:18px;margin-top:32px;',
+        'h1{font-size:28px;margin-bottom:8px;margin-top:32px}',
+        'h2{font-size:22px;margin-top:28px;',
         'border-bottom:2px solid #4f6ef7;',
         'padding-bottom:4px}',
+        'h3{font-size:18px;margin-top:24px}',
+        'h4{font-size:16px;margin-top:20px}',
+        'h5{font-size:14px;margin-top:16px}',
+        'h6{font-size:13px;margin-top:14px;color:#555}',
         '.meta{color:#555;margin-bottom:24px}',
         '.finding{border:1px solid #ccc;',
         'border-radius:6px;padding:16px;',
@@ -576,9 +580,12 @@ def _build_report_html(r, findings):
     has_poc = any([poc_first, poc_last, poc_email, poc_phone])
     secs = d.get('sections', [])
     for sec in secs:
+        hl = sec.get('heading_level', 1)
+        hl = hl if isinstance(hl, int) and 1 <= hl <= 6 else 1
+        htag = 'h' + str(hl)
         parts.append(
-            '<h2>' + esc(sec.get(
-            'title','')) + '</h2>')
+            '<' + htag + '>' + esc(sec.get(
+            'title','')) + '</' + htag + '>')
         stitle = sec.get('title','').lower()
         if has_poc and ('appendix b' in stitle or 'points of contact' in stitle):
             poc_name = (esc(poc_first) + ' ' + esc(poc_last)).strip()
@@ -832,7 +839,8 @@ def export_docx(rid: str):
         has_poc = any([poc_first, poc_last, poc_email, poc_phone])
         secs = d.get('sections', [])
         for sec in secs:
-            sec_lvl = sec.get('level', 2)
+            sec_lvl = sec.get('heading_level', 1)
+            sec_lvl = sec_lvl if isinstance(sec_lvl, int) and 1 <= sec_lvl <= 9 else 1
             doc.add_heading(
                 sec.get('title',''), sec_lvl)
             stitle = sec.get('title','').lower()
