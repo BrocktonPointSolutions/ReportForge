@@ -1,4 +1,5 @@
 from __future__ import annotations
+__version__ = "1.2.3"
 import typer
 import uvicorn
 from reportforge.utils import ensure_home, get_db_path
