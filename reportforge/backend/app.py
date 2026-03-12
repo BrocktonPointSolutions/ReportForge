@@ -583,17 +583,10 @@ def _build_report_html(r, findings):
         if has_poc and ('appendix b' in stitle or 'points of contact' in stitle):
             poc_name = (esc(poc_first) + ' ' + esc(poc_last)).strip()
             parts.append(
-                '<table style="border-collapse:collapse;width:100%;margin-bottom:16px">'
-                '<thead><tr>'
-                '<th style="border:1px solid #ccc;padding:8px 12px;background:#f5f5f5;text-align:left">Name</th>'
-                '<th style="border:1px solid #ccc;padding:8px 12px;background:#f5f5f5;text-align:left">Email</th>'
-                '<th style="border:1px solid #ccc;padding:8px 12px;background:#f5f5f5;text-align:left">Phone</th>'
-                '</tr></thead>'
-                '<tbody><tr>'
-                '<td style="border:1px solid #ccc;padding:8px 12px">' + poc_name + '</td>'
-                '<td style="border:1px solid #ccc;padding:8px 12px">' + esc(poc_email) + '</td>'
-                '<td style="border:1px solid #ccc;padding:8px 12px">' + esc(poc_phone) + '</td>'
-                '</tr></tbody></table>'
+                '<p style="margin:16px 0 4px 0">The primary point of contact for this assessment was:</p>'
+                '<p style="margin:4px 0 2px 0"><strong>' + poc_name + '</strong></p>'
+                + ('<p style="margin:2px 0">' + esc(poc_email) + '</p>' if poc_email else '')
+                + ('<p style="margin:2px 0 16px 0">' + esc(poc_phone) + '</p>' if poc_phone else '')
             )
         content = sec.get('content','')
         if content:
@@ -844,22 +837,14 @@ def export_docx(rid: str):
                 sec.get('title',''), sec_lvl)
             stitle = sec.get('title','').lower()
             if has_poc and ('appendix b' in stitle or 'points of contact' in stitle):
-                tbl = doc.add_table(rows=2, cols=3)
-                tbl.style = 'Table Grid'
-                hdr = tbl.rows[0].cells
-                hdr[0].text = 'Name'
-                hdr[1].text = 'Email'
-                hdr[2].text = 'Phone'
-                for cell in hdr:
-                    for para in cell.paragraphs:
-                        for run in para.runs:
-                            run.bold = True
-                row = tbl.rows[1].cells
+                doc.add_paragraph('The primary point of contact for this assessment was:')
                 poc_name = (poc_first + ' ' + poc_last).strip()
-                row[0].text = poc_name
-                row[1].text = poc_email
-                row[2].text = poc_phone
-                doc.add_paragraph('')
+                p_name = doc.add_paragraph()
+                p_name.add_run(poc_name).bold = True
+                if poc_email:
+                    doc.add_paragraph(poc_email)
+                if poc_phone:
+                    doc.add_paragraph(poc_phone)
             content = sec.get('content','')
             if content:
                 _add_html_to_docx(
