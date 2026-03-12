@@ -568,11 +568,33 @@ def _build_report_html(r, findings):
         parts.append(
             '<p class="meta">' +
             ' | '.join(meta) + '</p>')
+    rep = d.get('report', {})
+    poc_first = rep.get('poc_first','')
+    poc_last = rep.get('poc_last','')
+    poc_email = rep.get('poc_email','')
+    poc_phone = rep.get('poc_phone','')
+    has_poc = any([poc_first, poc_last, poc_email, poc_phone])
     secs = d.get('sections', [])
     for sec in secs:
         parts.append(
             '<h2>' + esc(sec.get(
             'title','')) + '</h2>')
+        stitle = sec.get('title','').lower()
+        if has_poc and ('appendix b' in stitle or 'points of contact' in stitle):
+            poc_name = (esc(poc_first) + ' ' + esc(poc_last)).strip()
+            parts.append(
+                '<table style="border-collapse:collapse;width:100%;margin-bottom:16px">'
+                '<thead><tr>'
+                '<th style="border:1px solid #ccc;padding:8px 12px;background:#f5f5f5;text-align:left">Name</th>'
+                '<th style="border:1px solid #ccc;padding:8px 12px;background:#f5f5f5;text-align:left">Email</th>'
+                '<th style="border:1px solid #ccc;padding:8px 12px;background:#f5f5f5;text-align:left">Phone</th>'
+                '</tr></thead>'
+                '<tbody><tr>'
+                '<td style="border:1px solid #ccc;padding:8px 12px">' + poc_name + '</td>'
+                '<td style="border:1px solid #ccc;padding:8px 12px">' + esc(poc_email) + '</td>'
+                '<td style="border:1px solid #ccc;padding:8px 12px">' + esc(poc_phone) + '</td>'
+                '</tr></tbody></table>'
+            )
         content = sec.get('content','')
         if content:
             parts.append(
@@ -809,11 +831,35 @@ def export_docx(rid: str):
                 'Authors: ' + r.authors)
         for ml in meta_lines:
             doc.add_paragraph(ml)
+        rep = d.get('report', {})
+        poc_first = rep.get('poc_first','')
+        poc_last = rep.get('poc_last','')
+        poc_email = rep.get('poc_email','')
+        poc_phone = rep.get('poc_phone','')
+        has_poc = any([poc_first, poc_last, poc_email, poc_phone])
         secs = d.get('sections', [])
         for sec in secs:
             sec_lvl = sec.get('level', 2)
             doc.add_heading(
                 sec.get('title',''), sec_lvl)
+            stitle = sec.get('title','').lower()
+            if has_poc and ('appendix b' in stitle or 'points of contact' in stitle):
+                tbl = doc.add_table(rows=2, cols=3)
+                tbl.style = 'Table Grid'
+                hdr = tbl.rows[0].cells
+                hdr[0].text = 'Name'
+                hdr[1].text = 'Email'
+                hdr[2].text = 'Phone'
+                for cell in hdr:
+                    for para in cell.paragraphs:
+                        for run in para.runs:
+                            run.bold = True
+                row = tbl.rows[1].cells
+                poc_name = (poc_first + ' ' + poc_last).strip()
+                row[0].text = poc_name
+                row[1].text = poc_email
+                row[2].text = poc_phone
+                doc.add_paragraph('')
             content = sec.get('content','')
             if content:
                 _add_html_to_docx(
