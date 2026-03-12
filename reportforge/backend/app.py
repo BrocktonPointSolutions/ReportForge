@@ -523,6 +523,45 @@ def _build_report_html(r, findings):
         .replace('<','&lt;')
         .replace('>','&gt;')
     )
+    d = json.loads(r.data_json or '{}')
+    rep = d.get('report', {})
+    logo_b64 = rep.get('logo','')
+    org = esc(r.org or rep.get('org',''))
+    assessor = esc(r.authors or rep.get('assessor',''))
+    end_date = esc(rep.get('end_date','') or r.assessment_date or '')
+    poc_first = rep.get('poc_first','')
+    poc_last = rep.get('poc_last','')
+    poc_email = rep.get('poc_email','')
+    poc_phone = rep.get('poc_phone','')
+    has_poc = any([poc_first, poc_last, poc_email, poc_phone])
+    # --- build logo img tag ---
+    if logo_b64:
+        if ',' in logo_b64:
+            logo_src = logo_b64
+        else:
+            logo_src = 'data:image/png;base64,' + logo_b64
+        logo_html = (
+            '<img src="' + logo_src + '" '
+            'style="max-height:120px;max-width:300px;'
+            'object-fit:contain" alt="Company Logo">')
+    else:
+        logo_html = ''
+    # --- title page ---
+    title_page = (
+        '<div class="title-page">'
+        '<div class="tp-top">'
+        + (logo_html if logo_html else '')
+        + '</div>'
+        '<div class="tp-mid">'
+        '<p class="tp-report-title">Security Assessment &#8211; Final Report</p>'
+        + ('<p class="tp-submitted">Submitted to: ' + org + '</p>' if org else '')
+        + '</div>'
+        '<div class="tp-bot">'
+        + ('<p class="tp-meta-line">Prepared By: ' + assessor + '</p>' if assessor else '')
+        + ('<p class="tp-meta-line">Date Issued: ' + end_date + '</p>' if end_date else '')
+        + '</div>'
+        '</div>'
+    )
     parts = [
         '<!DOCTYPE html>',
         '<html><head>',
@@ -530,7 +569,22 @@ def _build_report_html(r, findings):
         '<title>' + esc(t) + '</title>',
         '<style>',
         'body{font-family:Arial,sans-serif;',
-        'margin:40px;color:#1a1d27}',
+        'margin:0;color:#1a1d27}',
+        '.title-page{display:flex;flex-direction:column;',
+        'justify-content:space-between;',
+        'min-height:100vh;padding:60px 60px 60px 60px;',
+        'box-sizing:border-box;page-break-after:always}',
+        '.tp-top{text-align:center;padding-top:40px}',
+        '.tp-mid{text-align:center;margin-top:auto;',
+        'padding:40px 0}',
+        '.tp-report-title{font-size:26pt;font-weight:700;',
+        'color:#1a1d27;margin:0 0 20px 0;line-height:1.2}',
+        '.tp-submitted{font-size:14pt;color:#444;',
+        'margin:0}',
+        '.tp-bot{padding-bottom:40px}',
+        '.tp-meta-line{font-size:12pt;color:#333;',
+        'margin:4px 0}',
+        '.report-body{padding:40px 60px}',
         'h1{font-size:28px;margin-bottom:8px;margin-top:32px}',
         'h2{font-size:22px;margin-top:28px;',
         'border-bottom:2px solid #4f6ef7;',
@@ -539,7 +593,6 @@ def _build_report_html(r, findings):
         'h4{font-size:16px;margin-top:20px}',
         'h5{font-size:14px;margin-top:16px}',
         'h6{font-size:13px;margin-top:14px;color:#555}',
-        '.meta{color:#555;margin-bottom:24px}',
         '.finding{border:1px solid #ccc;',
         'border-radius:6px;padding:16px;',
         'margin-bottom:16px}',
@@ -555,29 +608,9 @@ def _build_report_html(r, findings):
         '.sec-content{margin:8px 0 16px 0;',
         'line-height:1.6}',
         '</style></head><body>',
+        title_page,
+        '<div class="report-body">',
     ]
-    parts.append(
-        '<h1>' + esc(t) + '</h1>')
-    meta = []
-    d = json.loads(r.data_json or '{}')
-    if r.org:
-        meta.append('Client: ' + esc(r.org))
-    if r.assessment_date:
-        meta.append(
-            'Date: ' + esc(r.assessment_date))
-    if r.authors:
-        meta.append(
-            'Authors: ' + esc(r.authors))
-    if meta:
-        parts.append(
-            '<p class="meta">' +
-            ' | '.join(meta) + '</p>')
-    rep = d.get('report', {})
-    poc_first = rep.get('poc_first','')
-    poc_last = rep.get('poc_last','')
-    poc_email = rep.get('poc_email','')
-    poc_phone = rep.get('poc_phone','')
-    has_poc = any([poc_first, poc_last, poc_email, poc_phone])
     secs = d.get('sections', [])
     for sec in secs:
         hl = sec.get('heading_level', 1)
@@ -630,6 +663,7 @@ def _build_report_html(r, findings):
                         + '<div>' + val
                         + '</div>')
             parts.append('</div>')
+    parts.append('</div>')  # close .report-body
     parts.append('</body></html>')
     return '\n'.join(parts)
 
@@ -814,29 +848,71 @@ def export_docx(rid: str):
         import io
         from docx import Document
         from bs4 import BeautifulSoup
+        from docx.shared import Pt, Inches, RGBColor
+        from docx.enum.text import WD_ALIGN_PARAGRAPH
+        from docx.oxml.ns import qn
+        from docx.oxml import OxmlElement
         doc = Document()
-        doc.add_heading(
-            r.title or 'Report', 1)
         d = json.loads(
             r.data_json or '{}')
-        meta_lines = []
-        if r.org:
-            meta_lines.append(
-                'Client: ' + r.org)
-        if r.assessment_date:
-            meta_lines.append(
-                'Date: ' + r.assessment_date)
-        if r.authors:
-            meta_lines.append(
-                'Authors: ' + r.authors)
-        for ml in meta_lines:
-            doc.add_paragraph(ml)
         rep = d.get('report', {})
+        logo_b64 = rep.get('logo','')
+        org_name = r.org or rep.get('org','')
+        assessor_name = r.authors or rep.get('assessor','')
+        end_date_val = rep.get('end_date','') or r.assessment_date or ''
         poc_first = rep.get('poc_first','')
         poc_last = rep.get('poc_last','')
         poc_email = rep.get('poc_email','')
         poc_phone = rep.get('poc_phone','')
         has_poc = any([poc_first, poc_last, poc_email, poc_phone])
+        # --- Title page ---
+        # Logo (centered)
+        if logo_b64:
+            import base64, io as _bio
+            try:
+                if ',' in logo_b64:
+                    logo_data = base64.b64decode(
+                        logo_b64.split(',',1)[1])
+                else:
+                    logo_data = base64.b64decode(logo_b64)
+                logo_stream = _bio.BytesIO(logo_data)
+                p_logo = doc.add_paragraph()
+                p_logo.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                run_logo = p_logo.add_run()
+                run_logo.add_picture(logo_stream, width=Inches(3))
+            except Exception:
+                pass
+        # Report title - 26pt bold centered
+        p_title = doc.add_paragraph()
+        p_title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        run_title = p_title.add_run(
+            'Security Assessment – Final Report')
+        run_title.bold = True
+        run_title.font.size = Pt(26)
+        # Submitted to
+        if org_name:
+            p_org = doc.add_paragraph()
+            p_org.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            run_org = p_org.add_run(
+                'Submitted to: ' + org_name)
+            run_org.font.size = Pt(14)
+        # Spacer paragraphs to push bottom content down
+        for _ in range(8):
+            sp = doc.add_paragraph()
+            sp.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        # Prepared By / Date Issued
+        if assessor_name:
+            p_prep = doc.add_paragraph()
+            p_prep.alignment = WD_ALIGN_PARAGRAPH.LEFT
+            p_prep.add_run(
+                'Prepared By: ' + assessor_name).font.size = Pt(12)
+        if end_date_val:
+            p_date = doc.add_paragraph()
+            p_date.alignment = WD_ALIGN_PARAGRAPH.LEFT
+            p_date.add_run(
+                'Date Issued: ' + end_date_val).font.size = Pt(12)
+        # Page break after title page
+        doc.add_page_break()
         secs = d.get('sections', [])
         for sec in secs:
             sec_lvl = sec.get('heading_level', 1)
