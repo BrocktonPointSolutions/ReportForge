@@ -14,7 +14,7 @@ from .models import Report, Template, Finding
 
 app = FastAPI(
     title='ReportForge API',
-    version='1.2.4')
+    version='1.2.5')
 
 app.add_middleware(
     CORSMiddleware,
