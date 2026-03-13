@@ -220,8 +220,6 @@ tr:hover td{background:rgba(255,255,255,.015)}
 <div class="sidebar">
   <div class="sidebar-logo" id="sidebar-brand-wrap">
     <img id="sidebar-brand-img" src="" alt="" style="max-height:48px;max-width:140px;object-fit:contain;display:none;margin-bottom:4px;">
-    <div class="logo-mark" id="sidebar-brand-name"><span class="r">Report</span><span class="f">Forge</span></div>
-    <div class="logo-sub" id="sidebar-brand-tagline">Security Report Builder</div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section-label">Workspace</div>
@@ -639,26 +637,12 @@ tr:hover td{background:rgba(255,255,255,.015)}
       <input type="file" id="branding-logo-input" accept="image/*" style="display:none;">
     </div>
 
-    <div class="branding-section">
-      <h3>App Identity</h3>
-      <div class="branding-field">
-        <label for="branding-app-name">App Name</label>
-        <input type="text" id="branding-app-name" placeholder="ReportForge" maxlength="40">
-      </div>
-      <div class="branding-field">
-        <label for="branding-app-tagline">Tagline</label>
-        <input type="text" id="branding-app-tagline" placeholder="Security Report Builder" maxlength="60">
-      </div>
-    </div>
 
     <div class="branding-section">
       <h3>Preview</h3>
       <div class="branding-preview-box">
         <img id="branding-preview-logo" class="branding-preview-logo" src="" alt="" style="display:none;">
-        <div class="branding-preview-text">
-          <div class="preview-name" id="branding-preview-name">ReportForge</div>
-          <div class="preview-tag"  id="branding-preview-tag">Security Report Builder</div>
-        </div>
+
       </div>
     </div>
 
@@ -2198,35 +2182,23 @@ function _applyBranding(){
   var b={};
   try{b=JSON.parse(localStorage.getItem('rf_branding')||'{}');}catch(e){}
   var img=document.getElementById('sidebar-brand-img');
-  var nm=document.getElementById('sidebar-brand-name');
-  var tg=document.getElementById('sidebar-brand-tagline');
   if(img){
     if(b.logo){img.src=b.logo;img.style.display='block';}
     else{img.style.display='none';}
   }
-  if(nm){nm.innerHTML=b.appName?('<span style="color:var(--text)">'+b.appName+'</span>'):'<span class="r">Report</span><span class="f">Forge</span>';}
-  if(tg){tg.textContent=b.tagline||'Security Report Builder';}
 }
 var _bi=false;
 function _initBrandingView(){
   if(_bi)return;_bi=true;
   var b={};
   try{b=JSON.parse(localStorage.getItem('rf_branding')||'{}');}catch(e){}
-  var nameI=$('branding-app-name');
-  var tagI=$('branding-app-tagline');
   var logoPreview=$('branding-logo-preview');
   var dropHint=$('branding-drop-hint');
   var clearBtn=$('branding-logo-clear');
   var previewLogo=$('branding-preview-logo');
-  var previewName=$('branding-preview-name');
-  var previewTag=$('branding-preview-tag');
   var fileInput=$('branding-logo-input');
   var currentLogo=b.logo||'';
   function updatePreview(){
-    var nm=nameI?nameI.value.trim():'';
-    var tg=tagI?tagI.value.trim():'';
-    if(previewName)previewName.textContent=nm||'ReportForge';
-    if(previewTag)previewTag.textContent=tg||'Security Report Builder';
     if(previewLogo){
       if(currentLogo){previewLogo.src=currentLogo;previewLogo.style.display='block';}
       else{previewLogo.style.display='none';}
@@ -2240,11 +2212,7 @@ function _initBrandingView(){
     updatePreview();
   }
   if(b.logo){setLogo(b.logo);}
-  if(nameI)nameI.value=b.appName||'';
-  if(tagI)tagI.value=b.tagline||'';
   updatePreview();
-  if(nameI)nameI.addEventListener('input',updatePreview);
-  if(tagI)tagI.addEventListener('input',updatePreview);
   var dz=$('branding-dropzone');
   if(dz){
     dz.addEventListener('dragover',function(e){e.preventDefault();dz.classList.add('drag-over');});
@@ -2273,7 +2241,7 @@ function _initBrandingView(){
   });}
   var saveBtn=$('branding-save-btn');
   if(saveBtn){saveBtn.addEventListener('click',function(){
-    var data={logo:currentLogo,appName:nameI?nameI.value.trim():'',tagline:tagI?tagI.value.trim():''};
+    var data={logo:currentLogo};
     localStorage.setItem('rf_branding',JSON.stringify(data));
     _applyBranding();
     toast('Branding saved');
@@ -2281,8 +2249,6 @@ function _initBrandingView(){
   var resetBtn=$('branding-reset-btn');
   if(resetBtn){resetBtn.addEventListener('click',function(){
     currentLogo='';
-    if(nameI)nameI.value='';
-    if(tagI)tagI.value='';
     if(logoPreview){logoPreview.src='';logoPreview.style.display='none';}
     if(dropHint)dropHint.style.display='';
     if(clearBtn)clearBtn.style.display='none';
