@@ -548,9 +548,10 @@ def _build_report_html(r, findings, branding_logo=''):
     submitted_block = ''
     if org or company_html:
         submitted_block = '<div class="tp-submitted-block">'
-        submitted_block += '<p class="tp-submitted-label">Submitted to:</p>'
         if org:
-            submitted_block += '<p class="tp-submitted-org">' + org + '</p>'
+            submitted_block += '<p class="tp-submitted-org">Submitted to: ' + org + '</p>'
+        elif company_html:
+            submitted_block += '<p class="tp-submitted-org">Submitted to:</p>'
         if company_html:
             submitted_block += '<div class="tp-company-logo">' + company_html + '</div>'
         submitted_block += '</div>'
@@ -877,15 +878,13 @@ def export_docx(rid: str, body: ExportBody = ExportBody()):
 
         # Submitted to: + company logo from report
         if org_name or logo_b64:
-            p_sub_lbl = doc.add_paragraph()
-            p_sub_lbl.alignment = WD_ALIGN_PARAGRAPH.CENTER
-            run_sub_lbl = p_sub_lbl.add_run('Submitted to:')
-            run_sub_lbl.font.size = Pt(10)
-            run_sub_lbl.font.color.rgb = RGBColor(0x66, 0x66, 0x66)
+            p_sub = doc.add_paragraph()
+            p_sub.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            run_sub_label = p_sub.add_run('Submitted to:')
+            run_sub_label.font.size = Pt(14)
             if org_name:
-                p_org = doc.add_paragraph()
-                p_org.alignment = WD_ALIGN_PARAGRAPH.CENTER
-                p_org.add_run(org_name).font.size = Pt(14)
+                run_sub_org = p_sub.add_run(' ' + org_name)
+                run_sub_org.font.size = Pt(14)
             _add_img(logo_b64, 2.0)
 
         # Spacers to push bottom content down
