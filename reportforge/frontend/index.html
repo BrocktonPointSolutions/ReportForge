@@ -936,7 +936,6 @@ function toggleFw(id){
   if(_fwSelected.has(id))_fwSelected.delete(id);
   else _fwSelected.add(id);
   renderFrameworks();
-  if(name==='branding')_initBrandingView();
 }
 function updateFwBar(){
   var cnt=$('fw-count');var btn=$('fw-import-btn');var n=_fwSelected.size;
@@ -976,6 +975,7 @@ function showView(name){
   if(name==='dash')renderDash();
   if(name==='preview')renderFullPreview();
   if(name==='frameworks')renderFrameworks();
+  if(name==='branding')_initBrandingView();
 }
 async function loadAll(){
   try{
