@@ -197,15 +197,33 @@ tr:hover td{background:rgba(255,255,255,.015)}
 .fw-import-bar{margin-top:20px;display:flex;align-items:center;gap:12px}
 .fw-selected-count{font-size:13px;color:var(--text2);flex:1}
 .fw-selected-count strong{color:var(--accent)}
+
+  /* ===== Branding Page ===== */
+  .branding-page { padding: 2rem; max-width: 700px; }
+  .branding-section { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; }
+  .branding-section h3 { margin: 0 0 1rem; font-size: 1rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: .05em; }
+  .branding-logo-dropzone { border: 2px dashed var(--border); border-radius: 8px; padding: 2rem; text-align: center; cursor: pointer; transition: border-color .2s, background .2s; }
+  .branding-logo-dropzone:hover, .branding-logo-dropzone.drag-over { border-color: var(--accent); background: var(--accent-faint,rgba(99,102,241,.05)); }
+  .branding-logo-preview { max-height: 80px; max-width: 220px; object-fit: contain; display: block; margin: .75rem auto 0; }
+  .branding-logo-hint { font-size: .8rem; color: var(--text-secondary); margin-top: .5rem; }
+  .branding-field { margin-bottom: 1rem; }
+  .branding-field label { display: block; font-size: .85rem; color: var(--text-secondary); margin-bottom: .3rem; }
+  .branding-field input { width: 100%; box-sizing: border-box; padding: .5rem .75rem; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); font-size: .95rem; }
+  .branding-preview-box { display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--nav-bg, #1e1e2e); border-radius: 8px; }
+  .branding-preview-logo { max-height: 48px; max-width: 140px; object-fit: contain; }
+  .branding-preview-text .preview-name { font-weight: 700; font-size: 1rem; color: #fff; }
+  .branding-preview-text .preview-tag  { font-size: .75rem; color: rgba(255,255,255,.55); }
+  .branding-actions { display: flex; gap: .75rem; }
 </style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@2/dist/quill.snow.css">
 <script src="https://cdn.jsdelivr.net/npm/quill@2/dist/quill.js"></script>
 </head>
 <body>
 <div class="sidebar">
-  <div class="sidebar-logo">
-    <div class="logo-mark"><span class="r">Report</span><span class="f">Forge</span></div>
-    <div class="logo-sub">Security Report Builder</div>
+  <div class="sidebar-logo" id="sidebar-brand-wrap">
+    <img id="sidebar-brand-img" src="" alt="" style="max-height:48px;max-width:140px;object-fit:contain;display:none;margin-bottom:4px;">
+    <div class="logo-mark" id="sidebar-brand-name"><span class="r">Report</span><span class="f">Forge</span></div>
+    <div class="logo-sub" id="sidebar-brand-tagline">Security Report Builder</div>
   </div>
   <nav class="sidebar-nav">
     <div class="nav-section-label">Workspace</div>
@@ -231,6 +249,7 @@ tr:hover td{background:rgba(255,255,255,.015)}
       <svg class="ni" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="2" width="14" height="2" rx="1"/><rect x="1" y="6" width="14" height="2" rx="1"/><rect x="1" y="10" width="9" height="2" rx="1"/></svg>
       Report Templates
     </div>
+    <div class="nav-item" data-nav="branding"><span class="nav-icon">🎨</span>Branding</div>
     <div class="nav-section-label" style="margin-top:6px">Output</div>
     <div class="nav-item" id="nav-preview-btn">
       <svg class="ni" viewBox="0 0 16 16" fill="currentColor"><ellipse cx="8" cy="8" rx="7" ry="4" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="8" cy="8" r="2"/></svg>
@@ -605,6 +624,54 @@ tr:hover td{background:rgba(255,255,255,.015)}
     <div class="modal-footer"><button class="btn btn-primary" data-close-modal="modal-alert">OK</button></div>
   </div>
 </div>
+<div class="view" id="view-branding">
+  <div class="branding-page">
+    <h2 style="margin:0 0 1.5rem;font-size:1.25rem;">Site Branding</h2>
+
+    <div class="branding-section">
+      <h3>Logo</h3>
+      <div class="branding-logo-dropzone" id="branding-dropzone">
+        <img id="branding-logo-preview" class="branding-logo-preview" src="" alt="" style="display:none;">
+        <div id="branding-drop-hint">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:.4;margin-bottom:.5rem"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <div>Drop image here or <u style="cursor:pointer" id="branding-browse-link">browse</u></div>
+          <div class="branding-logo-hint">PNG, SVG or JPEG &bull; displayed at up to 48 px tall in the sidebar</div>
+        </div>
+        <input type="file" id="branding-logo-input" accept="image/*" style="display:none;">
+      </div>
+      <button class="btn btn-sm btn-outline" id="branding-logo-clear" style="margin-top:.75rem;display:none;">Remove logo</button>
+    </div>
+
+    <div class="branding-section">
+      <h3>App Identity</h3>
+      <div class="branding-field">
+        <label for="branding-app-name">App Name</label>
+        <input type="text" id="branding-app-name" placeholder="ReportForge" maxlength="40">
+      </div>
+      <div class="branding-field">
+        <label for="branding-app-tagline">Tagline</label>
+        <input type="text" id="branding-app-tagline" placeholder="Security Report Builder" maxlength="60">
+      </div>
+    </div>
+
+    <div class="branding-section">
+      <h3>Preview</h3>
+      <div class="branding-preview-box">
+        <img id="branding-preview-logo" class="branding-preview-logo" src="" alt="" style="display:none;">
+        <div class="branding-preview-text">
+          <div class="preview-name" id="branding-preview-name">ReportForge</div>
+          <div class="preview-tag"  id="branding-preview-tag">Security Report Builder</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="branding-actions">
+      <button class="btn btn-primary" id="branding-save-btn">Save Branding</button>
+      <button class="btn btn-outline"  id="branding-reset-btn">Reset to Default</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast-root" id="toast-root"></div>
 <script>
 
@@ -869,6 +936,7 @@ function toggleFw(id){
   if(_fwSelected.has(id))_fwSelected.delete(id);
   else _fwSelected.add(id);
   renderFrameworks();
+  if(name==='branding')_initBrandingView();
 }
 function updateFwBar(){
   var cnt=$('fw-count');var btn=$('fw-import-btn');var n=_fwSelected.size;
@@ -2142,6 +2210,103 @@ document.addEventListener('input',function(e){
   }
 });
 
+function _applyBranding(){
+  var b={};
+  try{b=JSON.parse(localStorage.getItem('rf_branding')||'{}');}catch(e){}
+  var img=document.getElementById('sidebar-brand-img');
+  var nm=document.getElementById('sidebar-brand-name');
+  var tg=document.getElementById('sidebar-brand-tagline');
+  if(img){
+    if(b.logo){img.src=b.logo;img.style.display='block';}
+    else{img.style.display='none';}
+  }
+  if(nm){nm.innerHTML=b.appName?('<span style="color:var(--text)">'+b.appName+'</span>'):'<span class="r">Report</span><span class="f">Forge</span>';}
+  if(tg){tg.textContent=b.tagline||'Security Report Builder';}
+}
+var _bi=false;
+function _initBrandingView(){
+  if(_bi)return;_bi=true;
+  var b={};
+  try{b=JSON.parse(localStorage.getItem('rf_branding')||'{}');}catch(e){}
+  var nameI=$('branding-app-name');
+  var tagI=$('branding-app-tagline');
+  var logoPreview=$('branding-logo-preview');
+  var dropHint=$('branding-drop-hint');
+  var clearBtn=$('branding-logo-clear');
+  var previewLogo=$('branding-preview-logo');
+  var previewName=$('branding-preview-name');
+  var previewTag=$('branding-preview-tag');
+  var fileInput=$('branding-logo-input');
+  var currentLogo=b.logo||'';
+  function updatePreview(){
+    var nm=nameI?nameI.value.trim():'';
+    var tg=tagI?tagI.value.trim():'';
+    if(previewName)previewName.textContent=nm||'ReportForge';
+    if(previewTag)previewTag.textContent=tg||'Security Report Builder';
+    if(previewLogo){
+      if(currentLogo){previewLogo.src=currentLogo;previewLogo.style.display='block';}
+      else{previewLogo.style.display='none';}
+    }
+  }
+  function setLogo(dataUrl){
+    currentLogo=dataUrl;
+    if(logoPreview){logoPreview.src=dataUrl;logoPreview.style.display='block';}
+    if(dropHint)dropHint.style.display='none';
+    if(clearBtn)clearBtn.style.display='';
+    updatePreview();
+  }
+  if(b.logo){setLogo(b.logo);}
+  if(nameI)nameI.value=b.appName||'';
+  if(tagI)tagI.value=b.tagline||'';
+  updatePreview();
+  if(nameI)nameI.addEventListener('input',updatePreview);
+  if(tagI)tagI.addEventListener('input',updatePreview);
+  var dz=$('branding-dropzone');
+  if(dz){
+    dz.addEventListener('dragover',function(e){e.preventDefault();dz.classList.add('drag-over');});
+    dz.addEventListener('dragleave',function(){dz.classList.remove('drag-over');});
+    dz.addEventListener('drop',function(e){
+      e.preventDefault();dz.classList.remove('drag-over');
+      var f=e.dataTransfer.files[0];
+      if(f&&f.type.startsWith('image/')){var r=new FileReader();r.onload=function(ev){setLogo(ev.target.result);};r.readAsDataURL(f);}
+    });
+  }
+  var bl=$('branding-browse-link');
+  if(bl&&fileInput){bl.addEventListener('click',function(){fileInput.click();});}
+  if(fileInput){fileInput.addEventListener('change',function(){
+    var f=fileInput.files[0];
+    if(f){var r=new FileReader();r.onload=function(ev){setLogo(ev.target.result);};r.readAsDataURL(f);}
+  });}
+  if(clearBtn){clearBtn.addEventListener('click',function(){
+    currentLogo='';
+    if(logoPreview){logoPreview.src='';logoPreview.style.display='none';}
+    if(dropHint)dropHint.style.display='';
+    clearBtn.style.display='none';
+    updatePreview();
+  });}
+  var saveBtn=$('branding-save-btn');
+  if(saveBtn){saveBtn.addEventListener('click',function(){
+    var data={logo:currentLogo,appName:nameI?nameI.value.trim():'',tagline:tagI?tagI.value.trim():''};
+    localStorage.setItem('rf_branding',JSON.stringify(data));
+    _applyBranding();
+    toast('Branding saved');
+  });}
+  var resetBtn=$('branding-reset-btn');
+  if(resetBtn){resetBtn.addEventListener('click',function(){
+    currentLogo='';
+    if(nameI)nameI.value='';
+    if(tagI)tagI.value='';
+    if(logoPreview){logoPreview.src='';logoPreview.style.display='none';}
+    if(dropHint)dropHint.style.display='';
+    if(clearBtn)clearBtn.style.display='none';
+    updatePreview();
+    localStorage.removeItem('rf_branding');
+    _applyBranding();
+    toast('Branding reset to default');
+    _bi=false;
+  });}
+}
+
 function _applyTheme(dark){
   if(dark){
     document.body.classList.add('dark');
@@ -2167,6 +2332,7 @@ function toggleTheme(){
   }catch(e){_applyTheme(false);}
 })();
 loadAll();
+_applyBranding();
 initQuills();
 window.toggleFw=toggleFw;
 window.importSelectedFrameworks=importSelectedFrameworks;
