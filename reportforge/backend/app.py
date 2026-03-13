@@ -922,7 +922,7 @@ def export_docx(rid: str, body: ExportBody = ExportBody()):
         fld_char_begin.set(qn('w:dirty'), 'true')
         instr_text = OxmlElement('w:instrText')
         instr_text.set(qn('xml:space'), 'preserve')
-        instr_text.text = ' TOC \o "1-3" \h \z \u '
+        instr_text.text = ' TOC \\o "1-3" \\h \\z \\u '
         fld_char_end = OxmlElement('w:fldChar')
         fld_char_end.set(qn('w:fldCharType'), 'end')
         run_toc._r.append(fld_char_begin)
