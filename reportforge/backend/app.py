@@ -564,17 +564,13 @@ def _build_report_html(r, findings, branding_logo=''):
         '<p class="tp-report-title">Security Assessment &#8211; Final Report</p>'
         + submitted_block
         + '</div>'
-        '</div>'
-        '</div>'
+        + ('<div class="tp-bot">'
+        + ('<p class="tp-meta-line">Prepared By: ' + assessor + '</p>' if assessor else '')
+        + ('<p class="tp-meta-line">Date Issued: ' + delivery_date + '</p>' if delivery_date else '')
+        + '</div>' if (assessor or delivery_date) else '')
+        + '</div>'
     )
-    # Build title-page footer (confidentiality + Prepared By / Date Issued)
-    footer_meta = ''
-    if assessor:
-        footer_meta += '<span>Prepared By: ' + assessor + '</span>'
-    if delivery_date:
-        if footer_meta:
-            footer_meta += ' &nbsp;&nbsp; '
-        footer_meta += '<span>Date Issued: ' + delivery_date + '</span>'
+    # Build title-page footer (confidentiality notice only)
     title_footer_html = (
         '<div class="page-footer">'
         '<div class="footer-title-page">'
@@ -582,8 +578,7 @@ def _build_report_html(r, findings, branding_logo=''):
         'Unless you are the intended recipient, you may not use, copy or disclose '
         'to anyone the information contained herein.'
         '</div>'
-        + ('<div class="footer-meta">' + footer_meta + '</div>' if footer_meta else '')
-        + '</div>'
+        '</div>'
     )
     # Build standard footer (Confidential | Page # | Company Name)
     std_footer_html = (
@@ -620,7 +615,8 @@ def _build_report_html(r, findings, branding_logo=''):
         '.tp-submitted-label{font-size:11pt;color:#666;text-transform:uppercase;letter-spacing:.05em;margin:0 0 8px 0}',
         '.tp-company-logo{margin:8px 0}',
         '.tp-submitted-org{font-size:14pt;color:#444;margin:8px 0 0 0}',
-        '.tp-bot{display:none}',
+        '.tp-bot{margin-top:auto;padding-bottom:80px}',
+        '.tp-meta-line{font-size:12pt;color:#333;margin:6px 0}',
         '.report-body{padding:40px 60px}',
         'h1{font-size:28px;margin-bottom:8px;margin-top:32px}',
         'h2{font-size:22px;margin-top:28px;',
@@ -926,7 +922,23 @@ def export_docx(rid: str, body: ExportBody = ExportBody()):
                 run_sub_org.font.size = Pt(14)
             _add_img(logo_b64, 2.0)
 
-        # ── Footers ────────────────────────────────────────────────────────────
+        # Prepared By / Date Issued - stacked at bottom of title page, above footer
+        if assessor_name or delivery_date_val:
+            p_meta_anchor = doc.add_paragraph()
+            p_meta_anchor.paragraph_format.space_before = Pt(360)
+            p_meta_anchor.paragraph_format.space_after = Pt(0)
+            if assessor_name:
+                p_prep = doc.add_paragraph()
+                p_prep.alignment = WD_ALIGN_PARAGRAPH.LEFT
+                run_prep = p_prep.add_run('Prepared By: ' + assessor_name)
+                run_prep.font.size = Pt(12)
+            if delivery_date_val:
+                p_date = doc.add_paragraph()
+                p_date.alignment = WD_ALIGN_PARAGRAPH.LEFT
+                run_date = p_date.add_run('Date Issued: ' + delivery_date_val)
+                run_date.font.size = Pt(12)
+
+                # ── Footers ────────────────────────────────────────────────────────────
         section = doc.sections[0]
         section.different_first_page_header_footer = True
 
@@ -943,16 +955,7 @@ def export_docx(rid: str, body: ExportBody = ExportBody()):
         run_conf.font.size = Pt(8)
         run_conf.font.color.rgb = RGBColor(0x66, 0x66, 0x66)
         run_conf.font.italic = True
-        if assessor_name or delivery_date_val:
-            p_meta = fp_footer.add_paragraph()
-            p_meta.alignment = WD_ALIGN_PARAGRAPH.LEFT
-            meta_parts = []
-            if assessor_name:
-                meta_parts.append('Prepared By: ' + assessor_name)
-            if delivery_date_val:
-                meta_parts.append('Date Issued: ' + delivery_date_val)
-            run_meta = p_meta.add_run('    '.join(meta_parts))
-            run_meta.font.size = Pt(9)
+
 
         # Standard footer: Confidential | Page # | Company Name
         std_footer = section.footer
