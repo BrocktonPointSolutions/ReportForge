@@ -583,15 +583,14 @@ def _build_report_html(r, findings, branding_logo=''):
         'min-height:100vh;padding:60px 60px 60px 60px;',
         'box-sizing:border-box;page-break-after:always}',
         '.tp-top{text-align:center;padding-top:40px}',
-        '.tp-mid{text-align:center;margin-top:auto;',
-        'padding:40px 0}',
+        '.tp-mid{text-align:center;padding:40px 0}',
         '.tp-report-title{font-size:26pt;font-weight:700;',
         'color:#1a1d27;margin:0 0 20px 0;line-height:1.2}',
         '.tp-submitted-block{margin-top:20px}',
         '.tp-submitted-label{font-size:11pt;color:#666;text-transform:uppercase;letter-spacing:.05em;margin:0 0 8px 0}',
         '.tp-company-logo{margin:8px 0}',
         '.tp-submitted-org{font-size:14pt;color:#444;margin:8px 0 0 0}',
-        '.tp-bot{padding-bottom:40px}',
+        '.tp-bot{margin-top:auto;padding-bottom:40px}',
         '.tp-meta-line{font-size:12pt;color:#333;',
         'margin:4px 0}',
         '.report-body{padding:40px 60px}',
@@ -887,12 +886,10 @@ def export_docx(rid: str, body: ExportBody = ExportBody()):
                 run_sub_org.font.size = Pt(14)
             _add_img(logo_b64, 2.0)
 
-        # Spacers to push bottom content down
-        for _ in range(6):
-            sp = doc.add_paragraph()
-            sp.alignment = WD_ALIGN_PARAGRAPH.CENTER
-
-        # Prepared By / Date Issued at bottom of title page
+        # Prepared By / Date Issued pinned to bottom of title page
+        from docx.shared import Pt as _Pt
+        p_prep_anchor = doc.add_paragraph()
+        p_prep_anchor.paragraph_format.space_before = _Pt(480)
         if assessor_name:
             p_prep = doc.add_paragraph()
             p_prep.alignment = WD_ALIGN_PARAGRAPH.LEFT
