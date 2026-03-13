@@ -1353,7 +1353,10 @@ async function exportReport(fmt){
   var url='/api/reports/'+rid+'/export/'+fmt;
   try{
     toast('Preparing '+fmt.toUpperCase()+'...');
-    var res=await fetch(url);
+    var branding={};
+    try{branding=JSON.parse(localStorage.getItem('rf_branding')||'{}');}catch(e){}
+    var body=JSON.stringify({branding_logo:branding.logo||''});
+    var res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:body});
     if(!res.ok){
       var t=await res.text();
       toast('Export failed: '+(t||res.statusText),'err');
