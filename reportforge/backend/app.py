@@ -515,7 +515,7 @@ def _template_out(
             out['sections'] = []
     return out
 
-def _build_report_html(r, findings):
+def _build_report_html(r, findings, branding_logo=''):
     t = r.title or 'Report'
     esc = lambda s: (
         str(s)
@@ -535,27 +535,33 @@ def _build_report_html(r, findings):
     poc_email = rep.get('poc_email','')
     poc_phone = rep.get('poc_phone','')
     has_poc = any([poc_first, poc_last, poc_email, poc_phone])
-    # --- build logo img tag ---
-    if logo_b64:
-        if ',' in logo_b64:
-            logo_src = logo_b64
-        else:
-            logo_src = 'data:image/png;base64,' + logo_b64
-        logo_html = (
-            '<img src="' + logo_src + '" '
-            'style="max-height:120px;max-width:300px;'
-            'object-fit:contain" alt="Company Logo">')
-    else:
-        logo_html = ''
+    # --- build logo img tags ---
+    def _img_tag(b64, max_h, max_w, alt):
+        if not b64:
+            return ''
+        src = b64 if ',' in b64 else 'data:image/png;base64,' + b64
+        return ('<img src="' + src + '" style="max-height:' + max_h
+                + ';max-width:' + max_w + ';object-fit:contain" alt="' + alt + '">')
+    branding_html = _img_tag(branding_logo, '80px', '240px', 'Logo')
+    company_html = _img_tag(logo_b64, '80px', '200px', 'Company Logo')
     # --- title page ---
+    submitted_block = ''
+    if org or company_html:
+        submitted_block = '<div class="tp-submitted-block">'
+        submitted_block += '<p class="tp-submitted-label">Submitted to:</p>'
+        if company_html:
+            submitted_block += '<div class="tp-company-logo">' + company_html + '</div>'
+        if org:
+            submitted_block += '<p class="tp-submitted-org">' + org + '</p>'
+        submitted_block += '</div>'
     title_page = (
         '<div class="title-page">'
         '<div class="tp-top">'
-        + (logo_html if logo_html else '')
+        + (branding_html if branding_html else '')
         + '</div>'
         '<div class="tp-mid">'
         '<p class="tp-report-title">Security Assessment &#8211; Final Report</p>'
-        + ('<p class="tp-submitted">Submitted to: ' + org + '</p>' if org else '')
+        + submitted_block
         + '</div>'
         '<div class="tp-bot">'
         + ('<p class="tp-meta-line">Prepared By: ' + assessor + '</p>' if assessor else '')
@@ -580,8 +586,10 @@ def _build_report_html(r, findings):
         'padding:40px 0}',
         '.tp-report-title{font-size:26pt;font-weight:700;',
         'color:#1a1d27;margin:0 0 20px 0;line-height:1.2}',
-        '.tp-submitted{font-size:14pt;color:#444;',
-        'margin:0}',
+        '.tp-submitted-block{margin-top:20px}',
+        '.tp-submitted-label{font-size:11pt;color:#666;text-transform:uppercase;letter-spacing:.05em;margin:0 0 8px 0}',
+        '.tp-company-logo{margin:8px 0}',
+        '.tp-submitted-org{font-size:14pt;color:#444;margin:8px 0 0 0}',
         '.tp-bot{padding-bottom:40px}',
         '.tp-meta-line{font-size:12pt;color:#333;',
         'margin:4px 0}',
@@ -679,51 +687,29 @@ def _get_report_for_export(rid):
         findings = d.get('findings', [])
         return r, findings
 
-@app.get('/api/reports/{rid}/export/html')
-def export_html(rid: str):
-    r, findings = _get_report_for_export(
-        rid)
-    html = _build_report_html(r, findings)
-    fname = (r.title or 'report')
-    fname = fname.replace(' ', '_')
-    fname = fname + '.html'
-    return Response(
-        content=html,
-        media_type='text/html',
-        headers={
-            'Content-Disposition':
-            'attachment; filename="' +
-            fname + '"'
-        }
-    )
+class ExportBody(BaseModel):
+    branding_logo: str = ''
 
-@app.get('/api/reports/{rid}/export/pdf')
-def export_pdf(rid: str):
-    r, findings = _get_report_for_export(
-        rid)
-    html = _build_report_html(r, findings)
+@app.post('/api/reports/{rid}/export/html')
+def export_html(rid: str, body: ExportBody = ExportBody()):
+    r, findings = _get_report_for_export(rid)
+    html = _build_report_html(r, findings, branding_logo=body.branding_logo)
+    fname = (r.title or 'report').replace(' ', '_') + '.html'
+    return Response(content=html, media_type='text/html',
+        headers={'Content-Disposition': 'attachment; filename="' + fname + '"'})
+
+@app.post('/api/reports/{rid}/export/pdf')
+def export_pdf(rid: str, body: ExportBody = ExportBody()):
+    r, findings = _get_report_for_export(rid)
+    html = _build_report_html(r, findings, branding_logo=body.branding_logo)
     try:
         from weasyprint import HTML
-        pdf = HTML(
-            string=html
-        ).write_pdf()
+        pdf = HTML(string=html).write_pdf()
     except Exception as e:
-        raise HTTPException(
-            500,
-            'PDF generation failed: '
-            + str(e))
-    fname = (r.title or 'report')
-    fname = fname.replace(' ', '_')
-    fname = fname + '.pdf'
-    return Response(
-        content=pdf,
-        media_type='application/pdf',
-        headers={
-            'Content-Disposition':
-            'attachment; filename="' +
-            fname + '"'
-        }
-    )
+        raise HTTPException(500, 'PDF generation failed: ' + str(e))
+    fname = (r.title or 'report').replace(' ', '_') + '.pdf'
+    return Response(content=pdf, media_type='application/pdf',
+        headers={'Content-Disposition': 'attachment; filename="' + fname + '"'})
 
 def _add_html_to_docx(doc, html, base_heading=2):
     import re, base64, io as _io
@@ -841,12 +827,11 @@ def _add_html_to_docx(doc, html, base_heading=2):
         process_block(child)
 
 
-@app.get('/api/reports/{rid}/export/docx')
-def export_docx(rid: str):
-    r, findings = _get_report_for_export(
-        rid)
+@app.post('/api/reports/{rid}/export/docx')
+def export_docx(rid: str, body: ExportBody = ExportBody()):
+    r, findings = _get_report_for_export(rid)
     try:
-        import io
+        import io, base64, io as _bio
         from docx import Document
         from bs4 import BeautifulSoup
         from docx.shared import Pt, Inches, RGBColor
@@ -854,74 +839,105 @@ def export_docx(rid: str):
         from docx.oxml.ns import qn
         from docx.oxml import OxmlElement
         doc = Document()
-        d = json.loads(
-            r.data_json or '{}')
+        d = json.loads(r.data_json or '{}')
         rep = d.get('report', {})
-        logo_b64 = rep.get('logo','')
-        org_name = r.org or rep.get('org','')
-        assessor_name = r.authors or rep.get('assessor','')
-        end_date_val = rep.get('end_date','') or r.assessment_date or ''
-        delivery_date_val = rep.get('delivery_date','')
-        poc_first = rep.get('poc_first','')
-        poc_last = rep.get('poc_last','')
-        poc_email = rep.get('poc_email','')
-        poc_phone = rep.get('poc_phone','')
+        logo_b64 = rep.get('logo', '')
+        branding_logo = body.branding_logo or ''
+        org_name = r.org or rep.get('org', '')
+        assessor_name = r.authors or rep.get('assessor', '')
+        delivery_date_val = rep.get('delivery_date', '')
+        poc_first = rep.get('poc_first', '')
+        poc_last = rep.get('poc_last', '')
+        poc_email = rep.get('poc_email', '')
+        poc_phone = rep.get('poc_phone', '')
         has_poc = any([poc_first, poc_last, poc_email, poc_phone])
-        # --- Title page ---
-        # Logo (centered)
-        if logo_b64:
-            import base64, io as _bio
+
+        def _add_img(b64, width_in):
+            if not b64:
+                return
             try:
-                if ',' in logo_b64:
-                    logo_data = base64.b64decode(
-                        logo_b64.split(',',1)[1])
-                else:
-                    logo_data = base64.b64decode(logo_b64)
-                logo_stream = _bio.BytesIO(logo_data)
-                p_logo = doc.add_paragraph()
-                p_logo.alignment = WD_ALIGN_PARAGRAPH.CENTER
-                run_logo = p_logo.add_run()
-                run_logo.add_picture(logo_stream, width=Inches(3))
+                raw = b64.split(',', 1)[1] if ',' in b64 else b64
+                stream = _bio.BytesIO(base64.b64decode(raw))
+                p = doc.add_paragraph()
+                p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                p.add_run().add_picture(stream, width=Inches(width_in))
             except Exception:
                 pass
-        # Report title - 26pt bold centered
+
+        # --- Title page ---
+        # Top: site branding logo
+        _add_img(branding_logo, 2.5)
+
+        # Report title
         p_title = doc.add_paragraph()
         p_title.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        run_title = p_title.add_run(
-            'Security Assessment – Final Report')
+        run_title = p_title.add_run('Security Assessment – Final Report')
         run_title.bold = True
         run_title.font.size = Pt(26)
-        # Submitted to
-        if org_name:
-            p_org = doc.add_paragraph()
-            p_org.alignment = WD_ALIGN_PARAGRAPH.CENTER
-            run_org = p_org.add_run(
-                'Submitted to: ' + org_name)
-            run_org.font.size = Pt(14)
-        # Spacer paragraphs to push bottom content down
-        for _ in range(8):
+
+        # Submitted to: + company logo from report
+        if org_name or logo_b64:
+            p_sub_lbl = doc.add_paragraph()
+            p_sub_lbl.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            run_sub_lbl = p_sub_lbl.add_run('Submitted to:')
+            run_sub_lbl.font.size = Pt(10)
+            run_sub_lbl.font.color.rgb = RGBColor(0x66, 0x66, 0x66)
+            _add_img(logo_b64, 2.0)
+            if org_name:
+                p_org = doc.add_paragraph()
+                p_org.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                p_org.add_run(org_name).font.size = Pt(14)
+
+        # Spacers to push bottom content down
+        for _ in range(6):
             sp = doc.add_paragraph()
             sp.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        # Prepared By / Date Issued
+
+        # Prepared By / Date Issued at bottom of title page
         if assessor_name:
             p_prep = doc.add_paragraph()
             p_prep.alignment = WD_ALIGN_PARAGRAPH.LEFT
-            p_prep.add_run(
-                'Prepared By: ' + assessor_name).font.size = Pt(12)
+            p_prep.add_run('Prepared By: ' + assessor_name).font.size = Pt(12)
         if delivery_date_val:
             p_date = doc.add_paragraph()
             p_date.alignment = WD_ALIGN_PARAGRAPH.LEFT
-            p_date.add_run(
-                'Date Issued: ' + delivery_date_val).font.size = Pt(12)
+            p_date.add_run('Date Issued: ' + delivery_date_val).font.size = Pt(12)
+
         # Page break after title page
         doc.add_page_break()
+
+        # --- Table of Contents ---
+        toc_heading = doc.add_paragraph()
+        toc_heading.alignment = WD_ALIGN_PARAGRAPH.LEFT
+        run_toc_h = toc_heading.add_run('Table of Contents')
+        run_toc_h.bold = True
+        run_toc_h.font.size = Pt(16)
+
+        # Native Word TOC field - user can right-click > Update Field
+        toc_para = doc.add_paragraph()
+        toc_para.alignment = WD_ALIGN_PARAGRAPH.LEFT
+        run_toc = toc_para.add_run()
+        fld_char_begin = OxmlElement('w:fldChar')
+        fld_char_begin.set(qn('w:fldCharType'), 'begin')
+        fld_char_begin.set(qn('w:dirty'), 'true')
+        instr_text = OxmlElement('w:instrText')
+        instr_text.set(qn('xml:space'), 'preserve')
+        instr_text.text = ' TOC \o "1-3" \h \z \u '
+        fld_char_end = OxmlElement('w:fldChar')
+        fld_char_end.set(qn('w:fldCharType'), 'end')
+        run_toc._r.append(fld_char_begin)
+        run_toc._r.append(instr_text)
+        run_toc._r.append(fld_char_end)
+
+        doc.add_page_break()
+
+        # --- Report sections ---
         secs = d.get('sections', [])
         for sec in secs:
             sec_lvl = sec.get('heading_level', 1)
             sec_lvl = sec_lvl if isinstance(sec_lvl, int) and 1 <= sec_lvl <= 9 else 1
-            doc.add_heading(
-                sec.get('title',''), sec_lvl)
-            stitle = sec.get('title','').lower()
+            doc.add_heading(sec.get('title', ''), sec_lvl)
+            stitle = sec.get('title', '').lower()
             if has_poc and ('appendix b' in stitle or 'points of contact' in stitle):
                 doc.add_paragraph('The primary point of contact for this assessment was:')
                 poc_name = (poc_first + ' ' + poc_last).strip()
@@ -931,59 +947,34 @@ def export_docx(rid: str):
                     doc.add_paragraph(poc_email)
                 if poc_phone:
                     doc.add_paragraph(poc_phone)
-            content = sec.get('content','')
+            content = sec.get('content', '')
             if content:
-                _add_html_to_docx(
-                    doc, content,
-                    base_heading=sec_lvl+1)
+                _add_html_to_docx(doc, content, base_heading=sec_lvl + 1)
         if findings:
-            doc.add_heading(
-                'Findings', 2)
+            doc.add_heading('Findings', 2)
             for f in findings:
-                title = f.get('title','')
-                sev = f.get('severity','')
-                doc.add_heading(
-                    title + ' [' + sev + ']', 3)
+                title = f.get('title', '')
+                sev = f.get('severity', '')
+                doc.add_heading(title + ' [' + sev + ']', 3)
                 for lbl, key in [
-                  ('Observation','description'),
-                  ('Discussion','discussion'),
-                  ('Recommendations',
-                   'recommendation'),
-                  ('References','refs'),
+                    ('Observation', 'description'),
+                    ('Discussion', 'discussion'),
+                    ('Recommendations', 'recommendation'),
+                    ('References', 'refs'),
                 ]:
-                    html_val = f.get(key,'')
+                    html_val = f.get(key, '')
                     if not html_val:
                         continue
                     p2 = doc.add_paragraph()
-                    p2.add_run(
-                        lbl + ':'
-                    ).bold = True
-                    _add_html_to_docx(
-                        doc, html_val,
-                        base_heading=4)
+                    p2.add_run(lbl + ':').bold = True
+                    _add_html_to_docx(doc, html_val, base_heading=4)
         buf = io.BytesIO()
         doc.save(buf)
         buf.seek(0)
         data = buf.read()
     except Exception as e:
-        raise HTTPException(
-            500,
-            'DOCX generation failed: '
-            + str(e))
-    fname = (r.title or 'report')
-    fname = fname.replace(' ', '_')
-    fname = fname + '.docx'
-    ct = (
-        'application/vnd.openxmlformats'
-        '-officedocument'
-        '.wordprocessingml.document'
-    )
-    return Response(
-        content=data,
-        media_type=ct,
-        headers={
-            'Content-Disposition':
-            'attachment; filename="' +
-            fname + '"'
-        }
-    )
+        raise HTTPException(500, 'DOCX generation failed: ' + str(e))
+    fname = (r.title or 'report').replace(' ', '_') + '.docx'
+    ct = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    return Response(content=data, media_type=ct,
+        headers={'Content-Disposition': 'attachment; filename="' + fname + '"'})
