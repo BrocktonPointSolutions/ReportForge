@@ -2270,9 +2270,12 @@ function _initBrandingView(){
       var f=e.dataTransfer.files[0];
       if(f&&f.type.startsWith('image/')){var r=new FileReader();r.onload=function(ev){setLogo(ev.target.result);};r.readAsDataURL(f);}
     });
+    dz.addEventListener('click',function(e){
+      if(!e.target.closest('#branding-browse-link'))fileInput.click();
+    });
   }
   var bl=$('branding-browse-link');
-  if(bl&&fileInput){bl.addEventListener('click',function(){fileInput.click();});}
+  if(bl&&fileInput){bl.addEventListener('click',function(e){e.stopPropagation();fileInput.click();});}
   if(fileInput){fileInput.addEventListener('change',function(){
     var f=fileInput.files[0];
     if(f){var r=new FileReader();r.onload=function(ev){setLogo(ev.target.result);};r.readAsDataURL(f);}
