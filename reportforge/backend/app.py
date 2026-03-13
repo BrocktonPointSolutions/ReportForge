@@ -564,11 +564,41 @@ def _build_report_html(r, findings, branding_logo=''):
         '<p class="tp-report-title">Security Assessment &#8211; Final Report</p>'
         + submitted_block
         + '</div>'
-        '<div class="tp-bot">'
-        + ('<p class="tp-meta-line">Prepared By: ' + assessor + '</p>' if assessor else '')
-        + ('<p class="tp-meta-line">Date Issued: ' + delivery_date + '</p>' if delivery_date else '')
-        + '</div>'
         '</div>'
+        '</div>'
+    )
+    # Build title-page footer (confidentiality + Prepared By / Date Issued)
+    footer_meta = ''
+    if assessor:
+        footer_meta += '<span>Prepared By: ' + assessor + '</span>'
+    if delivery_date:
+        if footer_meta:
+            footer_meta += ' &nbsp;&nbsp; '
+        footer_meta += '<span>Date Issued: ' + delivery_date + '</span>'
+    title_footer_html = (
+        '<div class="page-footer">'
+        '<div class="footer-title-page">'
+        'This document contains information that is confidential and privileged. '
+        'Unless you are the intended recipient, you may not use, copy or disclose '
+        'to anyone the information contained herein.'
+        '</div>'
+        + ('<div class="footer-meta">' + footer_meta + '</div>' if footer_meta else '')
+        + '</div>'
+    )
+    # Build standard footer (Confidential | Page # | Company Name)
+    std_footer_html = (
+        '<div class="page-footer footer-std">'
+        '<span>Confidential</span>'
+        '<span id="pg-num"></span>'
+        '<span>' + esc(org) + '</span>'
+        '</div>'
+        '<script>'
+        '(function(){'
+        'var pages=document.querySelectorAll(".report-body");'
+        'var f=document.getElementById("pg-num");'
+        'if(f)f.textContent="Page "+window.location.hash.replace("#","");'
+        '})();'
+        '</script>'
     )
     parts = [
         '<!DOCTYPE html>',
@@ -590,9 +620,7 @@ def _build_report_html(r, findings, branding_logo=''):
         '.tp-submitted-label{font-size:11pt;color:#666;text-transform:uppercase;letter-spacing:.05em;margin:0 0 8px 0}',
         '.tp-company-logo{margin:8px 0}',
         '.tp-submitted-org{font-size:14pt;color:#444;margin:8px 0 0 0}',
-        '.tp-bot{margin-top:auto;padding-bottom:40px}',
-        '.tp-meta-line{font-size:12pt;color:#333;',
-        'margin:4px 0}',
+        '.tp-bot{display:none}',
         '.report-body{padding:40px 60px}',
         'h1{font-size:28px;margin-bottom:8px;margin-top:32px}',
         'h2{font-size:22px;margin-top:28px;',
@@ -616,8 +644,20 @@ def _build_report_html(r, findings, branding_logo=''):
         '.info{background:#0288d1;color:#fff}',
         '.sec-content{margin:8px 0 16px 0;',
         'line-height:1.6}',
+        '@page{margin-bottom:60px}',
+        '@page:first{margin-bottom:80px}',
+        '.page-footer{position:fixed;bottom:0;left:0;right:0;',
+        'padding:10px 60px;font-size:9pt;color:#555;',
+        'border-top:1px solid #ccc;background:#fff}',
+        '.footer-title-page{text-align:center;font-style:italic;',
+        'font-size:8.5pt;color:#666;line-height:1.4}',
+        '.footer-std{display:flex;justify-content:space-between;',
+        'align-items:center}',
+        '.footer-meta{margin-top:6px;font-size:9pt;color:#444}',
         '</style></head><body>',
         title_page,
+        title_footer_html,
+        std_footer_html,
         '<div class="report-body">',
     ]
     secs = d.get('sections', [])
@@ -886,18 +926,112 @@ def export_docx(rid: str, body: ExportBody = ExportBody()):
                 run_sub_org.font.size = Pt(14)
             _add_img(logo_b64, 2.0)
 
-        # Prepared By / Date Issued pinned to bottom of title page
-        from docx.shared import Pt as _Pt
-        p_prep_anchor = doc.add_paragraph()
-        p_prep_anchor.paragraph_format.space_before = _Pt(480)
-        if assessor_name:
-            p_prep = doc.add_paragraph()
-            p_prep.alignment = WD_ALIGN_PARAGRAPH.LEFT
-            p_prep.add_run('Prepared By: ' + assessor_name).font.size = Pt(12)
-        if delivery_date_val:
-            p_date = doc.add_paragraph()
-            p_date.alignment = WD_ALIGN_PARAGRAPH.LEFT
-            p_date.add_run('Date Issued: ' + delivery_date_val).font.size = Pt(12)
+        # ── Footers ────────────────────────────────────────────────────────────
+        section = doc.sections[0]
+        section.different_first_page_header_footer = True
+
+        # First-page footer: confidentiality notice + Prepared By / Date Issued
+        fp_footer = section.first_page_footer
+        fp_footer.is_linked_to_previous = False
+        p_conf = fp_footer.paragraphs[0] if fp_footer.paragraphs else fp_footer.add_paragraph()
+        p_conf.clear()
+        p_conf.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        run_conf = p_conf.add_run(
+            'This document contains information that is confidential and privileged. '
+            'Unless you are the intended recipient, you may not use, copy or disclose '
+            'to anyone the information contained herein.')
+        run_conf.font.size = Pt(8)
+        run_conf.font.color.rgb = RGBColor(0x66, 0x66, 0x66)
+        run_conf.font.italic = True
+        if assessor_name or delivery_date_val:
+            p_meta = fp_footer.add_paragraph()
+            p_meta.alignment = WD_ALIGN_PARAGRAPH.LEFT
+            meta_parts = []
+            if assessor_name:
+                meta_parts.append('Prepared By: ' + assessor_name)
+            if delivery_date_val:
+                meta_parts.append('Date Issued: ' + delivery_date_val)
+            run_meta = p_meta.add_run('    '.join(meta_parts))
+            run_meta.font.size = Pt(9)
+
+        # Standard footer: Confidential | Page # | Company Name
+        std_footer = section.footer
+        std_footer.is_linked_to_previous = False
+        p_std = std_footer.paragraphs[0] if std_footer.paragraphs else std_footer.add_paragraph()
+        p_std.clear()
+        from docx.oxml import OxmlElement as _OE
+        from docx.oxml.ns import qn as _qn
+        tbl = _OE('w:tbl')
+        tbl_pr = _OE('w:tblPr')
+        tbl_w = _OE('w:tblW')
+        tbl_w.set(_qn('w:w'), '9360')
+        tbl_w.set(_qn('w:type'), 'dxa')
+        tbl_pr.append(tbl_w)
+        tbl_borders = _OE('w:tblBorders')
+        for border_name in ['top','left','bottom','right','insideH','insideV']:
+            b = _OE('w:' + border_name)
+            b.set(_qn('w:val'), 'none')
+            tbl_borders.append(b)
+        tbl_pr.append(tbl_borders)
+        tbl.append(tbl_pr)
+        row = _OE('w:tr')
+        def _footer_cell(text_or_fld, align, width, use_page_field=False):
+            tc = _OE('w:tc')
+            tcp = _OE('w:tcPr')
+            tcw = _OE('w:tcW')
+            tcw.set(_qn('w:w'), str(width))
+            tcw.set(_qn('w:type'), 'dxa')
+            tcp.append(tcw)
+            tc.append(tcp)
+            p = _OE('w:p')
+            pp = _OE('w:pPr')
+            jc = _OE('w:jc')
+            jc.set(_qn('w:val'), align)
+            pp.append(jc)
+            p.append(pp)
+            rpr = _OE('w:rPr')
+            sz = _OE('w:sz')
+            sz.set(_qn('w:val'), '18')
+            rpr.append(sz)
+            if use_page_field:
+                rt = _OE('w:r')
+                rt.append(rpr)
+                t = _OE('w:t')
+                t.set(_qn('xml:space'), 'preserve')
+                t.text = 'Page '
+                rt.append(t)
+                p.append(rt)
+                r2 = _OE('w:r')
+                fld_begin = _OE('w:fldChar')
+                fld_begin.set(_qn('w:fldCharType'), 'begin')
+                r2.append(fld_begin)
+                p.append(r2)
+                r3 = _OE('w:r')
+                instr = _OE('w:instrText')
+                instr.set(_qn('xml:space'), 'preserve')
+                instr.text = ' PAGE '
+                r3.append(instr)
+                p.append(r3)
+                r4 = _OE('w:r')
+                fld_end = _OE('w:fldChar')
+                fld_end.set(_qn('w:fldCharType'), 'end')
+                r4.append(fld_end)
+                p.append(r4)
+            else:
+                r = _OE('w:r')
+                r.append(rpr)
+                t = _OE('w:t')
+                t.set(_qn('xml:space'), 'preserve')
+                t.text = text_or_fld
+                r.append(t)
+                p.append(r)
+            tc.append(p)
+            return tc
+        row.append(_footer_cell('Confidential', 'left', 3120))
+        row.append(_footer_cell('', 'center', 3120, use_page_field=True))
+        row.append(_footer_cell(org_name or '', 'right', 3120))
+        tbl.append(row)
+        p_std._p.addnext(tbl)
 
         # Page break after title page
         doc.add_page_break()
