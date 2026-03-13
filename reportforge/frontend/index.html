@@ -367,6 +367,9 @@ tr:hover td{background:rgba(255,255,255,.015)}
               <div class="field-group"><label class="field-label">Start Date</label><input class="field-input" type="date" id="ed-start"></div>
               <div class="field-group"><label class="field-label">End Date</label><input class="field-input" type="date" id="ed-end"></div>
             </div>
+            <div class="form-row">
+              <div class="field-group"><label class="field-label">Report Delivery Date</label><input class="field-input" type="date" id="ed-delivery"></div>
+            </div>
             <div class="field-group">
               <label class="field-label">Report Template</label>
               <input type="hidden" id="ed-template">
@@ -1109,6 +1112,7 @@ async function openEditor(id){
     sv('ed-assessor',m.assessor||'');
     sv('ed-start',m.start_date||'');
     sv('ed-end',m.end_date||'');
+    sv('ed-delivery',m.delivery_date||'');
     sv('ed-template',d.template_id||'');
     sv('ed-template-name',d.template_name||'None');
     sv('ed-poc-first',m.poc_first||'');
@@ -1187,6 +1191,7 @@ async function saveEditor(){
             assessor:gv('ed-assessor'),
             start_date:gv('ed-start'),
             end_date:gv('ed-end'),
+            delivery_date:gv('ed-delivery'),
             scope:'',
             poc_first:gv('ed-poc-first'),
             poc_last:gv('ed-poc-last'),
@@ -2113,7 +2118,7 @@ document.addEventListener('change',function(e){
 document.addEventListener('input',function(e){
   var t=e.target;
   var edF=['ed-title','ed-org','ed-assessor',
-    'ed-start','ed-end','ed-poc-first','ed-poc-last','ed-poc-email','ed-poc-phone'];
+    'ed-start','ed-end','ed-delivery','ed-poc-first','ed-poc-last','ed-poc-email','ed-poc-phone'];
   if(edF.indexOf(t.id)>=0){markDirty();return;}
   if(t.id==='rpt-search'){renderReports();return;}
   var st=t.getAttribute('data-sec-title');
