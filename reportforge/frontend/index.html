@@ -26,12 +26,10 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .nav-badge{margin-left:auto;background:var(--surface3);color:var(--text2);font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px}
 .nav-item.active .nav-badge{background:var(--accent-glow);color:var(--accent)}
 .sidebar-footer{padding:12px;border-top:1px solid var(--border)}
-.current-report-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px}
-.cr-label{font-size:9px;font-weight:700;letter-spacing:.1em;color:var(--text3);text-transform:uppercase;margin-bottom:6px}
-.cr-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.cr-bar-wrap{height:3px;background:var(--surface3);border-radius:2px;overflow:hidden;margin-bottom:5px}
-.cr-bar{height:100%;background:var(--accent);border-radius:2px;transition:.3s}
-.cr-pct{font-size:10px;color:var(--text3)}
+.app-version-card{padding:8px 0;text-align:center}
+.avc-name{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:2px}
+.avc-version{font-size:13px;font-weight:600;color:var(--accent);margin-bottom:4px}
+.avc-copy{font-size:10px;color:var(--text3)}
 .main-wrap{flex:1;display:flex;flex-direction:column;overflow:hidden}
 .topbar{background:var(--surface);border-bottom:1px solid var(--border);height:52px;display:flex;align-items:center;padding:0 24px;gap:12px;flex-shrink:0}
 .topbar-title{font-size:15px;font-weight:700;color:var(--text)}
@@ -257,11 +255,10 @@ tr:hover td{background:rgba(255,255,255,.015)}
     </div>
   </nav>
   <div class="sidebar-footer">
-    <div class="current-report-card">
-      <div class="cr-label">Current Report</div>
-      <div class="cr-title" id="cr-title">No report open</div>
-      <div class="cr-bar-wrap"><div class="cr-bar" id="cr-bar" style="width:0%"></div></div>
-      <div class="cr-pct" id="cr-pct">—</div>
+    <div class="app-version-card">
+      <div class="avc-name">ReportForge</div>
+      <div class="avc-version" id="avc-version">v1.2.4</div>
+      <div class="avc-copy">&copy; 2025 BrocktonPoint Solutions</div>
     </div>
   </div>
 </div>
@@ -711,19 +708,7 @@ function bdg(st){
   return '<span class="badge '+(m[k]||'badge-info')+'">'
     +esc(st)+'</span>';
 }
-function updateCrCard(){
-  var r=S.currentReport;
-  var ttl=$('cr-title');var bar=$('cr-bar');var pct=$('cr-pct');
-  if(!r){if(ttl)ttl.textContent='No report open';if(bar)bar.style.width='0%';if(pct)pct.textContent='—';return;}
-  if(ttl)ttl.textContent=r.title||'Untitled';
-  var d=r.data||{};var m=d.report||{};
-  var filled=0,total=5;
-  if(m.title)filled++;if(m.org)filled++;if(m.assessor)filled++;if(m.summary)filled++;
-  if((r.findings||[]).length)filled++;
-  var p=Math.round(filled/total*100);
-  if(bar)bar.style.width=p+'%';
-  if(pct)pct.textContent=p+'% complete';
-}
+
 function updateTopbar(name){
   var titles={dash:'Dashboard',reports:'Reports',editor:'Report Editor',findings:'Findings',templates:'Report Templates',frameworks:'Security Frameworks','template-editor':'Template Editor',preview:'Report Preview'};
   var el=$('topbar-title');if(el)el.textContent=titles[name]||name;
@@ -1022,7 +1007,6 @@ function renderDash(){
   $('stat-findings-val').textContent=S.findings.length;
   $('stat-tpl-val').textContent=S.templates.length;
 
-  updateCrCard();
   var inprogress=r.filter(function(x){
     return x.status==='draft'||x.status==='review';
   }).sort(function(a,b){
@@ -2336,6 +2320,7 @@ function toggleTheme(){
 })();
 loadAll();
 _applyBranding();
+(function(){var m=document.querySelector('meta[name="version"]');var el=document.getElementById('avc-version');if(el&&m)el.textContent='v'+m.getAttribute('content');})();
 initQuills();
 window.toggleFw=toggleFw;
 window.importSelectedFrameworks=importSelectedFrameworks;
