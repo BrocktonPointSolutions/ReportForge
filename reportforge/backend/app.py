@@ -549,10 +549,10 @@ def _build_report_html(r, findings, branding_logo=''):
     if org or company_html:
         submitted_block = '<div class="tp-submitted-block">'
         submitted_block += '<p class="tp-submitted-label">Submitted to:</p>'
-        if company_html:
-            submitted_block += '<div class="tp-company-logo">' + company_html + '</div>'
         if org:
             submitted_block += '<p class="tp-submitted-org">' + org + '</p>'
+        if company_html:
+            submitted_block += '<div class="tp-company-logo">' + company_html + '</div>'
         submitted_block += '</div>'
     title_page = (
         '<div class="title-page">'
@@ -882,11 +882,11 @@ def export_docx(rid: str, body: ExportBody = ExportBody()):
             run_sub_lbl = p_sub_lbl.add_run('Submitted to:')
             run_sub_lbl.font.size = Pt(10)
             run_sub_lbl.font.color.rgb = RGBColor(0x66, 0x66, 0x66)
-            _add_img(logo_b64, 2.0)
             if org_name:
                 p_org = doc.add_paragraph()
                 p_org.alignment = WD_ALIGN_PARAGRAPH.CENTER
                 p_org.add_run(org_name).font.size = Pt(14)
+            _add_img(logo_b64, 2.0)
 
         # Spacers to push bottom content down
         for _ in range(6):
