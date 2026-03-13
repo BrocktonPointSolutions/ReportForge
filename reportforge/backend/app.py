@@ -529,6 +529,7 @@ def _build_report_html(r, findings):
     org = esc(r.org or rep.get('org',''))
     assessor = esc(r.authors or rep.get('assessor',''))
     end_date = esc(rep.get('end_date','') or r.assessment_date or '')
+    delivery_date = esc(rep.get('delivery_date',''))
     poc_first = rep.get('poc_first','')
     poc_last = rep.get('poc_last','')
     poc_email = rep.get('poc_email','')
@@ -558,7 +559,7 @@ def _build_report_html(r, findings):
         + '</div>'
         '<div class="tp-bot">'
         + ('<p class="tp-meta-line">Prepared By: ' + assessor + '</p>' if assessor else '')
-        + ('<p class="tp-meta-line">Date Issued: ' + end_date + '</p>' if end_date else '')
+        + ('<p class="tp-meta-line">Date Issued: ' + delivery_date + '</p>' if delivery_date else '')
         + '</div>'
         '</div>'
     )
@@ -860,6 +861,7 @@ def export_docx(rid: str):
         org_name = r.org or rep.get('org','')
         assessor_name = r.authors or rep.get('assessor','')
         end_date_val = rep.get('end_date','') or r.assessment_date or ''
+        delivery_date_val = rep.get('delivery_date','')
         poc_first = rep.get('poc_first','')
         poc_last = rep.get('poc_last','')
         poc_email = rep.get('poc_email','')
@@ -906,11 +908,11 @@ def export_docx(rid: str):
             p_prep.alignment = WD_ALIGN_PARAGRAPH.LEFT
             p_prep.add_run(
                 'Prepared By: ' + assessor_name).font.size = Pt(12)
-        if end_date_val:
+        if delivery_date_val:
             p_date = doc.add_paragraph()
             p_date.alignment = WD_ALIGN_PARAGRAPH.LEFT
             p_date.add_run(
-                'Date Issued: ' + end_date_val).font.size = Pt(12)
+                'Date Issued: ' + delivery_date_val).font.size = Pt(12)
         # Page break after title page
         doc.add_page_break()
         secs = d.get('sections', [])
