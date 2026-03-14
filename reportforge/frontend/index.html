@@ -1796,7 +1796,7 @@ function addFindingToReport(tplId){
   var secs=S.currentReport.sections||[];
   var findingHtml=_buildFindingHtml(copy);
   secs.forEach(function(sec,i){
-    if(sec.type==='text'&&sec.title&&sec.title.toLowerCase().indexOf('finding')>=0){
+    if(sec.type==='text'&&sec.title&&/^findings?\b/i.test(sec.title)){
       sec.content=(sec.content||'')+findingHtml;
       // Update live Quill editor if open
       var q=_EQ[i];
