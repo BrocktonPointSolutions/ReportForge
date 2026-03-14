@@ -1316,7 +1316,7 @@ function renderEdSections(){
       var ids=sec.finding_ids||[];
       var items=ids.length
         ? ids.map(function(fid){
-            var f=S.findings.find(function(x){return x.id===fid;});
+            var f=S.findings.find(function(x){return x.id==fid;});
             if(!f)return '';
             var sev=(f.severity||'info').toLowerCase();
             return '<li class="rsec-finding-item">'
@@ -1747,6 +1747,7 @@ function openAddFindingToReport(){
   openM('modal-add-finding');
 }
 function addFindingToReport(tplId){
+  tplId=isNaN(tplId)?tplId:+tplId;
   var f=S.findings.find(function(x){
     return x.id===tplId;
   });
