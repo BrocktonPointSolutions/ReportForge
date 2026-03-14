@@ -1348,7 +1348,9 @@ function renderEdSections(){
       placeholder:'Enter content for this section...',
       modules:{toolbar:tb}
     });
-    q.clipboard.dangerouslyPasteHTML(sec.content||'');
+    var _org=(S.currentReport&&S.currentReport.data&&S.currentReport.data.report&&S.currentReport.data.report.org)||'';
+    var _secHtml=(sec.content||'').replace(/\{\{CUSTOMER\}\}/g,_org);
+    q.clipboard.dangerouslyPasteHTML(_secHtml);
     q.on('text-change',function(){
       S.currentReport.sections[i].content=
         q.root.innerHTML==='<p><br></p>'?'':
@@ -1449,7 +1451,8 @@ function renderPreview(){
       }
     } else {
       if(sec.content){
-        h+='<div>'+sec.content+'<\/div>';
+        var _previewOrg=(m&&m.org)||'';
+        h+='<div>'+sec.content.replace(/\{\{CUSTOMER\}\}/g,_previewOrg)+'<\/div>';
       }
       (sec.fields||[]).forEach(function(f){
         h+='<p><b>'+esc(f.label)+':<\/b> '+esc(f.value||'')+'<\/p>';
