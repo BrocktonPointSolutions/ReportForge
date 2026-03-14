@@ -1749,6 +1749,27 @@ function openAddFindingToReport(){
   }
   openM('modal-add-finding');
 }
+function _buildFindingHtml(f){
+  var sev=(f.severity||'info').toLowerCase();
+  var sevColours={
+    critical:'background:#d32f2f;color:#fff',
+    high:'background:#f57c00;color:#fff',
+    medium:'background:#f9a825;color:#000',
+    low:'background:#388e3c;color:#fff',
+    info:'background:#0288d1;color:#fff',
+    informational:'background:#0288d1;color:#fff'
+  };
+  var sevStyle=sevColours[sev]||sevColours.info;
+  var html='<div style="border:1px solid #ccc;border-radius:6px;padding:14px;margin-bottom:14px">'
+    +'<p><strong>'+esc(f.title)+'</strong>'
+    +' <span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;'+sevStyle+'">'+esc(f.severity||'Info')+'</span></p>';
+  if(f.description)html+='<p><strong>Observation:</strong></p><div>'+f.description+'</div>';
+  if(f.discussion)html+='<p><strong>Discussion:</strong></p><div>'+f.discussion+'</div>';
+  if(f.recommendation)html+='<p><strong>Recommendations:</strong></p><div>'+f.recommendation+'</div>';
+  if(f.refs)html+='<p><strong>References:</strong></p><div>'+f.refs+'</div>';
+  html+='</div>';
+  return html;
+}
 function addFindingToReport(tplId){
   tplId=isNaN(tplId)?tplId:+tplId;
   var f=S.findings.find(function(x){
@@ -1771,19 +1792,23 @@ function addFindingToReport(tplId){
   S.currentReport.findings=
     S.currentReport.findings||[];
   S.currentReport.findings.push(copy);
-  // Also add template ID to finding_ids of any 'findings' type section
+  // Append finding HTML into any text section whose title contains 'finding'
   var secs=S.currentReport.sections||[];
-  secs.forEach(function(sec){
-    if(sec.type==='findings'){
-      sec.finding_ids=sec.finding_ids||[];
-      if(sec.finding_ids.indexOf(tplId)<0){
-        sec.finding_ids.push(tplId);
+  var findingHtml=_buildFindingHtml(copy);
+  secs.forEach(function(sec,i){
+    if(sec.type==='text'&&sec.title&&sec.title.toLowerCase().indexOf('finding')>=0){
+      sec.content=(sec.content||'')+findingHtml;
+      // Update live Quill editor if open
+      var q=_EQ[i];
+      if(q){
+        var cur=q.root.innerHTML;
+        if(!cur||cur==='<p><br></p>') cur='';
+        q.clipboard.dangerouslyPasteHTML(cur+findingHtml);
       }
     }
   });
   closeM('modal-add-finding');
   renderEdFindings();
-  renderEdSections();
   syncFindingsTab();
   renderSidebarFindings();
   markDirty();
