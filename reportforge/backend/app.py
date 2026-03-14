@@ -33,6 +33,7 @@ def _migrate_findings_cols():
     cols = [
         ('discussion', 'TEXT'),
         ('refs', 'TEXT'),
+        ('assessment_types', 'TEXT'),
     ]
     from sqlalchemy import text
     with engine.connect() as con:
@@ -126,6 +127,7 @@ class FindingCreate(BaseModel):
     recommendation: str = ''
     refs: str = ''
     cvss: Optional[float] = None
+    assessment_types: Optional[list] = None
 
 class FindingUpdate(BaseModel):
     report_id: Optional[str] = None
@@ -137,6 +139,7 @@ class FindingUpdate(BaseModel):
     recommendation: Optional[str] = None
     refs: Optional[str] = None
     cvss: Optional[float] = None
+    assessment_types: Optional[list] = None
 
 class TemplateCreate(BaseModel):
     name: str
@@ -338,6 +341,8 @@ def create_finding(
                 payload.recommendation),
             refs=payload.refs,
             cvss=payload.cvss,
+            assessment_types=json.dumps(
+                payload.assessment_types or []),
         )
         db.add(f)
         db.commit()
@@ -380,6 +385,9 @@ def update_finding(
             f.refs = payload.refs
         if payload.cvss is not None:
             f.cvss = payload.cvss
+        if payload.assessment_types is not None:
+            f.assessment_types = json.dumps(
+                payload.assessment_types)
         f.updated_at = dt.datetime.utcnow()
         db.add(f)
         db.commit()
@@ -409,6 +417,8 @@ def _finding_out(f: Finding) -> dict:
         'recommendation': f.recommendation,
         'refs': f.refs,
         'cvss': f.cvss,
+        'assessment_types': json.loads(
+            f.assessment_types or '[]'),
         'created_at': _ts(f.created_at),
         'updated_at': _ts(f.updated_at),
     }
