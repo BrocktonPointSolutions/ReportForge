@@ -689,36 +689,7 @@ def _build_report_html(r, findings, branding_logo=''):
             parts.append(
                 '<div class="sec-content">'
                 + content + '</div>')
-    if findings:
-        parts.append(
-            '<h2>Findings (' +
-            str(len(findings)) + ')</h2>')
-        for f in findings:
-            sev = (f.get('severity')
-                   or 'info').lower()
-            parts.append(
-                '<div class="finding">')
-            parts.append(
-                '<b>' + esc(f.get(
-                'title','')) + '</b>'
-                + '<span class="sev '
-                + sev + '">' + sev
-                + '</span>')
-            for lbl, key in [
-                ('Observation','description'),
-                ('Discussion','discussion'),
-                ('Recommendations',
-                 'recommendation'),
-                ('References','refs'),
-            ]:
-                val = f.get(key,'')
-                if val:
-                    parts.append(
-                        '<p><b>' + lbl
-                        + ':</b></p>'
-                        + '<div>' + val
-                        + '</div>')
-            parts.append('</div>')
+
     parts.append('</div>')  # close .report-body
     parts.append('</body></html>')
     return '\n'.join(parts)
@@ -1095,24 +1066,7 @@ def export_docx(rid: str, body: ExportBody = ExportBody()):
             if content:
                 content = content.replace('{{CUSTOMER}}', org_name)
                 _add_html_to_docx(doc, content, base_heading=sec_lvl + 1)
-        if findings:
-            doc.add_heading('Findings', 2)
-            for f in findings:
-                title = f.get('title', '')
-                sev = f.get('severity', '')
-                doc.add_heading(title + ' [' + sev + ']', 3)
-                for lbl, key in [
-                    ('Observation', 'description'),
-                    ('Discussion', 'discussion'),
-                    ('Recommendations', 'recommendation'),
-                    ('References', 'refs'),
-                ]:
-                    html_val = f.get(key, '')
-                    if not html_val:
-                        continue
-                    p2 = doc.add_paragraph()
-                    p2.add_run(lbl + ':').bold = True
-                    _add_html_to_docx(doc, html_val, base_heading=4)
+
         buf = io.BytesIO()
         doc.save(buf)
         buf.seek(0)
