@@ -685,6 +685,7 @@ def _build_report_html(r, findings, branding_logo=''):
             )
         content = sec.get('content','')
         if content:
+            content = content.replace('{{CUSTOMER}}', org)
             parts.append(
                 '<div class="sec-content">'
                 + content + '</div>')
@@ -1092,6 +1093,7 @@ def export_docx(rid: str, body: ExportBody = ExportBody()):
                     doc.add_paragraph(poc_phone)
             content = sec.get('content', '')
             if content:
+                content = content.replace('{{CUSTOMER}}', org_name)
                 _add_html_to_docx(doc, content, base_heading=sec_lvl + 1)
         if findings:
             doc.add_heading('Findings', 2)
