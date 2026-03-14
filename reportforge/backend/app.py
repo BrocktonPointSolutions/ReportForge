@@ -739,11 +739,11 @@ def _add_html_to_docx(doc, html, base_heading=2):
                   'h5','h6','ul','ol','li','br',
                   'blockquote','pre'}
     H_MAP = {'h1': base_heading,
-             'h2': base_heading,
-             'h3': base_heading+1,
-             'h4': base_heading+2,
-             'h5': base_heading+2,
-             'h6': base_heading+3}
+             'h2': base_heading+1,
+             'h3': base_heading+2,
+             'h4': base_heading+3,
+             'h5': base_heading+4,
+             'h6': base_heading+5}
     def parse_color(style_str):
         m = re.search(r'colors*:s*#([0-9a-fA-F]{6})', style_str or '')
         if m:
