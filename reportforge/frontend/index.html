@@ -131,6 +131,10 @@ tr:hover td{background:rgba(255,255,255,.015)}
 .rsec-body .ql-wrap{min-height:120px}
 .rsec-body .ql-editor{min-height:120px}
 .rsec-findings-list{list-style:none;padding:0;margin:0}
+.assessment-type-group{display:flex;flex-wrap:wrap;gap:8px;padding:8px 0}
+.assessment-type-group label{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2);cursor:pointer;white-space:nowrap}
+.assessment-type-group input[type=checkbox]{accent-color:var(--accent);width:14px;height:14px;cursor:pointer}
+.at-badge{display:inline-block;font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;background:var(--surface3);color:var(--text2);margin:2px 2px 0 0}
 .rsec-finding-item{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px}
 .rsec-finding-item:last-child{border-bottom:none}
 .rsec-empty-note{color:var(--text3);font-size:12px;padding:8px 0}
@@ -591,6 +595,7 @@ tr:hover td{background:rgba(255,255,255,.015)}
       <div class="field-group"><label class="field-label">Recommendations</label><div class="ql-wrap" id="fm-rec"></div></div>
       <div class="field-group"><label class="field-label">References</label><div class="ql-wrap" id="fm-refs"></div></div>
       <div class="field-group"><label class="field-label">CVSS Score</label><input class="field-input" id="fm-cvss" type="number" min="0" max="10" step="0.1" placeholder="0.0"></div>
+      <div class="field-group"><label class="field-label">Assessment Type</label><div class="assessment-type-group" id="fm-assessment-types"><label><input type="checkbox" value="Pen Test"> Pen Test</label><label><input type="checkbox" value="CIS Controls v8"> CIS Controls v8</label><label><input type="checkbox" value="SOC 2"> SOC 2</label><label><input type="checkbox" value="PCI DSS"> PCI DSS</label><label><input type="checkbox" value="NIST"> NIST</label><label><input type="checkbox" value="ISO 27001"> ISO 27001</label><label><input type="checkbox" value="HIPAA"> HIPAA</label></div></div>
     </div>
     <div class="modal-footer"><button class="btn btn-ghost" data-close-modal="modal-finding">Cancel</button><button class="btn btn-primary" id="btn-save-finding">Save Finding</button></div>
   </div>
@@ -1489,13 +1494,28 @@ function rfCard(f,idx){
 }
 function fCard(f){
   var sev=(f.severity||'info').toLowerCase();
-  return '<div class="fcard fcard-row">'
+  var atBadges=(f.assessment_types&&f.assessment_types.length)
+    ?'<div style="margin:4px 0 0 0">'+f.assessment_types.map(function(a){return '<span class="at-badge">'+esc(a)+'</span>';}).join('')+'</div>'
+    :'';
+  return '<div class="fcard fcard-row" style="flex-wrap:wrap">'
+    +'<div style="display:flex;align-items:center;flex:1;min-width:0;gap:8px">'
     +'<span class="fsev sev-'+esc(sev)+'">'+esc(f.severity)+'</span>'
-    +'<span class="fcard-name">'+esc(f.title)+'</span>'
+    +'<div style="min-width:0"><span class="fcard-name">'+esc(f.title)+'</span>'+atBadges+'</div>'
+    +'</div>'
     +'<div class="item-actions">'
     +'<button class="btn btn-ghost btn-sm" data-edit-f="'+f.id+'">Edit</button>'
     +'<button class="btn btn-danger btn-sm" data-del-t="finding" data-del-id="'+f.id+'" data-del-n="'+esc(f.title)+'">Delete</button>'
     +'</div></div>';
+}
+function _getAssessmentTypes(){
+  var cbs=document.querySelectorAll('#fm-assessment-types input[type=checkbox]');
+  var out=[];
+  cbs.forEach(function(cb){if(cb.checked)out.push(cb.value);});
+  return out;
+}
+function _setAssessmentTypes(vals){
+  var cbs=document.querySelectorAll('#fm-assessment-types input[type=checkbox]');
+  cbs.forEach(function(cb){cb.checked=(vals&&vals.indexOf(cb.value)>=0);});
 }
 function openFinding(){
   S.editingFindingId=null;
@@ -1509,6 +1529,7 @@ function openFinding(){
   sv('fm-cvss','');
   sv('fm-severity','Medium');
   sv('fm-status','open');
+  _setAssessmentTypes([]);
   openM('modal-finding');
 }
 function editFinding(id){
@@ -1526,6 +1547,7 @@ function editFinding(id){
   sv('fm-cvss',f.cvss||'');
   sv('fm-severity',f.severity||'Medium');
   sv('fm-status',f.status||'open');
+  _setAssessmentTypes(f.assessment_types||[]);
   openM('modal-finding');
 }
 async function saveFinding(){
@@ -1546,7 +1568,8 @@ async function saveFinding(){
     discussion:_qv('fm-discussion'),
     recommendation:_qv('fm-rec'),
     refs:_qv('fm-refs'),
-    cvss:parseFloat(gv('fm-cvss'))||null
+    cvss:parseFloat(gv('fm-cvss'))||null,
+    assessment_types:_getAssessmentTypes()
   };
   try{
     if(S.editingFindingId){
@@ -1656,6 +1679,7 @@ function editReportFinding(idx){
   sv('fm-cvss',f.cvss||'');
   sv('fm-severity',f.severity||'Medium');
   sv('fm-status',f.status||'open');
+  _setAssessmentTypes(f.assessment_types||[]);
   openM('modal-finding');
 }
 async function saveReportFinding(){
@@ -1677,6 +1701,7 @@ async function saveReportFinding(){
   list[idx].refs=_qv('fm-refs');
   list[idx].cvss=
     parseFloat(gv('fm-cvss'))||null;
+  list[idx].assessment_types=_getAssessmentTypes();
   closeM('modal-finding');
   S.editingRFIdx=null;
   renderEdFindings();
