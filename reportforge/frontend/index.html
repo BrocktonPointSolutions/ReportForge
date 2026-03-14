@@ -1747,8 +1747,19 @@ function addFindingToReport(tplId){
   S.currentReport.findings=
     S.currentReport.findings||[];
   S.currentReport.findings.push(copy);
+  // Also add template ID to finding_ids of any 'findings' type section
+  var secs=S.currentReport.sections||[];
+  secs.forEach(function(sec){
+    if(sec.type==='findings'){
+      sec.finding_ids=sec.finding_ids||[];
+      if(sec.finding_ids.indexOf(tplId)<0){
+        sec.finding_ids.push(tplId);
+      }
+    }
+  });
   closeM('modal-add-finding');
   renderEdFindings();
+  renderEdSections();
   syncFindingsTab();
   renderSidebarFindings();
   markDirty();
