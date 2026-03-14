@@ -1455,7 +1455,7 @@ function renderPreview(){
         h+='<div>'+sec.content.replace(/\{\{CUSTOMER\}\}/g,_previewOrg)+'<\/div>';
       }
       (sec.fields||[]).forEach(function(f){
-        h+='<p><b>'+esc(f.label)+':<\/b> '+esc(f.value||'')+'<\/p>';
+        if(f.value)h+='<p><b>'+esc(f.label)+':<\/b> '+esc(f.value)+'<\/p>';
       });
     }
   });
