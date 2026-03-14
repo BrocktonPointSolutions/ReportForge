@@ -136,6 +136,12 @@ tr:hover td{background:rgba(255,255,255,.015)}
 .assessment-type-group input[type=checkbox]{accent-color:var(--accent);width:14px;height:14px;cursor:pointer}
 .at-badge{display:inline-block;font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;background:var(--surface3);color:var(--text2);margin:2px 2px 0 0}
 .rsec-finding-item{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px}
+.sb-findings-hdr{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.sb-finding-card{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:6px;cursor:pointer;transition:.12s;margin-bottom:4px;border:1px solid var(--border);background:var(--surface2)}
+.sb-finding-card:hover{border-color:var(--accent);background:rgba(0,184,158,.06)}
+.sb-finding-card.already-added{opacity:.45;pointer-events:none}
+.sb-finding-name{flex:1;font-size:12px;font-weight:500;color:var(--text);line-height:1.3;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sb-sev-group-label{font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.07em;text-transform:uppercase;padding:6px 0 4px;margin-top:4px}
 .rsec-finding-item:last-child{border-bottom:none}
 .rsec-empty-note{color:var(--text3);font-size:12px;padding:8px 0}
 .empty-state{text-align:center;padding:40px 20px;color:var(--text3)}
@@ -429,7 +435,7 @@ tr:hover td{background:rgba(255,255,255,.015)}
             <div class="preview-box" id="preview-content"></div>
           </div>
         </div>
-        <div class="ed-sidebar" id="editor-sidebar"><div id="ed-completion-widget" style="display:none;padding:12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:12px"><div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-bottom:8px">Completion</div><div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><div style="flex:1;height:6px;background:var(--surface3);border-radius:3px;overflow:hidden"><div id="ed-completion-bar" style="height:100%;border-radius:3px;transition:width .3s;background:var(--accent);width:0%"></div></div><span id="ed-completion-pct" style="font-size:13px;font-weight:700;color:var(--accent);min-width:36px;text-align:right">0%</span></div><div id="ed-completion-label" style="font-size:11px;color:var(--text3)">Framework fields filled</div></div></div>
+        <div class="ed-sidebar" id="editor-sidebar"><div id="sb-findings-panel" style="display:none"><div class="sb-findings-hdr">Available Findings</div><div id="sb-findings-list"><div class="rsec-empty-note" style="text-align:center;padding:16px 0">No findings match this report type.</div></div></div><div id="ed-completion-widget" style="display:none;padding:12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:12px"><div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);margin-bottom:8px">Completion</div><div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><div style="flex:1;height:6px;background:var(--surface3);border-radius:3px;overflow:hidden"><div id="ed-completion-bar" style="height:100%;border-radius:3px;transition:width .3s;background:var(--accent);width:0%"></div></div><span id="ed-completion-pct" style="font-size:13px;font-weight:700;color:var(--accent);min-width:36px;text-align:right">0%</span></div><div id="ed-completion-label" style="font-size:11px;color:var(--text3)">Framework fields filled</div></div></div>
       </div>
     </div>
 
@@ -1168,6 +1174,7 @@ async function openEditor(id){
     renderEdSections();
     renderEdFindings();
     syncFindingsTab();
+    renderSidebarFindings();
     switchTab('info');
     showView('editor');
     renderEdCompletion();
@@ -1451,6 +1458,68 @@ function renderFullPreview(){
   if(src&&dst)dst.innerHTML=src.innerHTML;
 }
 
+// Map template name → assessment_type label
+function _templateAssessmentType(){
+  if(!S.currentReport)return null;
+  var d=S.currentReport.data||{};
+  var name=(d.template_name||'').toLowerCase();
+  var type=S.currentReport.type||'';
+  var combined=name+' '+type.toLowerCase();
+  if(/pen.?test|pentest|penetration/.test(combined))return 'Pen Test';
+  if(/cis/.test(combined))return 'CIS Controls v8';
+  if(/soc.?2|soc2/.test(combined))return 'SOC 2';
+  if(/pci/.test(combined))return 'PCI DSS';
+  if(/nist/.test(combined))return 'NIST';
+  if(/iso.?27001|iso27001/.test(combined))return 'ISO 27001';
+  if(/hipaa/.test(combined))return 'HIPAA';
+  return null;
+}
+var _SEV_ORDER={critical:0,high:1,medium:2,low:3,info:4,informational:4};
+function renderSidebarFindings(){
+  var panel=$('sb-findings-panel');
+  var listEl=$('sb-findings-list');
+  if(!panel||!listEl)return;
+  var assessType=_templateAssessmentType();
+  if(!assessType||!S.findings||!S.findings.length){
+    panel.style.display='none';
+    return;
+  }
+  var matched=S.findings.filter(function(f){
+    var types=f.assessment_types||[];
+    return types.indexOf(assessType)>=0;
+  });
+  panel.style.display='block';
+  if(!matched.length){
+    listEl.innerHTML='<div class="rsec-empty-note" style="text-align:center;padding:16px 0">No findings tagged as <strong>'+esc(assessType)+'</strong> yet.</div>';
+    return;
+  }
+  matched.sort(function(a,b){
+    var sa=_SEV_ORDER[(a.severity||'info').toLowerCase()];
+    var sb=_SEV_ORDER[(b.severity||'info').toLowerCase()];
+    if(sa==null)sa=4;if(sb==null)sb=4;
+    if(sa!==sb)return sa-sb;
+    return (a.title||'').localeCompare(b.title||'');
+  });
+  var added=new Set(
+    (S.currentReport&&S.currentReport.findings||[]).map(function(f){return f.title;})
+  );
+  var groups={};var groupOrder=[];
+  matched.forEach(function(f){
+    var sev=(f.severity||'Info');
+    var sevN=sev.charAt(0).toUpperCase()+sev.slice(1).toLowerCase();
+    if(!groups[sevN]){groups[sevN]=[];groupOrder.push(sevN);}
+    groups[sevN].push(f);
+  });
+  var html='';
+  groupOrder.forEach(function(sev){
+    html+='<div class="sb-sev-group-label"><span class="fsev sev-'+sev.toLowerCase()+'">'+esc(sev)+'</span></div>';
+    groups[sev].forEach(function(f){
+      var isAdded=added.has(f.title);
+      html+='<div class="sb-finding-card'+(isAdded?' already-added':'')+'" data-sb-add-f="'+f.id+'" title="'+esc(f.title)+'">'+'<span class="sb-finding-name">'+esc(f.title)+'</span>'+(isAdded?'<span style="font-size:10px;color:var(--text3)">Added</span>':'<span style="font-size:18px;color:var(--accent);line-height:1">+</span>')+'</div>';
+    });
+  });
+  listEl.innerHTML=html;
+}
 function renderEdFindings(){
   var el=$('ed-findings-list');
   if(!el||!S.currentReport)return;
@@ -1652,7 +1721,8 @@ function addFindingToReport(tplId){
     discussion:f.discussion||'',
     recommendation:f.recommendation||'',
     refs:f.refs||'',
-    cvss:f.cvss||null
+    cvss:f.cvss||null,
+    assessment_types:f.assessment_types||[]
   };
   S.currentReport.findings=
     S.currentReport.findings||[];
@@ -1660,6 +1730,7 @@ function addFindingToReport(tplId){
   closeM('modal-add-finding');
   renderEdFindings();
   syncFindingsTab();
+  renderSidebarFindings();
   markDirty();
   toast('Finding added');
 }
@@ -2053,6 +2124,12 @@ document.addEventListener('click',function(e){
   if(arf){
     addFindingToReport(
       arf.getAttribute('data-add-rf'));
+    return;
+  }
+  var sbf=t.closest('[data-sb-add-f]');
+  if(sbf){
+    addFindingToReport(
+      sbf.getAttribute('data-sb-add-f'));
     return;
   }
   var rrf=t.closest('[data-rm-rf]');
