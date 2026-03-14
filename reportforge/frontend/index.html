@@ -1400,42 +1400,62 @@ function renderPreview(){
     h+='<p><b>Assessor:</b> '+esc(m.assessor)+'</p>';
   if(m.summary)
     h+='<h2>Summary</h2><p>'+esc(m.summary)+'</p>';
-  (r.sections||[]).forEach(function(sec){
-    h+='<h2>'+esc(sec.title)+'</h2>';
-    (sec.fields||[]).forEach(function(f){
-      h+='<p><b>'+esc(f.label)+':</b> '
-        +esc(f.value||'')+'</p>';
-    });
-  });
-  var rf=r.findings||[];
-  if(rf.length){
-    h+='<h2>Findings ('+rf.length+')</h2>';
-    rf.forEach(function(f){
-      var fd=f.description||'';
-      var fi=f.discussion||'';
-      var fr=f.recommendation||'';
-      var fx=f.refs||'';
-      h+='<div style="border:1px solid'
-        +' #ccc;border-radius:6px;'
-        +'padding:12px;margin-bottom'
-        +':14px"><div style="display'
-        +':flex;align-items:center;'
-        +'margin-bottom:8px"><b style'
-        +'="font-size:14px">'
-        +esc(f.title)+'<\/b>&nbsp;'
-        +bdg(f.severity||'info')
-        +'<\/div>';
-      if(fd)h+='<div><b>Observation'
-        +'<\/b>'+fd+'<\/div>';
-      if(fi)h+='<div><b>Discussion'
-        +'<\/b>'+fi+'<\/div>';
-      if(fr)h+='<div><b>Recommendations'
-        +'<\/b>'+fr+'<\/div>';
-      if(fx)h+='<div><b>References'
-        +'<\/b>'+fx+'<\/div>';
-      h+='<\/div>';
-    });
+  var _rfMap={};
+  (r.findings||[]).forEach(function(f){_rfMap[f.id]=f;_rfMap[f.template_id]=f;});
+  function _renderFindingCard(f){
+    var fd=f.description||'';
+    var fi=f.discussion||'';
+    var fr=f.recommendation||'';
+    var fx=f.refs||'';
+    var out='<div style="border:1px solid'
+      +' #ccc;border-radius:6px;'
+      +'padding:12px;margin-bottom'
+      +':14px"><div style="display'
+      +':flex;align-items:center;'
+      +'margin-bottom:8px"><b style'
+      +'="font-size:14px">'
+      +esc(f.title)+'<\/b>&nbsp;'
+      +bdg(f.severity||'info')
+      +'<\/div>';
+    if(fd)out+='<div><b>Observation'+'<\/b>'+fd+'<\/div>';
+    if(fi)out+='<div><b>Discussion'+'<\/b>'+fi+'<\/div>';
+    if(fr)out+='<div><b>Recommendations'+'<\/b>'+fr+'<\/div>';
+    if(fx)out+='<div><b>References'+'<\/b>'+fx+'<\/div>';
+    out+='<\/div>';
+    return out;
   }
+  (r.sections||[]).forEach(function(sec){
+    var hl=sec.heading_level||2;
+    var tag='h'+Math.min(Math.max(hl,1),6);
+    h+='<'+tag+'>'+esc(sec.title)+'<\/'+tag+'>';
+    if(sec.type==='findings'){
+      var sectionFindings=[];
+      var fids=sec.finding_ids||[];
+      if(fids.length){
+        fids.forEach(function(fid){
+          var match=(r.findings||[]).find(function(x){
+            return String(x.template_id)===String(fid);
+          });
+          if(match)sectionFindings.push(match);
+        });
+      }
+      if(!sectionFindings.length&&(r.findings||[]).length){
+        sectionFindings=r.findings||[];
+      }
+      if(sectionFindings.length){
+        sectionFindings.forEach(function(f){h+=_renderFindingCard(f);});
+      } else {
+        h+='<p style="color:#888;font-style:italic">No findings added yet.</p>';
+      }
+    } else {
+      if(sec.content){
+        h+='<div>'+sec.content+'<\/div>';
+      }
+      (sec.fields||[]).forEach(function(f){
+        h+='<p><b>'+esc(f.label)+':<\/b> '+esc(f.value||'')+'<\/p>';
+      });
+    }
+  });
   $('preview-content').innerHTML=h;
 }
 
