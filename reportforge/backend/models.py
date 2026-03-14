@@ -70,6 +70,8 @@ class Finding(Base):
         Text, default='')
     cvss: Mapped[Optional[float]] = mapped_column(
         Float, nullable=True)
+    assessment_types: Mapped[Optional[str]] = mapped_column(
+        Text, nullable=True, default='[]')
     created_at: Mapped[dt.datetime] = mapped_column(
         DateTime, default=_now)
     updated_at: Mapped[dt.datetime] = mapped_column(
